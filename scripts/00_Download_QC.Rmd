@@ -38,4 +38,18 @@ md5.download <- read_delim("../input/md5s.download.txt", col_names = c("md5", "f
 
 md5.original <- read_tsv("../input/md5s.original.txt")
 ```
+Run fastqc
+
+```{bash}
+cd ../output
+mkdir fastqc
+fastqc -o fastqc --noextract --threads 4 /raw_seq_data/Julin-FERN/30-1052403065/00_fastq/*gz
+```
+
+Run multiqc
+
+```{bash}
+conda activate sequencing
+
+```
 
