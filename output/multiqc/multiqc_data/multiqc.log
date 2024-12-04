@@ -1,0 +1,2 @@
+[2024-12-04 14:06:14,951] multiqc.core.file_search                           [INFO   ]  Search path: /home/exouser/git/McConnell-Ceratopteris-RNAseq/output/fastqc
+[2024-12-04 14:06:19,192] multiqc.modules.fastqc.fastqc                      [INFO   ]  Found 96 reports
