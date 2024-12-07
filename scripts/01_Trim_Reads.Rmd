@@ -22,7 +22,7 @@ for f in $(ls $input_dir/*R1*gz)
   do
    (
     newname=${output_dir}/$(basename $f .fastq.gz)_trimmed.fq.gz
-    logname=trimmomatic_logs/$(basename $f .fq.gz).trimmomatic.log
+    logname=$output_dir/$(basename $f .fastq.gz).trimmomatic.log
     trimmomatic PE -threads 1 -trimlog $logname \
       -basein $f -baseout $newname \
       ILLUMINACLIP:${adapters}:2:25:10 \
@@ -42,3 +42,19 @@ for f in $(ls $input_dir/*R1*gz)
   
 ```
 
+## FastQC on trimmed reads
+
+Run fastqc
+
+```{bash}
+cd ../output
+mkdir fastqc--trimmed
+fastqc -o fastqc --noextract --threads 7 /analyzed_data/Julin/sequencing/Julin-FERN/trimmed_fastq/*gz
+```
+
+Run multiqc
+
+```{bash}
+conda activate sequencing
+multiqc -o multiqc--trimmed fastqc--trimmed/
+```
