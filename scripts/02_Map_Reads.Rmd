@@ -1,0 +1,50 @@
+---
+title: "Map Reads"
+author: "Julin Maloof"
+date: "2024-12-07"
+output: html_document
+---
+
+## Index the genome
+
+Ran out of memory on medium size instance, try large.  Ran out of memory on large, try XXL
+```{bash}
+cd /analyzed_data/ref_genomes/C_richardii_v2.1
+
+STAR \
+    --runThreadN 7 \
+    --runMode genomeGenerate \
+    --genomeDir star_index \
+    --sjdbOverhang 149 \
+    --sjdbGTFfile annotation/Crichardii_676_v2.1.gene_exons.gff3 \
+    --sjdbGTFtagExonParentTranscript Parent \
+    --genomeFastaFiles assembly/Crichardii_676_v2.0.fa
+```
+
+## map the reads
+
+```{bash}
+conda activate sequencing
+
+fastq_dir=/analyzed_data/Julin/sequencing/Julin-FERN/trimmed_fastq
+index_dir=/analyzed_data/ref_genomes/C_richardii_v2.1/star_index
+out_dir=/analyzed_data/Julin/sequencing/Julin-FERN/bams
+
+FIGURE OUT WHAT TO SO WITH SE READS, IF ANYTHING
+
+cd $fastq_dir
+R1_files=$(ls *R1*gz)
+
+rm -f $outdir/mmap2.log
+
+for f1 in $R1_files
+  do
+    f2=$(echo $f1 | sed s/_R1/_R2/)
+    out_file=$(basename $f1 _R1.fastq.gz).bam
+    echo $(date) $f1 $f2 ">" $out_file 
+    minimap2 -ax sr -t 12 $ref_file $f1 $f2 2>> $out_dir/mmap2.log | samtools sort --threads 4 --output-fmt BAM -T /tmp/samtools > $out_dir/$out_file
+    samtools index $out_dir/$out_file
+  done
+
+```
+
