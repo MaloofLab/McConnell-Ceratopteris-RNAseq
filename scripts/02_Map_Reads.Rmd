@@ -54,9 +54,8 @@ for f1 in $R1_files
       --readFilesIn $f1 $f2 \
       --readFilesCommand gunzip -c \
       --outFileNamePrefix $out_dir/$out_file \
-      --outSAMtype BAM SortedByCoordinate \
-      --limitBAMsortRAM 30000000000 \
-      --outBAMcompression -1 \
+      --outSAMtype BAM Unsorted \
+      --outBAMcompression 0 \
       --alignIntronMax 25000 \
       --genomeLoad LoadAndKeep
 
@@ -67,16 +66,19 @@ for f1 in $R1_files
       --readFilesIn $f3,$f4 \
       --readFilesCommand gunzip -c \
       --outFileNamePrefix $out_dir/$out_file2 \
-      --outSAMtype BAM SortedByCoordinate \
-      --limitBAMsortRAM 30000000000 \
-      --outBAMcompression -1 \
+      --outSAMtype BAM Unsorted \
+      --outBAMcompression 0 \
       --alignIntronMax 25000 \
       --genomeLoad LoadAndKeep
     
-    # index the bam
+    # sort and index the bam
     
-    samtools index $out_dir/$out_fileAligned.sortedByCoord.out.bam
-    samtools index $out_dir/$out_file2Aligned.sortedByCoord.out.bam
+    cd $out_dir
+    
+    samtools sort -m 5G -O BAM --write-index --threads 4 ${out_file}Aligned.out.bam > ${out_file}Aligned.out.sorted.bam
+    samtools sort -m 5G -O BAM --write-index --threads 4 ${out_file2}Aligned.out.bam > ${out_file2}Aligned.out.sorted.bam
+    
+    cd $fastq_dir
     
   done
 ```
@@ -91,7 +93,7 @@ out_file=/home/exouser/git/McConnell-Ceratopteris-RNAseq/output/ht-seq-counts.ts
 
 cd /analyzed_data/Julin/sequencing/Julin-FERN/bams
 
-htseq-count --stranded=no --idattr=Parent --order=pos *.bam $gff > $out_file
+htseq-count --stranded=no --idattr=Parent --order=pos *.bam $gff -n 30 > $out_file
 
 # Note that the paired and unpaired reads are counted separartely for each file and will need to be combined.
 ```
