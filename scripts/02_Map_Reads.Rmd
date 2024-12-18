@@ -1,0 +1,100 @@
+---
+title: "Map Reads"
+author: "Julin Maloof"
+date: "2024-12-07"
+output: html_document
+---
+
+## Index the genome
+
+Ran out of memory on medium size instance, try large.  Ran out of memory on large, try XXL
+```{bash}
+cd /analyzed_data/ref_genomes/C_richardii_v2.1
+
+STAR \
+    --runThreadN 7 \
+    --runMode genomeGenerate \
+    --genomeDir star_index \
+    --sjdbOverhang 149 \
+    --sjdbGTFfile annotation/Crichardii_676_v2.1.gene_exons.gff3 \
+    --sjdbGTFtagExonParentTranscript Parent \
+    --genomeFastaFiles assembly/Crichardii_676_v2.0.fa
+```
+
+## map the reads
+
+What is the intron size distribution?
+
+
+
+Need to run an XL instance because of memory requirements with this large genome
+
+```{bash}
+conda activate sequencing
+
+fastq_dir=/analyzed_data/Julin/sequencing/Julin-FERN/trimmed_fastq
+index_dir=/analyzed_data/ref_genomes/C_richardii_v2.1/star_index
+out_dir=/analyzed_data/Julin/sequencing/Julin-FERN/bams
+
+rm -r $out_dir/*
+
+cd $fastq_dir
+R1_files=$(ls *1P*gz)
+
+for f1 in $R1_files
+  do
+    f2=$(echo $f1 | sed s/_1P/_2P/) # read pair 2
+    f3=$(echo $f1 | sed s/_1P/_1U/) # unpaired 1
+    f4=$(echo $f1 | sed s/_1P/_2U/) # unpaired 2
+    out_file=$(basename $f1 _R1_001_trimmed_1P.fq.gz)_P_
+    echo $(date) $f1 ">" $out_file 
+    # map the paired reads
+    STAR --runThreadN 28 \
+      --genomeDir $index_dir \
+      --readFilesIn $f1 $f2 \
+      --readFilesCommand gunzip -c \
+      --outFileNamePrefix $out_dir/$out_file \
+      --outSAMtype BAM Unsorted \
+      --outBAMcompression 0 \
+      --alignIntronMax 25000 \
+      --genomeLoad LoadAndKeep
+
+    out_file2=$(basename $f3 _R1_001_trimmed_1U.fq.gz)_U_
+    # map the unpaired reads
+    STAR --runThreadN 28 \
+      --genomeDir $index_dir \
+      --readFilesIn $f3,$f4 \
+      --readFilesCommand gunzip -c \
+      --outFileNamePrefix $out_dir/$out_file2 \
+      --outSAMtype BAM Unsorted \
+      --outBAMcompression 0 \
+      --alignIntronMax 25000 \
+      --genomeLoad LoadAndKeep
+    
+    # sort and index the bam
+    
+    cd $out_dir
+    
+    samtools sort -m 5G -O BAM --write-index --threads 4 ${out_file}Aligned.out.bam > ${out_file}Aligned.out.sorted.bam
+    samtools sort -m 5G -O BAM --write-index --threads 4 ${out_file2}Aligned.out.bam > ${out_file2}Aligned.out.sorted.bam
+    
+    cd $fastq_dir
+    
+  done
+```
+
+Count the reads
+
+```{bash}
+conda activate sequencing
+
+gff=/analyzed_data/ref_genomes/C_richardii_v2.1/annotation/Crichardii_676_v2.1.gene_exons.gff3
+out_file=/home/exouser/git/McConnell-Ceratopteris-RNAseq/output/ht-seq-counts.tsv
+
+cd /analyzed_data/Julin/sequencing/Julin-FERN/bams
+
+htseq-count --stranded=no --idattr=Parent --order=pos *.bam $gff -n 30 > $out_file
+
+# Note that the paired and unpaired reads are counted separartely for each file and will need to be combined.
+```
+
