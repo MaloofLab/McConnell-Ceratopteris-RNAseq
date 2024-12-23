@@ -168,6 +168,9 @@ counts_combined <- counts %>%
 
 counts_combined
 ```
+```{r}
+write_csv(counts_combined, file = "../output/ht-seq-counts-combined.csv.gz")
+```
 
 
 
