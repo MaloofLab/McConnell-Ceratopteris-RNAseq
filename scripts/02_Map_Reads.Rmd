@@ -5,6 +5,11 @@ date: "2024-12-07"
 output: html_document
 ---
 
+```{r}
+library(tidyverse)
+```
+
+
 ## Index the genome
 
 Ran out of memory on medium size instance, try large.  Ran out of memory on large, try XXL
@@ -135,4 +140,34 @@ htseq-count --stranded=no --idattr=Parent --order=pos *sorted.bam $gff -n 30 > $
 
 # Note that the paired and unpaired reads are counted separately for each file and will need to be combined.
 ```
+
+```{r}
+samplenames <- read_tsv("../output/bam_names.txt", col_names = "sample_ID") %>%
+  mutate(sample_ID=basename(sample_ID),
+         sample_ID=str_remove(sample_ID, "_Aligned.*")) %>%
+  pull(sample_ID)
+samplenames
+```
+
+
+combine paired and unpaired counts
+```{r}
+counts <- read_tsv("../output/ht-seq-counts.tsv.gz",
+                   col_names = c("gene_ID", samplenames))
+counts[,1:10]
+```
+
+combine counts for the P and U files
+```{r}
+counts_combined <- counts %>% 
+  pivot_longer(-gene_ID, names_to="sample", values_to="count") %>%
+  separate(sample, into=c("sample_ID", "type"), sep = "_") %>%
+  group_by(gene_ID, sample_ID) %>%
+  summarize(count=sum(count)) %>%
+  pivot_wider(names_from = sample_ID, values_from = count)
+
+counts_combined
+```
+
+
 
