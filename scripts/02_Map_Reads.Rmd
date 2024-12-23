@@ -141,6 +141,7 @@ htseq-count --stranded=no --idattr=Parent --order=pos *sorted.bam $gff -n 30 > $
 # Note that the paired and unpaired reads are counted separately for each file and will need to be combined.
 ```
 
+## Combine reads
 ```{r}
 samplenames <- read_tsv("../output/bam_names.txt", col_names = "sample_ID") %>%
   mutate(sample_ID=basename(sample_ID),
