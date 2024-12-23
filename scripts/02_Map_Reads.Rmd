@@ -75,13 +75,51 @@ for f1 in $R1_files
     
     cd $out_dir
     
-    samtools sort -m 5G -O BAM --write-index --threads 4 ${out_file}Aligned.out.bam > ${out_file}Aligned.out.sorted.bam
-    samtools sort -m 5G -O BAM --write-index --threads 4 ${out_file2}Aligned.out.bam > ${out_file2}Aligned.out.sorted.bam
+    samtools sort -m 5G -O BAM --threads 4 ${out_file}Aligned.out.bam > ${out_file}Aligned.out.sorted.bam
+    samtools index ${out_file}Aligned.out.sorted.bam
+    samtools sort -m 5G -O BAM --threads 4 ${out_file2}Aligned.out.bam > ${out_file2}Aligned.out.sorted.bam
+    
+    samtools index ${out_file2}Aligned.out.sorted.bam
     
     cd $fastq_dir
     
   done
+  
+STAR --genomeLoad Remove --genomeDir $index_dir
 ```
+
+```{bash}
+# temp loop to redo samtools sorting; should not be needed
+
+fastq_dir=/analyzed_data/Julin/sequencing/Julin-FERN/trimmed_fastq
+index_dir=/analyzed_data/ref_genomes/C_richardii_v2.1/star_index
+out_dir=/analyzed_data/Julin/sequencing/Julin-FERN/bams
+
+cd $fastq_dir
+
+R1_files=$(ls *1P*gz)
+
+cd $out_dir
+
+for f1 in $R1_files
+  do
+    f3=$(echo $f1 | sed s/_1P/_1U/) # unpaired 1
+    out_file=$(basename $f1 _R1_001_trimmed_1P.fq.gz)_P_
+    out_file2=$(basename $f3 _R1_001_trimmed_1U.fq.gz)_U_
+
+    echo $(date) $f1 ">" $out_file 
+    
+    # sort and index the bam
+    samtools sort -m 5G -O BAM --threads 4 ${out_file}Aligned.out.bam > ${out_file}Aligned.out.sorted.bam
+    samtools index ${out_file}Aligned.out.sorted.bam
+    samtools sort -m 5G -O BAM --threads 4 ${out_file2}Aligned.out.bam > ${out_file2}Aligned.out.sorted.bam
+    
+    samtools index ${out_file2}Aligned.out.sorted.bam
+    
+  done
+
+```
+
 
 Count the reads
 
@@ -93,8 +131,8 @@ out_file=/home/exouser/git/McConnell-Ceratopteris-RNAseq/output/ht-seq-counts.ts
 
 cd /analyzed_data/Julin/sequencing/Julin-FERN/bams
 
-htseq-count --stranded=no --idattr=Parent --order=pos *.bam $gff -n 30 > $out_file
+htseq-count --stranded=no --idattr=Parent --order=pos *sorted.bam $gff -n 30 > $out_file
 
-# Note that the paired and unpaired reads are counted separartely for each file and will need to be combined.
+# Note that the paired and unpaired reads are counted separately for each file and will need to be combined.
 ```
 
