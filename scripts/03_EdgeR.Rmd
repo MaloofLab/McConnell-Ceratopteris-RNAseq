@@ -140,5 +140,42 @@ CrLFY1: Ceric.33G031700
 
 CrLFY2: Ceric.18G076300
 
+```{r}
+CrLFY1 <- "Ceric.33G031700.2.v2.1" # this is the primary transcript.  There is another but it is expressed at very low levels.
+
+CrLFY2 <- "Ceric.18G076300"
+```
+
+
+```{r}
+cpm <- dge.data %>% cpm(log = FALSE) %>% as_tibble(rownames = "gene_ID")
+```
+
 ### LFY1:
 
+```{r}
+cpm %>% filter(str_detect(gene_ID, CrLFY1)) %>%
+  pivot_longer(-gene_ID, names_to = "sample", values_to = "cpm") %>%
+  full_join(sample.description) %>%
+  mutate(gt = ifelse(is.na(rep), gt, str_c(gt, "-", rep ))) %>%
+  ggplot(aes(x=gt, y=cpm, fill=base_gt)) +
+  geom_col() +
+  facet_wrap(~ tissue, scales = "free_y", ncol=2) +
+  scale_fill_brewer(type = "qual", palette = 3) +
+  theme(axis.text.x = element_text(angle=90, hjust = 1, vjust=.5)) +
+  ggtitle("CrLFY1")
+```
+### LFY2:
+
+```{r}
+cpm %>% filter(str_detect(gene_ID, CrLFY2)) %>%
+  pivot_longer(-gene_ID, names_to = "sample", values_to = "cpm") %>%
+  full_join(sample.description) %>%
+  mutate(gt = ifelse(is.na(rep), gt, str_c(gt, "-", rep ))) %>%
+  ggplot(aes(x=gt, y=cpm, fill=base_gt)) +
+  geom_col() +
+  facet_wrap(~ tissue, scales = "free_y", ncol=2) +
+  scale_fill_brewer(type = "qual", palette = 3) +
+  theme(axis.text.x = element_text(angle=90, hjust = 1, vjust=.5)) +
+  ggtitle("Cr LFY2")
+```
