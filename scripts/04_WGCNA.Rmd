@@ -36,10 +36,24 @@ Filter for genes with the highest coefficient of variation
 CV <- apply(lcpm, 1, \(x) abs(sd(x)/mean(x)))
 hist(log10(CV))
 ```
+
 ```{r}
-lcpm.filter <- lcpm[CV > quantile(CV, 0.4),]
+names(CV) <- rownames(lcpm)
+CV[str_detect(names(CV), "18G076300|33G031700")]
+```
+
+```{r}
+quantile(CV, 0.24)
+```
+
+LFY2 has a pretty low CV; have to include 76% of the genes by CV to include it.
+```{r}
+lcpm.filter <- lcpm[CV > quantile(CV, 0.24),]
 dim(lcpm.filter)
 ```
+
+
+
 
 WGCNA wants genes in columns
 
@@ -52,7 +66,7 @@ Start by including all samples
 Soft thresholding
 ```{r}
 powers <- c(c(1:10), seq(from = 12, to=20, by=2))
-sft <- pickSoftThreshold(lcpm.filter.t, powerVector = powers, verbose = 5,networkType = "signed hybrid", blockSize = 15000)
+sft <- pickSoftThreshold(lcpm.filter.t, powerVector = powers, verbose = 5,networkType = "signed hybrid", blockSize = 21000)
 ```
 ```{r}
 sizeGrWindow(9, 5)
@@ -72,10 +86,10 @@ plot(sft$fitIndices[,1], sft$fitIndices[,5],
      main = paste("Mean connectivity"))
 text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
 ```
-choose 3
+choose 5
 
 ```{r}
-softPower <- 3
+softPower <- 5
 adjacency <- adjacency(lcpm.filter.t, power = softPower, type = "signed hybrid")
 # Turn adjacency into topological overlap
 TOM <- TOMsimilarity(adjacency, TOMType = "signed");
@@ -131,9 +145,10 @@ plot(METree, main = "Clustering of module eigengenes",
      xlab = "", sub = "")
 ```
 
-merge with correlation > 0.8
+merge with correlation > 0.75
+(Change from default of 0.8 / 0.2())
 ```{r}
-MEDissThres = 0.2
+MEDissThres = 0.25
 # Plot the cut line into the dendrogram
 plot(METree, main = "Clustering of module eigengenes",
      xlab = "", sub = "")
@@ -175,7 +190,7 @@ median(table(merge$colors))
 Which module is LFY in?
 
 ```{r}
-CrLFY1 <- "Ceric.33G031700.2.v2.1" # this is the primary transcript.  There is another but it is expressed at very low levels.
+CrLFY1 <- "Ceric.33G031700" 
 
 CrLFY2 <- "Ceric.18G076300"
 ```
@@ -186,7 +201,7 @@ module.assignment <- tibble(geneID=colnames(lcpm.filter.t), module = mergedColor
 module.assignment %>%
   filter(str_detect(geneID, "18G076300|33G031700"))
 ```
-Interesting: they are in different modules(!).  But turquoise is the largest module, so that probably is not very interesting.
+Interesting: they are in different modules(!).  
 
 ```{r}
 module.assignment %>% group_by(module) %>% summarize(n_genes = n()) %>% arrange(n_genes)
@@ -204,13 +219,13 @@ sample.eigen <- cbind(sample.description, MEs)
 sample.eigen
 ```
 
-```{r, fig.height=6}
+```{r, fig.height=6, fig.width=10}
 sample.eigen %>%
   mutate(gt_tissue=str_c(tissue, "-", base_gt)) %>%
   pivot_longer(starts_with("ME"), names_to = "ME") %>%
   ggplot(aes(x=gt_tissue, y = value, color = tissue)) +
   geom_point() +
-  facet_wrap(~ME, ncol=3) +
+  facet_wrap(~ME, ncol=5) +
   theme(axis.text.x = element_text(angle = 90, hjust=1, vjust=.5)) +
   scale_color_brewer(type="qual", palette = "Set3")
 ```
