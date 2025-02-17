@@ -131,12 +131,12 @@ Count the reads
 ```{bash}
 conda activate sequencing
 
-gff=/analyzed_data/ref_genomes/C_richardii_v2.1/annotation/Crichardii_676_v2.1.gene_exons.gff3
-out_file=/home/exouser/git/McConnell-Ceratopteris-RNAseq/output/ht-seq-counts.tsv
+gff=/analyzed_data/ref_genomes/C_richardii_v2.1/annotation/Crichardii_676_v2.1.gene.gff3
+out_file=/home/exouser/git/McConnell-Ceratopteris-RNAseq/output/ht-seq-counts_redo.tsv
 
 cd /analyzed_data/Julin/sequencing/Julin-FERN/bams
 
-htseq-count --stranded=no --idattr=Parent --order=pos *sorted.bam $gff -n 30 > $out_file
+htseq-count --stranded=no --type=mRNA --idattr=Parent --order=pos *sorted.bam $gff -n 30 > $out_file
 
 # Note that the paired and unpaired reads are counted separately for each file and will need to be combined.
 ```
@@ -153,10 +153,15 @@ samplenames
 
 combine paired and unpaired counts
 ```{r}
-counts <- read_tsv("../output/ht-seq-counts.tsv.gz",
+counts <- read_tsv("../output/ht-seq-counts_redo.tsv.gz",
                    col_names = c("gene_ID", samplenames))
 counts[,1:10]
 ```
+
+```{r}
+counts %>% filter(str_detect(gene_ID, "__"))
+```
+
 
 combine counts for the P and U files
 ```{r}
