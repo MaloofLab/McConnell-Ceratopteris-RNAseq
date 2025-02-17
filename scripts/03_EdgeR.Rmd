@@ -37,6 +37,8 @@ sample.description <- tibble(sample=colnames(counts.data)[-1]) %>%
   mutate( group=str_c(base_gt, "-", tissue))
 
 sample.description
+
+write_csv(sample.description, "../input/sample.description.csv")
 ```
 
 ```{r}
@@ -179,3 +181,10 @@ cpm %>% filter(str_detect(gene_ID, CrLFY2)) %>%
   theme(axis.text.x = element_text(angle=90, hjust = 1, vjust=.5)) +
   ggtitle("Cr LFY2")
 ```
+## write out log counts
+
+```{r}
+dge.data %>% cpm(log = TRUE) %>% write.csv("../output/log2cpm.csv")
+R.utils::gzip("../output/log2cpm.csv", overwrite=TRUE)
+```
+
