@@ -45,7 +45,16 @@ CV <- apply(lcpm, 1, \(x) abs(sd(x)/mean(x)))
 hist(log10(CV))
 ```
 ```{r}
-lcpm.filter <- lcpm[CV > quantile(CV, 0.4),]
+names(CV) <- rownames(lcpm)
+CV[str_detect(names(CV), "18G076300|33G031700")]
+```
+
+```{r}
+quantile(CV, 0.30)
+```
+
+```{r}
+lcpm.filter <- lcpm[CV > quantile(CV, 0.3),]
 dim(lcpm.filter)
 ```
 
@@ -59,7 +68,7 @@ lcpm.filter.t <- t(lcpm.filter)
 Soft thresholding
 ```{r}
 powers <- c(c(1:10), seq(from = 12, to=20, by=2))
-sft <- pickSoftThreshold(lcpm.filter.t, powerVector = powers, verbose = 5,networkType = "signed hybrid", blockSize = 15000)
+sft <- pickSoftThreshold(lcpm.filter.t, powerVector = powers, verbose = 5,networkType = "signed hybrid", blockSize = 20000)
 ```
 
 ```{r}
@@ -139,9 +148,9 @@ plot(METree, main = "Clustering of module eigengenes",
      xlab = "", sub = "")
 ```
 
-merge with correlation > 0.8
+merge with correlation > 0.75
 ```{r}
-MEDissThres = 0.2
+MEDissThres = 0.25
 # Plot the cut line into the dendrogram
 plot(METree, main = "Clustering of module eigengenes",
      xlab = "", sub = "")
@@ -192,7 +201,7 @@ module.assignment <- tibble(geneID=colnames(lcpm.filter.t), module = mergedColor
 module.assignment %>%
   filter(str_detect(geneID, "18G076300|33G031700"))
 ```
-Interesting: they are in different modules(!).  But turquoise is the largest module, so that probably is not very interesting.
+Interesting: they are in different modules(!).  But these are both very large modules
 
 ```{r}
 module.assignment %>% group_by(module) %>% summarize(n_genes = n()) %>% arrange(n_genes)

@@ -45,7 +45,16 @@ CV <- apply(lcpm, 1, \(x) abs(sd(x)/mean(x)))
 hist(log10(CV))
 ```
 ```{r}
-lcpm.filter <- lcpm[CV > quantile(CV, 0.4),]
+names(CV) <- rownames(lcpm)
+CV[str_detect(names(CV), "18G076300|33G031700")]
+```
+
+```{r}
+quantile(CV, 0.23)
+```
+
+```{r}
+lcpm.filter <- lcpm[CV > quantile(CV, 0.23),]
 dim(lcpm.filter)
 ```
 
@@ -80,10 +89,10 @@ plot(sft$fitIndices[,1], sft$fitIndices[,5],
      main = paste("Mean connectivity"))
 text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
 ```
-choose 3
+choose 8
 
 ```{r}
-softPower <- 3
+softPower <- 8
 adjacency <- adjacency(lcpm.filter.t, power = softPower, type = "signed hybrid")
 # Turn adjacency into topological overlap
 TOM <- TOMsimilarity(adjacency, TOMType = "signed");
@@ -139,9 +148,9 @@ plot(METree, main = "Clustering of module eigengenes",
      xlab = "", sub = "")
 ```
 
-merge with correlation > 0.8
+merge with correlation > 0.75
 ```{r}
-MEDissThres = 0.2
+MEDissThres = 0.25
 # Plot the cut line into the dendrogram
 plot(METree, main = "Clustering of module eigengenes",
      xlab = "", sub = "")
@@ -192,7 +201,7 @@ module.assignment <- tibble(geneID=colnames(lcpm.filter.t), module = mergedColor
 module.assignment %>%
   filter(str_detect(geneID, "18G076300|33G031700"))
 ```
-Interesting: they are in different modules(!).  But turquoise is the largest module, so that probably is not very interesting.
+Interesting: they are in different modules(!).  But both are quite large...
 
 ```{r}
 module.assignment %>% group_by(module) %>% summarize(n_genes = n()) %>% arrange(n_genes)
@@ -210,7 +219,7 @@ sample.eigen <- cbind(sample.description, MEs)
 sample.eigen
 ```
 
-```{r, fig.height=6}
+```{r, fig.height=6, fig.width=10}
 sample.eigen.l <- sample.eigen %>%
   mutate(gt_tissue=str_c(base_gt, "-", tissue)) %>%
   pivot_longer(starts_with("ME"), names_to = "ME")
@@ -223,7 +232,7 @@ sample.eigen.l %>%
   ggplot(aes(x=gt_tissue, y = value)) +
     geom_point(aes(color = tissue)) +
     geom_line(data=sample.eigen.means, group = 1, lwd=.3) + 
-  facet_wrap(~ME, ncol=4) +
+  facet_wrap(~ME, ncol=5) +
   theme(axis.text.x = element_text(angle = 90, hjust=1, vjust=.5)) +
   scale_color_brewer(type="qual", palette = "Set3")
 ```
