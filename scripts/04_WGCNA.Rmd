@@ -237,4 +237,7 @@ heatmap.2(MEs.m, trace="none", cexRow= 0.6, col="bluered")
 ```
 
 
+```{r}
+save(module.assignment, MEs, lcpm.filter, CrLFY1, CrLFY2, file="../output/WGCNA_allSamples.Rdata")
+```
 
