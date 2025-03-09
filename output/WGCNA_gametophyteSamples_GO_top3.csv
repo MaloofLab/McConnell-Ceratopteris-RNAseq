@@ -1,0 +1,45 @@
+module,GO.ID,Term,Annotated,Significant,Expected,p.value
+black,GO:0055085,transmembrane transport,384,33,19.7,0.0013
+black,GO:0015995,chlorophyll biosynthetic process,19,4,0.97,0.0142
+black,GO:0006096,glycolytic process,26,4,1.33,0.0415
+blue,GO:0006412,translation,176,63,35.1,0.00021
+blue,GO:0015986,proton motive force-driven ATP synthesis,40,17,7.98,0.00091
+blue,GO:0006779,porphyrin-containing compound biosynthet...,28,9,5.58,0.00301
+brown,GO:0006355,regulation of DNA-templated transcriptio...,443,119,88.62,0.00015
+brown,GO:0008152,metabolic process,3631,801,726.34,0.00026
+brown,GO:0015986,proton motive force-driven ATP synthesis,40,18,8,0.00029
+cyan,GO:0006355,regulation of DNA-templated transcriptio...,443,26,12.2,0.00014
+cyan,GO:0046274,lignin catabolic process,26,4,0.72,0.00513
+cyan,GO:0007275,multicellular organism development,20,4,0.55,0.00716
+green,GO:0016049,cell growth,4,3,0.21,0.00056
+green,GO:0010215,cellulose microfibril organization,4,3,0.21,0.00056
+green,GO:0006564,L-serine biosynthetic process,2,2,0.11,0.00279
+grey60,GO:0032264,IMP salvage,2,2,0.12,0.0038
+grey60,GO:0009432,SOS response,2,2,0.12,0.0038
+grey60,GO:0007165,signal transduction,217,24,13.45,0.0068
+lightcyan,GO:0007034,vacuolar transport,8,2,0.11,0.0047
+lightcyan,GO:0009312,oligosaccharide biosynthetic process,13,2,0.18,0.0133
+lightcyan,GO:0045900,negative regulation of translational elo...,1,1,0.01,0.0135
+lightcyan,GO:0006614,SRP-dependent cotranslational protein ta...,1,1,0.01,0.0135
+lightcyan,GO:0005980,glycogen catabolic process,1,1,0.01,0.0135
+lightcyan,GO:0006893,Golgi to plasma membrane transport,1,1,0.01,0.0135
+lightcyan,GO:0048015,phosphatidylinositol-mediated signaling,1,1,0.01,0.0135
+lightgreen,GO:0035434,copper ion transmembrane transport,8,2,0.07,0.0023
+lightgreen,GO:0006979,response to oxidative stress,86,4,0.8,0.0080
+lightgreen,GO:0042545,cell wall modification,59,3,0.55,0.0171
+lightyellow,GO:0006102,isocitrate metabolic process,2,2,0.03,0.00022
+lightyellow,GO:0006108,malate metabolic process,9,2,0.14,0.00752
+lightyellow,GO:0043419,urea catabolic process,1,1,0.02,0.01505
+midnightblue,GO:0006355,regulation of DNA-templated transcriptio...,443,12,5.35,0.0059
+midnightblue,GO:0009086,methionine biosynthetic process,2,1,0.02,0.0240
+midnightblue,GO:0006468,protein phosphorylation,716,14,8.65,0.0429
+purple,GO:0007165,signal transduction,217,12,4.86,0.00049
+purple,GO:0034755,iron ion transmembrane transport,3,2,0.07,0.00147
+purple,GO:0006468,protein phosphorylation,716,26,16.02,0.01047
+salmon,GO:0009415,response to water,4,3,0.08,0.0004
+salmon,GO:0006952,defense response,31,4,0.63,0.0032
+salmon,GO:0006979,response to oxidative stress,86,6,1.74,0.0075
+turquoise,GO:0006813,potassium ion transport,36,18,11.32,0.00031
+turquoise,GO:0006811,monoatomic ion transport,168,69,52.81,0.00091
+turquoise,GO:0006289,nucleotide-excision repair,6,6,1.89,0.00096
+turquoise,GO:0007076,mitotic chromosome condensation,6,6,1.89,0.00096

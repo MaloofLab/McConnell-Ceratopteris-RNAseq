@@ -6,9 +6,11 @@ output: html_notebook
 ```{r}
 library(tidyverse)
 library(topGO)
+conflicted::conflicts_prefer(dplyr::select())
 #library(clusterProfiler)
 ```
 
+## for WGCNA with ALL samples
 ```{r}
 load("../output/WGCNA_allSamples.Rdata")
 ```
@@ -44,20 +46,115 @@ gene2GO.list <- moduleGOs %>%
   pull(GOlist)
 ```
 
-Test on one module:
-
+Create a function to return a go table
 ```{r}
-magenta <- module.assignment %>%
-  mutate(magenta = as.numeric(module == "magenta")) %>% 
-  pull(magenta, name = geneID) %>% as.factor()
+getGO <- function(moduleID, module.assignment, ontology = "BP")  {
+  module.genes <- module.assignment %>%
+    mutate(module.genes = as.numeric(module == moduleID)) %>% 
+    pull(module.genes, name = geneID) %>% as.factor()
+  
+  go.data.module <- new("topGOdata", ontology = ontology, description = moduleID, allGenes = module.genes, annot = annFUN.gene2GO, gene2GO = gene2GO.list)
+  
+  result.module <- runTest(go.data.module, algorithm = "weight01", statistic = "fisher")
+  
+  GenTable(go.data.module, result.module, topNodes = sum(result.module@score < 0.05 )) %>%
+    dplyr::rename_with( \(x) str_replace(x, "result1|apply.*", "p.value"))
+}
 ```
 
-```{r}
-go.data.magenta <- new("topGOdata", ontology = "BP", description = "magenta", allGenes = magenta, annot = annFUN.gene2GO, gene2GO = gene2GO.list)
-result.magenta <- runTest(go.data.magenta, algorithm = "weight01", statistic = "fisher")
-```
-```{r}
-GenTable(go.data.magenta, result.magenta, topNodes = sum(result.magenta@score < 0.01 )) %>%
-  dplyr::rename(P_val=result1)
+
+```{r, message=FALSE}
+GOresults <- tibble(module=sort(unique(module.assignment$module))) %>%
+  mutate(GOtable = map(module, getGO, module.assignment)) %>%
+  unnest(cols=GOtable)
+
+write_csv(GOresults, file = "../output/WGCNA_allSamples_GO.csv")
+
+GOresults %>% group_by(module) %>% slice_min(p.value, n=3) %>% write_csv(file = "../output/WGCNA_allSamples_GO_top3.csv")
+
+GOresults
 ```
 
+
+## for WGCNA with SPOROPHYTE samples
+```{r}
+load("../output/WGCNA_sporophyteSamples.Rdata")
+```
+
+how will the gene IDs match up?
+```{r}
+moduleGOs <- module.assignment %>%
+  mutate(geneID2 = str_remove(geneID, fixed(".v2"))) %>%
+  inner_join(GOs, by = c("geneID2" = "transcriptName")) %>%
+  select(geneID, module, GO)
+
+dim(module.assignment)
+dim(moduleGOs)
+head(moduleGOs)
+```
+Great.  All genes in module.assignments are retained after the join
+
+Create a gene2GO list needed by topGO:
+
+```{r}
+gene2GO.list <- moduleGOs %>% 
+  rowwise() %>%
+  mutate(GOlist = str_split(GO, pattern = " ")) %>%
+  ungroup() %>%
+  mutate(GOlist = set_names(GOlist, geneID)) %>%
+  pull(GOlist)
+```
+
+```{r, message=FALSE}
+GOresults <- tibble(module=sort(unique(module.assignment$module))) %>%
+  mutate(GOtable = map(module, getGO, module.assignment)) %>%
+  unnest(cols=GOtable)
+
+write_csv(GOresults, file = "../output/WGCNA_sporophyteSamples_GO.csv")
+
+GOresults %>% group_by(module) %>% slice_min(p.value, n=3) %>% write_csv(file = "../output/WGCNA_sporophyteSamples_GO_top3.csv")
+
+GOresults
+```
+
+
+## for WGCNA with GAMETOPHYTE samples
+```{r}
+load("../output/WGCNA_gametophyteSamples.Rdata")
+```
+
+how will the gene IDs match up?
+```{r}
+moduleGOs <- module.assignment %>%
+  mutate(geneID2 = str_remove(geneID, fixed(".v2"))) %>%
+  inner_join(GOs, by = c("geneID2" = "transcriptName")) %>%
+  select(geneID, module, GO)
+
+dim(module.assignment)
+dim(moduleGOs)
+head(moduleGOs)
+```
+Great.  All genes in module.assignments are retained after the join
+
+Create a gene2GO list needed by topGO:
+
+```{r}
+gene2GO.list <- moduleGOs %>% 
+  rowwise() %>%
+  mutate(GOlist = str_split(GO, pattern = " ")) %>%
+  ungroup() %>%
+  mutate(GOlist = set_names(GOlist, geneID)) %>%
+  pull(GOlist)
+```
+
+```{r, message=FALSE}
+GOresults <- tibble(module=sort(unique(module.assignment$module))) %>%
+  mutate(GOtable = map(module, getGO, module.assignment)) %>%
+  unnest(cols=GOtable)
+
+write_csv(GOresults, file = "../output/WGCNA_gametophyteSamples_GO.csv")
+
+GOresults %>% group_by(module) %>% slice_min(p.value, n=3) %>% write_csv(file = "../output/WGCNA_gametophyteSamples_GO_top3.csv")
+
+GOresults
+```
