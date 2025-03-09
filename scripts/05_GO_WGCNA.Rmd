@@ -58,7 +58,8 @@ getGO <- function(moduleID, module.assignment, ontology = "BP")  {
   result.module <- runTest(go.data.module, algorithm = "weight01", statistic = "fisher")
   
   GenTable(go.data.module, result.module, topNodes = sum(result.module@score < 0.05 )) %>%
-    dplyr::rename_with( \(x) str_replace(x, "result1|apply.*", "p.value"))
+    dplyr::rename_with( \(x) str_replace(x, "result1|apply.*", "p.value")) %>%
+    mutate(p.value = as.numeric(p.value))
 }
 ```
 
