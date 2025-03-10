@@ -1,0 +1,279 @@
+---
+title: "06_TGCN"
+author: "Julin Maloof"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Try using a [Targetted Gene Correlation Network](https://www.nature.com/articles/s41598-024-67329-7) to identify the LFY1 and LFY2 networks
+
+Install...
+```{r, eval=FALSE}
+BiocManager::install(c("AnnotationDBi", "GO.db", "preprocessCore", "impute", "rrvgo", "ComplexHeatmap"))
+BiocManager::install(c("sva", "GOSim"))
+install.packages("MLmetrics")
+remotes::install_local("~/Downloads/GOSim_1.40.0.tgz") # get download link from https://bioconductor.org/packages/3.18/bioc/html/GOSim.html
+remotes::install_github('juanbot/CoExpNets') 
+# remotes::install_github("aliciagp/TGCN") # don't use this, use mine, see below!
+```
+
+use my modified version of TGCN
+```{r}
+# remotes::install_local("~/git/TGCN/", force = TRUE)
+# or from web:
+remotes::install_github("https://github.com/jnmaloof/TGCN", ref = "dev")
+```
+
+
+```{r}
+library(TGCN)
+library(tidyverse)
+library(ggpubr)
+library(gridExtra)
+```
+
+```{r}
+sample.description <- read.csv("../input/sample.description.csv")
+```
+
+
+load read counts. These should be log2 cpm or Voom transformed or something similar.
+
+```{r}
+lcpm <- read.csv("../output/log2cpm.csv.gz", row.names = 1, check.names = FALSE) 
+rownames(lcpm) <- str_remove(rownames(lcpm), fixed(".v2"))
+head(lcpm)
+dim(lcpm)
+```
+Get the GO info and convert to a list.
+```{r}
+GOs <- read_delim("../input/Crichardii_676_v2.1.annotation_info.txt")
+GOs <- GOs[match(rownames(lcpm), GOs$transcriptName),] %>% drop_na(transcriptName)
+gene2GO.list <- GOs %>% 
+  select(transcriptName, GO) %>%
+  rowwise() %>%
+  mutate(GOlist = str_split(GO, pattern = " ")) %>%
+  ungroup() %>%
+  mutate(GOlist = set_names(GOlist, transcriptName)) %>%
+  pull(GOlist)
+```
+
+Looking at the example notebook on the github site, it looks like genes in rows, samples in columns
+
+My genes of interest.
+```{r}
+CrLFY1 <- "Ceric.33G031700"
+
+CrLFY2 <- "Ceric.18G076300"
+```
+
+Subset data to build LFY1 and LFY2 networks.  Want to find networks around expression of LFY1 or LFY2, so pull those out and also create matrices that don't have them.
+```{r}
+LFY1.expression <- lcpm[str_detect(rownames(lcpm), CrLFY1),] %>%
+  unlist() %>%
+  as.vector()
+
+input_for_LFY1 <- lcpm[str_detect(rownames(lcpm), CrLFY1, negate = TRUE),]
+
+LFY2.expression <- lcpm[str_detect(rownames(lcpm), CrLFY2),] %>%
+  unlist() %>%
+  as.vector()
+
+input_for_LFY2 <- lcpm[str_detect(rownames(lcpm), CrLFY2, negate = TRUE),]
+```
+
+## LFY1 network
+```{r, message=FALSE}
+if(dir.exists("../output/TGCN_LFY1"))   system("rm -r ../output/TGCN_LFY1")
+
+if(!dir.exists("../output/TGCN_LFY1"))  dir.create("../output/TGCN_LFY1")
+
+r.lfy1 <- testAllCutoffs(exprData=input_for_LFY1,
+                    target=LFY1.expression,
+                    covs=NULL,
+                    train.split=0.7,
+                    nfolds=5,
+                    t=10,
+                    path="../output/TGCN_LFY1",
+                    targetName="LFY1",
+                    tissueName="ALL",
+                    seed=3333,
+                    cutoffs=10:1,
+                    n=100, 
+                    m=10, 
+                    s=10, 
+                    minCor=0.3,
+                    maxTol=3,
+                    save=T,
+                    overwrite=T,
+                    approach="enrichment", # the approach selected to complete the seed modules
+                    report=F,              # if report=T, an automated report will be created
+                    gene2GO=gene2GO.list,
+                    cellTypeAnnotation=FALSE)
+```
+
+
+
+```{r}
+r.lfy1$selectRatio$nHubs
+r.lfy1$selectRatio$stats
+```
+Focus on 5 and 6
+
+```{r}
+p <- lapply(r.lfy1$nets, function(cutoff) cutoff$GOenrich$plotStats) 
+
+ggarrange(p$c5 + theme(text=element_text(size=10)), 
+          p$c6 + theme(text=element_text(size=10)), 
+          ncol=2, nrow=1, common.legend=T, legend="bottom")
+```
+
+```{r}
+r.lfy1$nets$c5$net$moduleSizeSelectionPlot
+```
+
+```{r}
+r.lfy1$nets$c6$net$moduleSizeSelectionPlot
+```
+
+Correlation with trait, I assume
+```{r}
+r.lfy1$nets$c5$net$plotCorr
+```
+
+```{r}
+r.lfy1$nets$c6$net$plotCorr
+```
+
+
+```{r}
+DT::datatable(r.lfy1$nets$c5$net$modules)
+```
+
+```{r}
+DT::datatable(r.lfy1$nets$c6$net$modules)
+```
+
+
+```{r}
+knitr::include_graphics("../output/TGCN_LFY1/results/LFY1_ALL_c5_TGCN_crossTabPlot.png")
+```
+
+
+```{r}
+knitr::include_graphics("../output/TGCN_LFY1/results/LFY1_ALL_c6_TGCN_crossTabPlot.png")
+```
+
+```{r}
+grid.arrange(r.lfy1$nets$c5$GOenrich$plotStats, r.lfy1$nets$c5$GOenrich$plotNterms, nrow=2)
+```
+
+```{r}
+grid.arrange(r.lfy1$nets$c6$GOenrich$plotStats, r.lfy1$nets$c6$GOenrich$plotNterms, nrow=2)
+```
+
+
+## LFY2 network
+```{r, message=FALSE}
+if(dir.exists("../output/TGCN_LFY2"))   system("rm -r ../output/TGCN_LFY2")
+
+if(!dir.exists("../output/TGCN_LFY2"))  dir.create("../output/TGCN_LFY2")
+
+r.lfy2 <- testAllCutoffs(exprData=input_for_LFY2,
+                    target=LFY2.expression,
+                    covs=NULL,
+                    train.split=0.7,
+                    nfolds=5,
+                    t=10,
+                    path="../output/TGCN_LFY2",
+                    targetName="LFY2",
+                    tissueName="ALL",
+                    seed=3333,
+                    cutoffs=10:1,
+                    n=100, 
+                    m=10, 
+                    s=10, 
+                    minCor=0.3,
+                    maxTol=3,
+                    save=T,
+                    overwrite=T,
+                    approach="enrichment", # the approach selected to complete the seed modules
+                    report=F,              # if report=T, an automated report will be created
+                    gene2GO=gene2GO.list,
+                    cellTypeAnnotation=FALSE)
+```
+
+
+
+```{r}
+r.lfy2$selectRatio$nHubs
+r.lfy2$selectRatio$stats
+```
+Focus on 3
+
+```{r}
+p <- lapply(r.lfy2$nets, function(cutoff) cutoff$GOenrich$plotStats) 
+
+ggarrange(p$c3 + theme(text=element_text(size=10)), 
+          p$c4 + theme(text=element_text(size=10)), 
+          ncol=2, nrow=1, common.legend=T, legend="bottom")
+```
+
+```{r}
+r.lfy2$nets$c3$net$moduleSizeSelectionPlot
+```
+
+Correlation with trait, I assume
+
+```{r}
+r.lfy2$nets$c3$net$plotCorr
+```
+
+
+```{r}
+DT::datatable(r.lfy2$nets$c3$net$modules)
+```
+
+```{r}
+knitr::include_graphics("../output/TGCN_LFY2/results/LFY2_ALL_c3_TGCN_crossTabPlot.png")
+```
+
+```{r}
+grid.arrange(r.lfy2$nets$c3$GOenrich$plotStats, r.lfy2$nets$c3$GOenrich$plotNterms, nrow=2)
+```
+
+This was for troubleshooting...
+```{r, eval=FALSE}
+exprData=input_for_LFY2
+target=LFY2.expression
+covs=NULL
+train.split=0.7
+nfolds=5
+t=10
+path="../output/TGCN_LFY2"
+targetName="LFY2"
+tissueName="ALL"
+seed=1234
+cutoffs=10:1
+n=100 
+m=10 
+s=10 
+minCor=0.3
+maxTol=3
+save=T
+overwrite=T
+approach="enrichment" # the approach selected to complete the seed modules
+report=F              # if report=T an automated report will be created
+gene2GO=gene2GO.list
+reduced=F
+cellTypeAnnotation=F
+```
+
+
+load the networks...
+
+
