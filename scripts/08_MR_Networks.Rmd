@@ -1,0 +1,89 @@
+---
+title: "08_MR_Networks"
+output: html_notebook
+---
+
+```{r, message=FALSE}
+library(tidyverse)
+library(igraph)
+```
+
+```{r}
+CrLFY1 <- "Ceric.33G031700.1"
+
+CrLFY2 <- "Ceric.18G076300.1"
+```
+
+```{r}
+annotation <- read_delim("../input/Crichardii_676_v2.1.annotation_info.txt")
+```
+
+
+```{r}
+sample.description <- read.csv("../input/sample.description.csv")
+```
+
+```{r}
+lcpm <- read.csv("../output/log2cpm.csv.gz", row.names = 1, check.names = FALSE) 
+rownames(lcpm) <- str_remove(rownames(lcpm), fixed(".v2"))
+head(lcpm)
+dim(lcpm)
+```
+
+```{r}
+CV <- apply(lcpm, 1, \(x) abs(sd(x)/mean(x)))
+lcpm.filter <- lcpm[CV > quantile(CV, 0.24),]
+```
+
+
+```{r}
+lcpm.cor <- cor(t(lcpm.filter))
+diag(lcpm.cor) <- 0
+mem.maxVSize(30000)
+lcpm.ranks <- apply(lcpm.cor,2,function(x) rank(-abs(x)))
+lcpm.MR <- sqrt(lcpm.ranks * t(lcpm.ranks))
+```
+
+```{r}
+MR4 <- lcpm.MR <= 4
+MR10 <- lcpm.MR <= 10 
+```
+
+```{r}
+graph.MR4 <- graph_from_adjacency_matrix(MR4, mode = "undirected")
+graph.MR10 <- graph_from_adjacency_matrix(MR10, mode = "undirected")
+```
+
+```{r}
+V(graph.MR4)[CrLFY1]$color <- "cornflowerblue"
+V(graph.MR4)[CrLFY2]$color <- "magenta"
+
+V(graph.MR10)[CrLFY1]$color <- "cornflowerblue"
+V(graph.MR10)[CrLFY2]$color <- "magenta"
+
+lfy1.mr4.order1 <- make_neighborhood_graph(graph.MR4, order = 1, nodes = CrLFY1 )[[1]]
+plot(lfy1.mr4.order1)
+
+lfy2.mr4.order1 <- make_neighborhood_graph(graph.MR4, order = 1, nodes = CrLFY2)[[1]]
+plot(lfy2.mr4.order1)
+```
+
+```{r}
+lfy1.mr10.order1 <- make_neighborhood_graph(graph.MR10, order = 1, nodes = CrLFY1 )[[1]]
+plot(lfy1.mr10.order1)
+
+lfy2.mr10.order1 <- make_neighborhood_graph(graph.MR10, order = 1, nodes = CrLFY2)[[1]]
+plot(lfy2.mr10.order1)
+```
+What are the genes in the MR10?
+
+```{r}
+annotation %>% filter(transcriptName %in% names(V(lfy1.mr10.order1)))
+```
+
+What are the actual correlations?
+
+```{r}
+lcpm.cor[CrLFY1, names(V(lfy1.mr10.order1))]
+```
+

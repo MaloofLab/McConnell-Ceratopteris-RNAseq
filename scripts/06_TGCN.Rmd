@@ -34,6 +34,8 @@ library(TGCN)
 library(tidyverse)
 library(ggpubr)
 library(gridExtra)
+library(gplots)
+library(patchwork)
 ```
 
 ```{r}
@@ -119,8 +121,7 @@ r.lfy1 <- testAllCutoffs(exprData=input_for_LFY1,
 
 
 ```{r}
-r.lfy1$selectRatio$nHubs
-r.lfy1$selectRatio$stats
+r.lfy1$selectRatio$nHubs + r.lfy1$selectRatio$stats
 ```
 Focus on 5 and 6
 
@@ -210,8 +211,7 @@ r.lfy2 <- testAllCutoffs(exprData=input_for_LFY2,
 
 
 ```{r}
-r.lfy2$selectRatio$nHubs
-r.lfy2$selectRatio$stats
+r.lfy2$selectRatio$nHubs + r.lfy2$selectRatio$stats
 ```
 Focus on 3
 
@@ -246,34 +246,67 @@ knitr::include_graphics("../output/TGCN_LFY2/results/LFY2_ALL_c3_TGCN_crossTabPl
 grid.arrange(r.lfy2$nets$c3$GOenrich$plotStats, r.lfy2$nets$c3$GOenrich$plotNterms, nrow=2)
 ```
 
-This was for troubleshooting...
-```{r, eval=FALSE}
-exprData=input_for_LFY2
-target=LFY2.expression
-covs=NULL
-train.split=0.7
-nfolds=5
-t=10
-path="../output/TGCN_LFY2"
-targetName="LFY2"
-tissueName="ALL"
-seed=1234
-cutoffs=10:1
-n=100 
-m=10 
-s=10 
-minCor=0.3
-maxTol=3
-save=T
-overwrite=T
-approach="enrichment" # the approach selected to complete the seed modules
-report=F              # if report=T an automated report will be created
-gene2GO=gene2GO.list
-reduced=F
-cellTypeAnnotation=F
+
+## Heat Maps
+
+### LFY1
+
+#### C5
+
+```{r}
+LFY1.c5 <- read_csv("../output/TGCN_LFY1/results/LFY1_ALL_c5_TGCN.csv")
+LFY1.c5
 ```
 
+All genes
+```{r}
+rbind(LFY1=LFY1.expression,lcpm[unique(LFY1.c5$genes),]) %>%
+  as.matrix() %>%
+  heatmap.2(trace="none", cexRow= 0.6, cexCol=0.7, col="bluered", scale="row")
+```
+hubgenes
+```{r}
+rbind(LFY1=LFY1.expression,lcpm[unique(LFY1.c5$hubGene),]) %>%
+  as.matrix() %>%
+  heatmap.2(trace="none", cexRow= 0.6, cexCol=0.7, col="bluered", scale="row")
+```
 
-load the networks...
+#### C6
 
+```{r}
+LFY1.c6 <- read_csv("../output/TGCN_LFY1/results/LFY1_ALL_c6_TGCN.csv")
+LFY1.c6
+```
 
+All genes
+```{r}
+rbind(LFY1=LFY1.expression,lcpm[unique(LFY1.c6$genes),]) %>%
+  as.matrix() %>%
+  heatmap.2(trace="none", cexRow= 0.5, cexCol=0.7, col="bluered", scale="row")
+```
+hubgenes
+```{r}
+rbind(LFY1=LFY1.expression,lcpm[unique(LFY1.c6$hubGene),]) %>%
+  as.matrix() %>%
+  heatmap.2(trace="none", cexRow= 0.6, cexCol=0.7, col="bluered", scale="row")
+```
+
+## LFY2 C3
+
+```{r}
+LFY2.c3 <- read_csv("../output/TGCN_LFY2/results/LFY2_ALL_c3_TGCN.csv")
+LFY2.c3
+```
+
+All genes
+```{r}
+rbind(LFY2=LFY2.expression,lcpm[unique(LFY2.c3$genes),]) %>%
+  as.matrix() %>%
+  heatmap.2(trace="none", cexRow= 0.6, cexCol=0.7, col="bluered", scale="row")
+```
+hubgenes
+```{r}
+rbind(LFY2=LFY2.expression,lcpm[unique(LFY2.c3$hubGene),]) %>%
+  as.matrix() %>%
+  heatmap.2(trace="none", cexRow= 0.6, cexCol=0.7, col="bluered", scale="row")
+```
