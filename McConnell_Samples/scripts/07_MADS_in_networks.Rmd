@@ -1,0 +1,129 @@
+---
+title: "07_MADS_box"
+author: "Julin Maloof"
+date: "`r Sys.Date()`"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+
+Where are the MADS box genes relative to the LFY1 and LFY2 in the various networks that I have built?
+
+```{r}
+CrLFY1 <- "Ceric.33G031700"
+
+CrLFY2 <- "Ceric.18G076300"
+```
+
+
+```{r}
+MADS <- read_tsv("../input/MADS.box.genes.txt") %>% 
+  select(transcriptName)
+```
+## WGCNA
+
+### All samples
+```{r}
+load("../output/WGCNA_allSamples.Rdata")
+module.assignment <- module.assignment %>%
+  mutate(transcriptName = str_remove(geneID, fixed(".v2")))
+```
+
+```{r}
+MADS.modules <- module.assignment %>% semi_join(MADS)
+```
+```{r}
+table(MADS.modules$module)
+```
+
+```{r}
+module.assignment %>% filter(str_detect(transcriptName, CrLFY1))
+```
+```{r}
+module.assignment %>% filter(str_detect(transcriptName, CrLFY2))
+```
+
+```{r}
+MADS.modules %>% filter(str_detect(module, "midnightblue|magenta"))
+```
+
+### Sporophyte samples
+```{r}
+load("../output/WGCNA_sporophyteSamples.Rdata")
+module.assignment <- module.assignment %>%
+  mutate(transcriptName = str_remove(geneID, fixed(".v2")))
+```
+
+```{r}
+MADS.modules <- module.assignment %>% semi_join(MADS)
+```
+```{r}
+table(MADS.modules$module)
+```
+
+
+
+```{r}
+module.assignment %>% filter(str_detect(geneID, CrLFY1))
+```
+```{r}
+module.assignment %>% filter(str_detect(transcriptName, CrLFY2))
+```
+```{r}
+MADS.modules %>% filter(str_detect(module, "blue|brown"))
+```
+
+
+### Gametophyte samples
+```{r}
+load("../output/WGCNA_gametophyteSamples.Rdata")
+module.assignment <- module.assignment %>%
+  mutate(transcriptName = str_remove(geneID, fixed(".v2")))
+```
+
+```{r}
+MADS.modules <- module.assignment %>% semi_join(MADS)
+```
+```{r}
+table(MADS.modules$module)
+```
+
+```{r}
+module.assignment %>% filter(str_detect(transcriptName, CrLFY1))
+```
+```{r}
+module.assignment %>% filter(str_detect(transcriptName, CrLFY2))
+```
+
+```{r}
+MADS.modules %>% filter(str_detect(module, "turquoise|brown"))
+```
+
+## TGCN
+
+### LFY1 Cutoff 5
+
+```{r}
+read_csv("../output/TGCN_LFY1/results/LFY1_ALL_c5_TGCN.csv") %>% semi_join(MADS, by = c("genes" = "transcriptName" ))
+```
+
+### LFY1 Cutoff 6
+
+```{r}
+read_csv("../output/TGCN_LFY1/results/LFY1_ALL_c6_TGCN.csv") %>% semi_join(MADS, by = c("genes" = "transcriptName" ))
+```
+
+### LFY2 Cutoff 3
+
+```{r}
+read_csv("../output/TGCN_LFY2/results/LFY2_ALL_c3_TGCN.csv") %>% semi_join(MADS, by = c("genes" = "transcriptName" ))
+```
+
+

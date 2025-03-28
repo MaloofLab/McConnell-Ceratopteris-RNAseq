@@ -1,0 +1,4 @@
+"query","GO.ID","Term","Annotated","Significant","Expected","p_value","source","logPval"
+"Ceric.05G066500.1","GO:0007165","signal transduction",327,1,0.08,0.081,"BP",1.09151498112135
+"Ceric.15G011900.1","GO:0006508","proteolysis",350,1,0.13,0.13,"BP",0.886056647693163
+"hubs","GO:0006355","regulation of DNA-templated transcriptio...",603,1,0.08,0.076,"BP",1.11918640771921

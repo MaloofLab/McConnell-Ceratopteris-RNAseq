@@ -1,0 +1,28 @@
+"query","GO.ID","Term","Annotated","Significant","Expected","p_value","source","logPval"
+"Ceric.01G018500.1","GO:0010411","xyloglucan metabolic process",21,1,0.02,0.016,"BP",1.79588001734408
+"Ceric.01G018500.1","GO:0007275","multicellular organism development",25,1,0.02,0.019,"BP",1.72124639904717
+"Ceric.01G018500.1","GO:0042546","cell wall biogenesis",35,1,0.03,0.026,"BP",1.58502665202918
+"Ceric.01G018500.1","GO:0009664","plant-type cell wall organization",52,1,0.04,0.039,"BP",1.4089353929735
+"Ceric.01G042200.1","GO:0006355","regulation of DNA-templated transcriptio...",603,2,0.23,0.016,"BP",1.79588001734408
+"Ceric.02G059700.1","GO:0009116","nucleoside metabolic process",18,1,0.01,0.009,"BP",2.04575749056068
+"Ceric.02G059700.1","GO:0006479","protein methylation",20,1,0.01,0.01,"BP",2
+"Ceric.02G059700.1","GO:0016567","protein ubiquitination",63,1,0.03,0.031,"BP",1.50863830616573
+"Ceric.11G001200.1","GO:0006633","fatty acid biosynthetic process",87,1,0.03,0.033,"BP",1.48148606012211
+"Ceric.11G001200.1","GO:0009058","biosynthetic process",2357,3,0.89,0.036,"BP",1.44369749923271
+"Ceric.16G069600.1","GO:0007275","multicellular organism development",25,1,0.01,0.0063,"BP",2.20065945054642
+"Ceric.16G069600.1","GO:0030001","metal ion transport",167,1,0.04,0.0417,"BP",1.37986394502624
+"Ceric.18G036100.1","GO:0009664","plant-type cell wall organization",52,2,0.05,0.00087,"BP",3.06048074738138
+"Ceric.18G036100.1","GO:0010411","xyloglucan metabolic process",21,1,0.02,0.01839,"BP",1.73541827076192
+"Ceric.18G036100.1","GO:0042546","cell wall biogenesis",35,1,0.03,0.03049,"BP",1.51584257563462
+"Ceric.1Z004200.1","GO:0007275","multicellular organism development",25,1,0.01,0.013,"BP",1.88605664769316
+"Ceric.1Z004200.1","GO:0006355","regulation of DNA-templated transcriptio...",603,2,0.3,0.031,"BP",1.50863830616573
+"Ceric.1Z119300.1","GO:0006364","rRNA processing",33,1,0.01,0.012,"BP",1.92081875395238
+"Ceric.1Z119300.1","GO:0006470","protein dephosphorylation",121,1,0.05,0.045,"BP",1.34678748622466
+"Ceric.31G020500.1","GO:0006189","'de novo' IMP biosynthetic process",6,1,0.01,0.0083,"BP",2.08092190762393
+"Ceric.31G020500.1","GO:0006108","malate metabolic process",13,1,0.02,0.0179,"BP",1.74714696902011
+"Ceric.33G032900.1","GO:0045892","negative regulation of DNA-templated tra...",6,1,0,0.003,"BP",2.52287874528034
+"Ceric.33G032900.1","GO:0006535","cysteine biosynthetic process from serin...",18,1,0.01,0.009,"BP",2.04575749056068
+"Ceric.33G032900.1","GO:0006096","glycolytic process",48,1,0.02,0.024,"BP",1.61978875828839
+"Ceric.38G016900.1","GO:0015700","arsenite transport",2,1,0,0.001,"BP",3
+"Ceric.38G016900.1","GO:0006814","sodium ion transport",17,1,0.01,0.0085,"BP",2.07058107428571
+"hubs","GO:0030001","metal ion transport",167,1,0.04,0.042,"BP",1.3767507096021

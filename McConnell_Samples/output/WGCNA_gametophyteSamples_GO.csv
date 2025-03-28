@@ -1,0 +1,182 @@
+module,GO.ID,Term,Annotated,Significant,Expected,p.value
+black,GO:0009765,"photosynthesis, light harvesting",40,18,2.05,1.4e-13
+black,GO:0005978,glycogen biosynthetic process,6,4,0.31,9.4e-5
+black,GO:0055085,transmembrane transport,384,33,19.7,0.0013
+black,GO:0015995,chlorophyll biosynthetic process,19,4,0.97,0.0142
+black,GO:0006096,glycolytic process,26,4,1.33,0.0415
+blue,GO:0015979,photosynthesis,186,75,37.1,4.5e-11
+blue,GO:0008152,metabolic process,3631,798,724.19,3.4e-6
+blue,GO:0033014,tetrapyrrole biosynthetic process,39,19,7.78,1.7e-5
+blue,GO:0009765,"photosynthesis, light harvesting",40,19,7.98,7.6e-5
+blue,GO:0006412,translation,176,63,35.1,2.1e-4
+blue,GO:0015986,proton motive force-driven ATP synthesis,40,17,7.98,9.1e-4
+blue,GO:0006779,porphyrin-containing compound biosynthet...,28,9,5.58,0.00301
+blue,GO:0006457,protein folding,64,22,12.76,0.00768
+blue,GO:0019464,glycine decarboxylation via glycine clea...,3,3,0.6,0.00791
+blue,GO:0010207,photosystem II assembly,3,3,0.6,0.00791
+blue,GO:0006414,translational elongation,9,5,1.8,0.01926
+blue,GO:0006662,glycerol ether metabolic process,23,9,4.59,0.02659
+blue,GO:0006436,tryptophanyl-tRNA aminoacylation,2,2,0.4,0.03975
+blue,GO:0042274,ribosomal small subunit biogenesis,2,2,0.4,0.03975
+blue,GO:0009052,"pentose-phosphate shunt, non-oxidative b...",2,2,0.4,0.03975
+blue,GO:0009306,protein secretion,2,2,0.4,0.03975
+blue,GO:0009236,cobalamin biosynthetic process,2,2,0.4,0.03975
+blue,GO:0015700,arsenite transport,2,2,0.4,0.03975
+blue,GO:0045039,protein insertion into mitochondrial inn...,2,2,0.4,0.03975
+blue,GO:0006480,N-terminal protein amino acid methylatio...,2,2,0.4,0.03975
+brown,GO:0006412,translation,176,87,35.21,1.3e-22
+brown,GO:0009772,photosynthetic electron transport in pho...,32,29,6.4,1e-17
+brown,GO:0019685,"photosynthesis, dark reaction",12,10,2.4,4.4e-6
+brown,GO:0015979,photosynthesis,186,87,37.21,4.5e-6
+brown,GO:0009767,photosynthetic electron transport chain,49,41,9.8,2.5e-5
+brown,GO:0015995,chlorophyll biosynthetic process,19,12,3.8,4.8e-5
+brown,GO:0015977,carbon fixation,10,8,2,7.7e-5
+brown,GO:0006355,regulation of DNA-templated transcriptio...,443,119,88.62,1.5e-4
+brown,GO:0008152,metabolic process,3631,801,726.34,2.6e-4
+brown,GO:0015986,proton motive force-driven ATP synthesis,40,18,8,2.9e-4
+brown,GO:0045454,cell redox homeostasis,92,32,18.4,6e-4
+brown,GO:0042773,ATP synthesis coupled electron transport,9,6,1.8,0.00304
+brown,GO:0016567,protein ubiquitination,36,14,7.2,0.00687
+brown,GO:0003333,amino acid transmembrane transport,16,8,3.2,0.00692
+brown,GO:0009107,lipoate biosynthetic process,3,3,0.6,0.00799
+brown,GO:0022904,respiratory electron transport chain,17,11,3.4,0.01662
+brown,GO:0009664,plant-type cell wall organization,47,16,9.4,0.01671
+brown,GO:0006633,fatty acid biosynthetic process,56,20,11.2,0.02479
+brown,GO:0022900,electron transport chain,76,57,15.2,0.02781
+brown,GO:0032259,methylation,17,5,3.4,0.03338
+brown,GO:0051252,regulation of RNA metabolic process,445,121,89.02,0.03739
+brown,GO:0006164,purine nucleotide biosynthetic process,61,28,12.2,0.03885
+brown,GO:0006777,Mo-molybdopterin cofactor biosynthetic p...,2,2,0.4,0.03998
+brown,GO:0046654,tetrahydrofolate biosynthetic process,2,2,0.4,0.03998
+brown,GO:0006465,signal peptide processing,2,2,0.4,0.03998
+brown,GO:0009435,NAD biosynthetic process,2,2,0.4,0.03998
+brown,GO:0006351,DNA-templated transcription,500,134,100.02,0.04036
+brown,GO:0009733,response to auxin,25,9,5,0.04641
+cyan,GO:0007165,signal transduction,217,14,5.97,1.4e-5
+cyan,GO:0006355,regulation of DNA-templated transcriptio...,443,26,12.2,1.4e-4
+cyan,GO:0046274,lignin catabolic process,26,4,0.72,0.00513
+cyan,GO:0007275,multicellular organism development,20,4,0.55,0.00716
+cyan,GO:0006952,defense response,31,4,0.85,0.00972
+cyan,GO:0005985,sucrose metabolic process,6,2,0.17,0.0105
+cyan,GO:0009607,response to biotic stimulus,18,3,0.5,0.01231
+cyan,GO:0006004,fucose metabolic process,1,1,0.03,0.02753
+cyan,GO:0036092,phosphatidylinositol-3-phosphate biosynt...,1,1,0.03,0.02753
+cyan,GO:0048366,leaf development,1,1,0.03,0.02753
+cyan,GO:0009956,radial pattern formation,1,1,0.03,0.02753
+cyan,GO:0008356,asymmetric cell division,1,1,0.03,0.02753
+cyan,GO:0009664,plant-type cell wall organization,47,4,1.29,0.03936
+cyan,GO:0006535,cysteine biosynthetic process from serin...,12,2,0.33,0.04146
+green,GO:0042545,cell wall modification,59,16,3.12,3.4e-8
+green,GO:0016049,cell growth,4,3,0.21,5.6e-4
+green,GO:0010215,cellulose microfibril organization,4,3,0.21,5.6e-4
+green,GO:0006564,L-serine biosynthetic process,2,2,0.11,0.00279
+green,GO:0006979,response to oxidative stress,86,11,4.55,0.00523
+green,GO:0042546,cell wall biogenesis,32,8,1.69,0.01378
+green,GO:0045892,negative regulation of DNA-templated tra...,4,2,0.21,0.01557
+green,GO:0010411,xyloglucan metabolic process,21,4,1.11,0.02244
+green,GO:0006542,glutamine biosynthetic process,5,2,0.26,0.02505
+green,GO:0055085,transmembrane transport,384,30,20.31,0.03387
+green,GO:0072488,ammonium transmembrane transport,6,2,0.32,0.03628
+green,GO:0010167,response to nitrate,6,2,0.32,0.03628
+green,GO:0015706,nitrate transmembrane transport,6,2,0.32,0.03628
+green,GO:0000413,protein peptidyl-prolyl isomerization,15,3,0.79,0.04147
+grey60,GO:0006886,intracellular protein transport,64,16,3.97,1.1e-5
+grey60,GO:0032264,IMP salvage,2,2,0.12,0.0038
+grey60,GO:0009432,SOS response,2,2,0.12,0.0038
+grey60,GO:0007165,signal transduction,217,24,13.45,0.0068
+grey60,GO:0007034,vacuolar transport,8,3,0.5,0.0105
+grey60,GO:0006367,transcription initiation at RNA polymera...,9,3,0.56,0.015
+grey60,GO:0016192,vesicle-mediated transport,44,9,2.73,0.0161
+grey60,GO:0009058,biosynthetic process,1291,77,80.03,0.0164
+grey60,GO:0006479,protein methylation,10,3,0.62,0.0204
+grey60,GO:0000079,regulation of cyclin-dependent protein s...,4,2,0.25,0.0211
+grey60,GO:0006415,translational termination,4,2,0.25,0.0211
+grey60,GO:0006486,protein glycosylation,18,4,1.12,0.0222
+grey60,GO:0006631,fatty acid metabolic process,70,5,4.34,0.0272
+grey60,GO:0016310,phosphorylation,741,61,45.94,0.0322
+grey60,GO:0015012,heparan sulfate proteoglycan biosyntheti...,6,2,0.37,0.0487
+grey60,GO:0006094,gluconeogenesis,6,2,0.37,0.0487
+grey60,GO:0006506,GPI anchor biosynthetic process,6,2,0.37,0.0487
+grey60,GO:0006468,protein phosphorylation,716,56,44.39,0.0489
+lightcyan,GO:0007034,vacuolar transport,8,2,0.11,0.0047
+lightcyan,GO:0009312,oligosaccharide biosynthetic process,13,2,0.18,0.0133
+lightcyan,GO:0045900,negative regulation of translational elo...,1,1,0.01,0.0135
+lightcyan,GO:0006614,SRP-dependent cotranslational protein ta...,1,1,0.01,0.0135
+lightcyan,GO:0005980,glycogen catabolic process,1,1,0.01,0.0135
+lightcyan,GO:0006893,Golgi to plasma membrane transport,1,1,0.01,0.0135
+lightcyan,GO:0048015,phosphatidylinositol-mediated signaling,1,1,0.01,0.0135
+lightcyan,GO:0006635,fatty acid beta-oxidation,3,1,0.04,0.0399
+lightcyan,GO:0042823,pyridoxal phosphate biosynthetic process,3,1,0.04,0.0399
+lightcyan,GO:0000387,spliceosomal snRNP assembly,3,1,0.04,0.0399
+lightcyan,GO:0071805,potassium ion transmembrane transport,24,2,0.32,0.0408
+lightgreen,GO:0009094,L-phenylalanine biosynthetic process,7,3,0.07,2.6e-5
+lightgreen,GO:0035434,copper ion transmembrane transport,8,2,0.07,0.0023
+lightgreen,GO:0006979,response to oxidative stress,86,4,0.8,0.008
+lightgreen,GO:0042545,cell wall modification,59,3,0.55,0.0171
+lightgreen,GO:0031145,anaphase-promoting complex-dependent cat...,2,1,0.02,0.0185
+lightgreen,GO:0015074,DNA integration,2,1,0.02,0.0185
+lightgreen,GO:0006825,copper ion transport,11,3,0.1,0.0265
+lightgreen,GO:0042255,ribosome assembly,3,1,0.03,0.0277
+lightgreen,GO:0019290,siderophore biosynthetic process,33,2,0.31,0.0373
+lightyellow,GO:0006102,isocitrate metabolic process,2,2,0.03,2.2e-4
+lightyellow,GO:0006108,malate metabolic process,9,2,0.14,0.00752
+lightyellow,GO:0043419,urea catabolic process,1,1,0.02,0.01505
+lightyellow,GO:0009264,deoxyribonucleotide catabolic process,2,1,0.03,0.02988
+lightyellow,GO:0006979,response to oxidative stress,86,4,1.29,0.03983
+lightyellow,GO:0030418,nicotianamine biosynthetic process,3,1,0.05,0.04449
+lightyellow,GO:0006275,regulation of DNA replication,3,1,0.05,0.04449
+midnightblue,GO:0006355,regulation of DNA-templated transcriptio...,443,12,5.35,0.0059
+midnightblue,GO:0009086,methionine biosynthetic process,2,1,0.02,0.024
+midnightblue,GO:0006468,protein phosphorylation,716,14,8.65,0.0429
+midnightblue,GO:0051260,protein homooligomerization,4,1,0.05,0.0475
+purple,GO:0007165,signal transduction,217,12,4.86,4.9e-4
+purple,GO:0034755,iron ion transmembrane transport,3,2,0.07,0.00147
+purple,GO:0006468,protein phosphorylation,716,26,16.02,0.01047
+purple,GO:0071805,potassium ion transmembrane transport,24,3,0.54,0.01569
+purple,GO:0009742,brassinosteroid mediated signaling pathw...,1,1,0.02,0.02238
+purple,GO:0032012,regulation of ARF protein signal transdu...,1,1,0.02,0.02238
+purple,GO:0010038,response to metal ion,1,1,0.02,0.02238
+purple,GO:0046938,phytochelatin biosynthetic process,1,1,0.02,0.02238
+purple,GO:0031124,mRNA 3'-end processing,1,1,0.02,0.02238
+purple,GO:0008612,peptidyl-lysine modification to peptidyl...,2,1,0.04,0.04426
+purple,GO:0016480,negative regulation of transcription by ...,2,1,0.04,0.04426
+purple,GO:0009245,lipid A biosynthetic process,2,1,0.04,0.04426
+salmon,GO:0006950,response to stress,289,23,5.84,5.6e-5
+salmon,GO:0009415,response to water,4,3,0.08,4e-4
+salmon,GO:0006952,defense response,31,4,0.63,0.0032
+salmon,GO:0006979,response to oxidative stress,86,6,1.74,0.0075
+salmon,GO:0046274,lignin catabolic process,26,3,0.53,0.0149
+salmon,GO:0006873,intracellular monoatomic ion homeostasis,11,2,0.22,0.0197
+salmon,GO:0042157,lipoprotein metabolic process,2,1,0.04,0.04
+salmon,GO:0009269,response to desiccation,2,1,0.04,0.04
+turquoise,GO:0007018,microtubule-based movement,71,60,22.32,1.1e-19
+turquoise,GO:0006281,DNA repair,100,74,31.43,2.5e-12
+turquoise,GO:0006260,DNA replication,62,47,19.49,7e-9
+turquoise,GO:0006139,nucleobase-containing compound metabolic...,901,340,283.2,7.7e-5
+turquoise,GO:0006813,potassium ion transport,36,18,11.32,3.1e-4
+turquoise,GO:0006811,monoatomic ion transport,168,69,52.81,9.1e-4
+turquoise,GO:0006289,nucleotide-excision repair,6,6,1.89,9.6e-4
+turquoise,GO:0007076,mitotic chromosome condensation,6,6,1.89,9.6e-4
+turquoise,GO:0006270,DNA replication initiation,8,7,2.51,0.00174
+turquoise,GO:0015914,phospholipid transport,12,9,3.77,0.00241
+turquoise,GO:0032147,activation of protein kinase activity,5,5,1.57,0.00305
+turquoise,GO:0060236,regulation of mitotic spindle organizati...,5,5,1.57,0.00305
+turquoise,GO:0000723,telomere maintenance,5,5,1.57,0.00305
+turquoise,GO:0006310,DNA recombination,28,18,8.8,0.00328
+turquoise,GO:0055085,transmembrane transport,384,141,120.7,0.00333
+turquoise,GO:0007017,microtubule-based process,126,92,39.6,0.00827
+turquoise,GO:0006904,vesicle docking involved in exocytosis,4,4,1.26,0.00974
+turquoise,GO:0006298,mismatch repair,12,8,3.77,0.01277
+turquoise,GO:0046488,phosphatidylinositol metabolic process,34,18,10.69,0.01337
+turquoise,GO:0006334,nucleosome assembly,10,7,3.14,0.01387
+turquoise,GO:0006284,base-excision repair,15,9,4.71,0.02075
+turquoise,GO:0016310,phosphorylation,741,260,232.91,0.02226
+turquoise,GO:0035556,intracellular signal transduction,103,51,32.37,0.02278
+turquoise,GO:0009873,ethylene-activated signaling pathway,3,3,0.94,0.03101
+turquoise,GO:0000077,DNA damage checkpoint signaling,3,3,0.94,0.03101
+turquoise,GO:0046168,glycerol-3-phosphate catabolic process,3,3,0.94,0.03101
+turquoise,GO:0006351,DNA-templated transcription,500,136,157.16,0.03264
+turquoise,GO:0006885,regulation of pH,7,5,2.2,0.03512
+turquoise,GO:0007094,mitotic spindle assembly checkpoint sign...,5,4,1.57,0.03646
+turquoise,GO:0006002,fructose 6-phosphate metabolic process,5,4,1.57,0.03646
+turquoise,GO:0016192,vesicle-mediated transport,44,21,13.83,0.04353

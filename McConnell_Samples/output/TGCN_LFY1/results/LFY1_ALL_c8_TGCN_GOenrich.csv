@@ -1,0 +1,6 @@
+"query","GO.ID","Term","Annotated","Significant","Expected","p_value","source","logPval"
+"Ceric.16G069600.1","GO:0007275","multicellular organism development",25,1,0.01,0.0063,"BP",2.20065945054642
+"Ceric.16G069600.1","GO:0030001","metal ion transport",167,1,0.04,0.0417,"BP",1.37986394502624
+"Ceric.1Z119300.1","GO:0006364","rRNA processing",33,1,0.01,0.012,"BP",1.92081875395238
+"Ceric.1Z119300.1","GO:0006470","protein dephosphorylation",121,1,0.05,0.045,"BP",1.34678748622466
+"hubs","GO:0000012","single strand break repair",1,0,0,1,"BP",0
