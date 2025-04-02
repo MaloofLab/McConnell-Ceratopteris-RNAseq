@@ -34,15 +34,22 @@ for bioproject in $(cat bioproject_accessions.txt)
   do
     echo $bioproject
       esearch -db sra -query "$bioproject" | efetch -format runinfo | \
-      cut -d',' -f1 | grep -E "^SRR|^ERR" | grep -v "ERR3440669" >> "$OUTPUT_SRR_LIST"
+      cut -d',' -f1 | grep -E "^SRR|^ERR" | grep -vE "ERR3440669|SRR12605705|SRR12605702|SRR9829640|SRR12605706|SRR12605704|SRR513505|SRR513506|SRR513501" >> "$OUTPUT_SRR_LIST"
   done
+# ERR3440669 is a microbial read set that I think mistakingly got added to a fern bioproject.  The others are wrong platform or too large.
 
 # Download the reads 
-# need to sudo because raw_seq_data is owned by root
-# If I specify a single output directory is it going to overwrite it?
-sudo prefetch --option-file all_srr_ids.txt --max-size 100G -p -O /raw_seq_data/Julin-FERN/sra
+prefetch --option-file all_srr_ids.txt --max-size 100G -p -O /analyzed_data/Julin/sequencing/Julin-FERN/ncbi/prefetch
 
-cat all_srr_ids.txt | xargs -n 1 -P 4 fasterq-dump --split-files --gzip --outdir ./fastq_files
+cd /analyzed_data/Julin/sequencing/Julin-FERN/ncbi
+
+# Note, could increase P to > 1 if on machine with a lot of cpus, but fasterq-dump is already mulithreaded (Default 6)
+# Note: originally I had gzip following the fasterq-dump in the same command but that is slow.  Better to do them separately to better be able to take advantage of multiprocessors for gzip
+cat  ~/git/McConnell-Ceratopteris-RNAseq/NCBI_Samples/input/all_srr_ids.txt | xargs -L 1 -P 1 -I {} fasterq-dump ./prefetch/{} --split-3 --outdir /media/volume/julin-scratch/fastqs 
+cd /media/volume/julin-scratch/fastqs 
+
+ls -1 | xargs -L 1 -P 4  gzip 
+
 
 
 
