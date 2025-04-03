@@ -1,0 +1,243 @@
+---
+title: "09_WT_male_v_hermaphrodite"
+author: "Julin Maloof"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+The goal of this script is to find differntially expressed genes between male and hermaphrodite gametophytes
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(edgeR)
+library(tidyverse)
+library(goseq)
+library(GO.db)
+library(Biostrings)
+conflicted::conflicts_prefer(dplyr::select, dplyr::filter())
+```
+
+```{r}
+annotation <- read_delim("../input/Crichardii_676_v2.1.annotation_info.txt") %>% 
+  select(-contains("pacid"), -locusName, -peptideName, geneID = transcriptName)
+```
+
+
+```{r}
+counts.data <- read_csv("../output/ht-seq-counts-combined.csv.gz")
+head(counts.data)
+```
+
+```{r}
+counts.data %>% filter(str_detect(gene_ID, "__"))
+```
+```{r}
+counts.data <- counts.data %>% filter(str_detect(gene_ID, "__", negate = TRUE))
+```
+
+```{r}
+counts.data <- counts.data %>%
+  rename_with(.fn = ~ str_remove(.x, "RESUB-")) %>%
+  rename_with(.fn = ~ str_replace(.x, "(male|mature)-", "\\1_"))
+```
+
+Get WT gametophyte samples:
+
+```{r}
+counts.data <- counts.data %>% select(gene_ID, matches("WT.*(male|herm)"))
+head(counts.data)
+```
+
+```{r}
+sample.description <- tibble(sample=colnames(counts.data)[-1]) %>%
+  mutate(gt=str_extract(sample, "^[a-zA-Z0-9]*"),
+         tissue=str_remove(sample, "^[a-zA-Z0-9]*-")) %>%
+  separate(tissue, into=c("tissue", "rep"), sep = "-", fill="right", extra="merge") %>%
+  mutate( group=str_c(gt, "-", tissue))
+
+sample.description
+
+```
+
+remove low read genes:
+
+```{r}
+counts.data <- counts.data[rowSums(counts.data[,-1] > 5) >= 3,]
+```
+
+```{r}
+counts.matrix <- counts.data %>% select(-gene_ID) %>% as.matrix()
+rownames(counts.matrix) <- counts.data$gene_ID
+
+dge.data <- DGEList(counts=counts.matrix, 
+                    group=sample.description$group)
+dim(dge.data) 
+dge.data <- calcNormFactors(dge.data, method = "TMM")
+dge.data$samples # look at the normalization factors
+```
+
+## MAKE AN MDS
+
+```{r}
+mdsvals <- plotMDS(dge.data, plot = FALSE) # get the MDS values for plotting
+```
+
+
+```{r}
+mdsvals2 <- tibble(x=mdsvals$x, y=mdsvals$y, sample=rownames(dge.data$samples)) %>%
+  inner_join(sample.description)
+
+
+mdsvals2 %>%  ggplot(aes(x=x, y=y, color=tissue)) +
+  scale_color_brewer(type="qual", palette = 3) +
+  theme_bw() +
+  geom_point(size=3) 
+```
+## Calculate dispersion
+
+```{r}
+design <- model.matrix(~tissue,data = sample.description) 
+colnames(design) <- colnames(design) %>% str_remove("tissue")
+rownames(design) <- sample.description$sample
+
+design
+```
+
+```{r}
+#First the overall dispersion
+dge.data <- estimateGLMCommonDisp(dge.data,design,verbose = TRUE)
+
+#Then a trended dispersion based on count level
+dge.data <- estimateGLMTrendedDisp(dge.data,design)
+
+#And lastly we calculate the gene-wise dispersion, using the prior estimates to "squeeze" the dispersion towards the common dispersion.
+dge.data <- estimateGLMTagwiseDisp(dge.data,design)
+
+#We can examine this with a plot
+plotBCV(dge.data)
+```
+## Find DEG
+
+```{r}
+fit <- glmQLFit(dge.data, design)
+lrt <- glmQLFTest(fit,coef = "mature_herm")
+summary(decideTests.DGELRT(lrt,p.value=0.01)) 
+```
+
+```{r}
+#Extract get DE info for all genes
+genes.all <- topTags(lrt, n = Inf, p.value = 1)$table %>%
+  rownames_to_column("geneID") %>%
+  mutate()
+head(genes.all)
+```
+
+Add annotation
+
+```{r}
+genes.all <- genes.all %>%
+  mutate(geneID = str_remove(geneID, "v[1-9]\\.")) %>% left_join(annotation)
+```
+Add GO term names
+
+```{r}
+get_GO_definition <- function(go_id) {
+  require(GO.db)
+  if(is.na(go_id)) return("")
+  go_id <- str_split_1(go_id, pattern = " ")
+  sapply(go_id, \ (x) {
+    term_info <- GOTERM[[x]]
+    if (is.null(term_info)) {
+      return("")
+    }
+    Term(term_info)
+  }) |>
+    str_c(collapse = "; ")
+}
+
+genes.all <- genes.all %>% rowwise() %>% mutate(GOterms = get_GO_definition(GO)) %>%
+  dplyr::select(geneID:FDR, GO, GOterms, starts_with("Best"), everything())
+```
+
+```{r}
+head(genes.all)
+```
+
+```{r}
+#save to a file
+write_csv(genes.all,"../output/DEG_ALL_WT_male_v_herm.csv.gz")
+```
+
+## GO term enrichment:
+
+format go list
+```{r}
+go.list <- genes.all %>% pull(GO) %>% strsplit(" ") %>% set_names(genes.all$geneID)
+head(go.list)
+```
+Get gene lengths
+
+```{r, eval=FALSE}
+seqs <- readDNAStringSet("~/Sequences/ref_genomes/C_richardii_v2.1/annotation/Crichardii_676_v2.1.cds.fa.gz") 
+
+gene.lengths <- nchar(seqs) %>% set_names(str_remove(names(seqs), " .*"))
+
+gene.lengths
+
+saveRDS(gene.lengths, "../input/genelengths.Rds")
+```
+
+```{r}
+gene.lengths <- readRDS("../input/genelengths.Rds")
+```
+
+```{r}
+gene.lengths <- gene.lengths[genes.all$geneID]
+```
+
+vectors of upregulated and downregulated genes
+
+```{r}
+genes.up <- genes.all %>% mutate(up = (FDR <= 0.01 & logFC > 0) * 1 ) %>% pull(up, name = geneID)
+genes.down <- genes.all %>% mutate(up = (FDR <= 0.01 & logFC < 0) * 1 ) %>% pull(up, name = geneID)
+```
+
+```{r}
+#determines if there is bias due to gene length.  The plot shows the relationship.
+nullp.result.up <- nullp(DEgenes = genes.up, bias.data = gene.lengths)
+
+#calculate p-values for each GO term
+rownames(nullp.result.up) <- names(gene.lengths) #because of a bug in nullp()
+
+GO.out.up <- goseq(pwf = nullp.result.up, gene2cat = go.list, use_genes_without_cat=TRUE) %>%
+  filter(ontology == "BP") %>%
+  mutate(FDR = p.adjust(over_represented_pvalue, method = "fdr")) %>%
+  filter(FDR < 0.05) %>%
+  select(category, term, FDR, everything(), -under_represented_pvalue)
+ 
+GO.out.up
+
+write.csv(GO.out.up, "../output/GO_up_WT_male_v_herm.csv")
+```
+
+```{r}
+#determines if there is bias due to gene length.  The plot shows the relationship.
+nullp.result.down <- nullp(DEgenes = genes.down, bias.data = gene.lengths)
+
+#calculate p-values for each GO term
+rownames(nullp.result.down) <- names(gene.lengths) #because of a bug in nullp()
+
+GO.out.down <- goseq(pwf = nullp.result.down, gene2cat = go.list, use_genes_without_cat=TRUE) %>%
+  filter(ontology == "BP") %>%
+  mutate(FDR = p.adjust(over_represented_pvalue, method = "fdr")) %>%
+  filter(FDR < 0.05) %>%
+  select(category, term, FDR, everything(), -under_represented_pvalue)
+ 
+GO.out.down
+
+write.csv(GO.out.down, "../output/GO_down_WT_male_v_herm.csv")
+
+```
