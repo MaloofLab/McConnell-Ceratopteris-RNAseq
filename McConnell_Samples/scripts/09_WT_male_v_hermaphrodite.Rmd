@@ -17,6 +17,7 @@ library(tidyverse)
 library(goseq)
 library(GO.db)
 library(Biostrings)
+library(gplots)
 conflicted::conflicts_prefer(dplyr::select, dplyr::filter())
 ```
 
@@ -134,6 +135,33 @@ genes.all <- topTags(lrt, n = Inf, p.value = 1)$table %>%
   mutate()
 head(genes.all)
 ```
+
+## Heat maps
+
+```{r}
+genes.heatmap <- bind_rows( {
+  genes.all %>% 
+    filter(logFC > 0) %>% 
+    slice_min(PValue, n = 50)
+},
+{ genes.all %>%
+    filter(logFC < 0) %>%
+    slice_min(PValue, n = 50)}
+  
+)
+
+cpm(dge.data, log = TRUE) %>%
+  as_tibble(rownames = "geneID") %>%
+  semi_join(genes.heatmap) %>%
+  column_to_rownames("geneID") %>%
+  rename_with(\(x) str_remove(x, "WT-")) %>%
+  as.matrix() %>%
+  heatmap.2(trace="none",col="bluered", Colv = FALSE, dendrogram = "row", mar=c(10,8))
+  
+dev.copy(png, filename = "../output/male_v_herm_heatmap.png", width=1200, height = 900)
+  
+```
+
 
 Add annotation
 
