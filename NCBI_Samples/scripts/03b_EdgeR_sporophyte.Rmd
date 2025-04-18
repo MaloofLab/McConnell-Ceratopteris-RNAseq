@@ -1,0 +1,244 @@
+---
+title: "03_EdgeR"
+author: "Julin Maloof"
+date: "2025-04-18"
+output: html_document
+---
+
+Goal: TMM normalize all gametophyte samples together (NCBI and McConnell)
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(edgeR)
+library(ggrepel)
+```
+
+## McConnel Counts
+
+### Read the counts and create sample description
+```{r}
+counts.data.Mc <- read_csv("../../McConnell_Samples/output/ht-seq-counts-combined.csv.gz")
+head(counts.data.Mc)
+```
+
+```{r}
+counts.data.Mc %>% filter(str_detect(gene_ID, "__"))
+```
+
+```{r}
+counts.data.Mc <- counts.data.Mc %>% filter(str_detect(gene_ID, "__", negate = TRUE))
+```
+
+```{r}
+counts.data.Mc <- counts.data.Mc %>%
+  rename_with(.fn = ~ str_remove(.x, "RESUB-")) %>%
+  rename_with(.fn = ~ str_replace(.x, "(male|mature)-", "\\1_"))
+```
+
+
+```{r}
+sample.description.Mc <- tibble(sample=colnames(counts.data.Mc)[-1]) %>%
+  mutate(gt=str_extract(sample, "^[a-zA-Z0-9]*"),
+         base_gt=str_remove(gt, "[0-9]+"),
+         base_gt=str_replace(base_gt, "BA", "CrLFY1-OX"),
+         base_gt=str_replace(base_gt, "B(D|F)", "CrLFY2-OX"),
+         tissue=str_remove(sample, "^[a-zA-Z0-9]*-")) %>%
+  separate(tissue, into=c("tissue", "rep"), sep = "-", fill="right", extra="merge") %>%
+  mutate( group=str_c(base_gt, "-", tissue))
+
+sample.description.Mc
+
+write_csv(sample.description.Mc, "../input/McConnel.sample.description.Mc.csv")
+```
+
+### Filter for sporophyte only
+
+```{r}
+sample.description.Mc <- sample.description.Mc %>% filter(str_detect(tissue, "gam|herm", negate = TRUE))
+
+counts.data.Mc <- counts.data.Mc %>% select(gene_ID, matches(sample.description.Mc$sample))
+```
+
+## NCBI counts
+
+### Read the counts and create sample description
+```{r}
+counts.data.ncbi <- read_delim("../output/ht-seq-counts_ncbi.csv.gz")
+head(counts.data.ncbi)
+```
+
+```{r}
+counts.data.ncbi %>% filter(str_detect(gene_ID, "__"))
+```
+
+```{r}
+counts.data.ncbi <- counts.data.ncbi %>% filter(str_detect(gene_ID, "__", negate = TRUE))
+```
+
+
+```{r}
+sample.description.ncbi <- read_csv("../input/all_srr_info_short.csv")
+sample.description.ncbi
+```
+
+what is missing?
+
+```{r}
+mapped.samples.ncbi <- tibble(Run=colnames(counts.data.ncbi)[-1])
+sample.description.ncbi %>% anti_join(mapped.samples.ncbi)
+```
+callus.  not sure why this got dropped but probably okay.
+
+```{r}
+sample.description.ncbi <- sample.description.ncbi %>% semi_join(mapped.samples.ncbi)
+```
+
+
+### Filter for sporophyte only
+
+```{r}
+sample.description.ncbi <- sample.description.ncbi %>% filter(str_detect(stage, "sporophyte"))
+
+counts.data.ncbi <- counts.data.ncbi %>% select(gene_ID, matches(sample.description.ncbi$Run))
+```
+
+## Combine data sets
+
+
+```{r}
+sample.description <- sample.description.ncbi %>% 
+  mutate(group=str_c(BioProject, description,sep = "-")) %>%
+  select(sample=Run, group) %>% bind_rows(sample.description.Mc) %>%
+  select(sample, group) %>%
+  mutate(label=str_remove(group, "PRJ.*?-")) %>%
+  group_by(label) %>%
+  mutate(label.unique = str_c(label,"-",row_number()))
+
+counts.data <- full_join(counts.data.ncbi, counts.data.Mc)
+
+colnames(counts.data)[-1] == sample.description$sample
+```
+
+remove low read genes:
+
+```{r}
+counts.data <- counts.data[rowSums(counts.data[,-1] > 5) >= 3,]
+```
+
+```{r}
+counts.matrix <- counts.data %>% select(-gene_ID) %>% as.matrix()
+rownames(counts.matrix) <- counts.data$gene_ID
+
+dge.data <- DGEList(counts=counts.matrix, 
+                    group=sample.description$group)
+dim(dge.data) 
+dge.data <- calcNormFactors(dge.data, method = "TMM")
+dge.data$samples # look at the normalization factors
+```
+
+
+## MAKE AN MDS
+
+```{r}
+mdsvals <- plotMDS(dge.data, plot = FALSE) # get the MDS values for plotting
+```
+
+
+```{r}
+mdsvals2 <- tibble(x=mdsvals$x, y=mdsvals$y, sample=rownames(dge.data$samples)) %>%
+  inner_join(sample.description)
+
+
+mdsvals2 %>% 
+  ggplot(aes(x=x, y=y)) +
+  theme_bw() +
+  geom_point(size=3) +
+  geom_text_repel(aes(label=label), size=2)
+```
+
+## Check LFY Levels
+
+CrLFY1: Ceric.33G031700
+
+CrLFY2: Ceric.18G076300
+
+```{r}
+CrLFY1 <- "Ceric.33G031700" 
+
+CrLFY2 <- "Ceric.18G076300"
+```
+
+
+```{r}
+cpm <- dge.data %>% cpm(log = FALSE) %>% as_tibble(rownames = "gene_ID")
+```
+
+### LFY1:
+
+all samples
+```{r}
+cpm %>% filter(str_detect(gene_ID, CrLFY1)) %>%
+  pivot_longer(-gene_ID, names_to = "sample", values_to = "cpm") %>%
+  full_join(sample.description) %>%
+  ggplot(aes(x=label.unique, y=cpm)) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle=90, hjust = 1, vjust=.5)) +
+  ggtitle("CrLFY1")
+```
+mean expression per group
+
+```{r}
+cpm %>% filter(str_detect(gene_ID, CrLFY1)) %>%
+  pivot_longer(-gene_ID, names_to = "sample", values_to = "cpm") %>%
+  full_join(sample.description) %>%
+  group_by(group) %>%
+  summarize(cpm=mean(cpm),
+            sem=sd(cpm)/sqrt(n()),
+            label=unique(label)) %>%
+  ggplot(aes(x=label, y=cpm, ymax=cpm+sem, ymin=cpm-sem)) +
+  geom_col() +
+  geom_errorbar() +
+  theme(axis.text.x = element_text(angle=90, hjust = 1, vjust=.5)) +
+  ggtitle("CrLFY1")
+```
+
+
+### LFY2:
+
+```{r}
+cpm %>% filter(str_detect(gene_ID, CrLFY2)) %>%
+  pivot_longer(-gene_ID, names_to = "sample", values_to = "cpm") %>%
+  full_join(sample.description) %>%
+  ggplot(aes(x=label.unique, y=cpm)) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle=90, hjust = 1, vjust=.5)) +
+  ggtitle("CrLFY2")
+```
+mean expression per group
+
+```{r}
+cpm %>% filter(str_detect(gene_ID, CrLFY2)) %>%
+  pivot_longer(-gene_ID, names_to = "sample", values_to = "cpm") %>%
+  full_join(sample.description) %>%
+  group_by(group) %>%
+  summarize(cpm=mean(cpm),
+            sem=sd(cpm)/sqrt(n()),
+            label=unique(label)) %>%
+  ggplot(aes(x=label, y=cpm, ymax=cpm+sem, ymin=cpm-sem)) +
+  geom_col() +
+  geom_errorbar() +
+  theme(axis.text.x = element_text(angle=90, hjust = 1, vjust=.5)) +
+  ggtitle("CrLFY2")
+```
+
+## write out log counts
+
+```{r}
+dge.data %>% cpm(log = TRUE) %>% write.csv("../output/sporophyte_combined_log2cpm.csv")
+R.utils::gzip("../output/sporophyte_combined_log2cpm.csv", overwrite=TRUE)
+```
+

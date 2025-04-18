@@ -25,7 +25,7 @@ cd ../input
 
 cut -f 1 -d "," bioprojectlist.csv | grep "#" -v  > bioproject_accessions.txt
 
-# Get the run info:
+# Get the run ids:
 OUTPUT_SRR_LIST="all_srr_ids.txt"
 
 > "$OUTPUT_SRR_LIST" # Clears existing file or creates a new one
@@ -37,6 +37,20 @@ for bioproject in $(cat bioproject_accessions.txt)
       cut -d',' -f1 | grep -E "^SRR|^ERR" | grep -vE "ERR3440669|SRR12605705|SRR12605702|SRR9829640|SRR12605706|SRR12605704|SRR513505|SRR513506|SRR513501" >> "$OUTPUT_SRR_LIST"
   done
 # ERR3440669 is a microbial read set that I think mistakingly got added to a fern bioproject.  The others are wrong platform or too large.
+
+# Get the run info:
+OUTPUT_SRR_LIST="all_srr_info.csv"
+
+> "$OUTPUT_SRR_LIST" # Clears existing file or creates a new one
+
+for bioproject in $(cat bioproject_accessions.txt)
+  do
+    echo $bioproject
+      esearch -db sra -query "$bioproject" | efetch -format runinfo | \
+       grep -E "^SRR|^ERR|^Run" | grep -vE "ERR3440669|SRR12605705|SRR12605702|SRR9829640|SRR12605706|SRR12605704|SRR513505|SRR513506|SRR513501" >> "$OUTPUT_SRR_LIST"
+  done
+# ERR3440669 is a microbial read set that I think mistakingly got added to a fern bioproject.  The others are wrong platform or too large.
+
 
 # Download the reads 
 prefetch --option-file all_srr_ids.txt --max-size 100G -p -O /analyzed_data/Julin/sequencing/Julin-FERN/ncbi/prefetch

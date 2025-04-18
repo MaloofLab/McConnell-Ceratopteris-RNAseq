@@ -127,22 +127,20 @@ cd /media/volume/julin-scratch/bams
 
 htseq-count --stranded=no --type=mRNA --idattr=Parent --order=pos *sorted.bam $gff -n 30 > $out_file
 
-# Note that the paired and unpaired reads are counted separately for each file and will need to be combined.
+ls -1 *sorted.bam > ~/git/McConnell-Ceratopteris-RNAseq/NCBI_Samples/output/bam_names.txt
 ```
 
-## Combine reads
+## Add a header
 ```{r}
 samplenames <- read_tsv("../output/bam_names.txt", col_names = "sample_ID") %>%
   mutate(sample_ID=basename(sample_ID),
-         sample_ID=str_remove(sample_ID, "_Aligned.*")) %>%
+         sample_ID=str_remove(sample_ID, "_1.fastq_P_Aligned.*")) %>%
   pull(sample_ID)
 samplenames
 ```
 
-
-combine paired and unpaired counts
 ```{r}
-counts <- read_tsv("../output/ht-seq-counts_redo.tsv.gz",
+counts <- read_tsv("../output/ht-seq-counts_ncbi.tsv",
                    col_names = c("gene_ID", samplenames))
 counts[,1:10]
 ```
@@ -151,20 +149,8 @@ counts[,1:10]
 counts %>% filter(str_detect(gene_ID, "__"))
 ```
 
-
-combine counts for the P and U files
 ```{r}
-counts_combined <- counts %>% 
-  pivot_longer(-gene_ID, names_to="sample", values_to="count") %>%
-  separate(sample, into=c("sample_ID", "type"), sep = "_") %>%
-  group_by(gene_ID, sample_ID) %>%
-  summarize(count=sum(count)) %>%
-  pivot_wider(names_from = sample_ID, values_from = count)
-
-counts_combined
-```
-```{r}
-write_csv(counts_combined, file = "../output/ht-seq-counts-combined.csv.gz")
+write_csv(counts, file = "../output/ht-seq-counts_ncbi.csv.gz")
 ```
 
 
