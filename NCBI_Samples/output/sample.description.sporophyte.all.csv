@@ -1,0 +1,110 @@
+sample,group,label,label.unique
+ERR3436536,PRJEB33372-frond,frond,frond-1
+SRR30294741,PRJNA1149654-whole sporophyte DMSO,whole sporophyte DMSO,whole sporophyte DMSO-1
+SRR30294740,PRJNA1149654-whole sporophyte DMSO,whole sporophyte DMSO,whole sporophyte DMSO-2
+SRR30294753,PRJNA1149654-whole sporophyte DMSO,whole sporophyte DMSO,whole sporophyte DMSO-3
+SRR30294752,PRJNA1149654-whole sporophyte DMSO,whole sporophyte DMSO,whole sporophyte DMSO-4
+SRR30294751,PRJNA1149654-whole sporophyte IAA,whole sporophyte IAA,whole sporophyte IAA-1
+SRR30294750,PRJNA1149654-whole sporophyte IAA,whole sporophyte IAA,whole sporophyte IAA-2
+SRR30294749,PRJNA1149654-whole sporophyte IAA,whole sporophyte IAA,whole sporophyte IAA-3
+SRR30294748,PRJNA1149654-whole sporophyte IAA,whole sporophyte IAA,whole sporophyte IAA-4
+SRR9723088,PRJNA555841-30 Day whole sporophyte mock,30 Day whole sporophyte mock,30 Day whole sporophyte mock-1
+SRR9723093,PRJNA555841-30 day whole sporophyte 38h 2-4D,30 day whole sporophyte 38h 2-4D,30 day whole sporophyte 38h 2-4D-1
+SRR9723092,PRJNA555841-30 day whole sporophyte 38h 2-4D,30 day whole sporophyte 38h 2-4D,30 day whole sporophyte 38h 2-4D-2
+SRR9723091,PRJNA555841-30 day whole sporophyte 24h 2-4D,30 day whole sporophyte 24h 2-4D,30 day whole sporophyte 24h 2-4D-1
+SRR9723090,PRJNA555841-30 day whole sporophyte 24h 2-4D,30 day whole sporophyte 24h 2-4D,30 day whole sporophyte 24h 2-4D-2
+SRR9723089,PRJNA555841-30 Day whole sporophyte mock,30 Day whole sporophyte mock,30 Day whole sporophyte mock-2
+SRR10317158,PRJNA578676-root tip,root tip,root tip-1
+SRR10317157,PRJNA578676-root-no tip,root-no tip,root-no tip-1
+SRR10317156,PRJNA578676-root-no tip,root-no tip,root-no tip-2
+SRR10317155,PRJNA578676-root-no tip,root-no tip,root-no tip-3
+SRR10317154,PRJNA578676-leaf tip,leaf tip,leaf tip-1
+SRR10317153,PRJNA578676-leaf tip,leaf tip,leaf tip-2
+SRR10317152,PRJNA578676-leaf tip,leaf tip,leaf tip-3
+SRR10317166,PRJNA578676-leaf-no tip,leaf-no tip,leaf-no tip-1
+SRR10317165,PRJNA578676-leaf-no tip,leaf-no tip,leaf-no tip-2
+SRR10317164,PRJNA578676-leaf-no tip,leaf-no tip,leaf-no tip-3
+SRR10317163,PRJNA578676-shoot tip,shoot tip,shoot tip-1
+SRR10317162,PRJNA578676-shoot tip,shoot tip,shoot tip-2
+SRR10317161,PRJNA578676-shoot tip,shoot tip,shoot tip-3
+SRR10317160,PRJNA578676-root tip,root tip,root tip-2
+SRR10317159,PRJNA578676-root tip,root tip,root tip-3
+SRR12605703,PRJNA651764-developing leaf,developing leaf,developing leaf-1
+SRR12605701,PRJNA651765-expanding leaf,expanding leaf,expanding leaf-1
+SRR12605700,PRJNA651766-sterile leaf,sterile leaf,sterile leaf-1
+SRR12605699,PRJNA651767-fertile leaf,fertile leaf,fertile leaf-1
+SRR12605698,PRJNA651768-sori,sori,sori-1
+SRR12605695,PRJNA651771-stem,stem,stem-1
+SRR12605708,PRJNA651772-root,root,root-1
+SRR12605707,PRJNA651773-young sporophyte,young sporophyte,young sporophyte-1
+SRR12827994,PRJNA666635-60mins-dryaba-high-br,60mins-dryaba-high-br,60mins-dryaba-high-br-1
+SRR12827995,PRJNA666635-0mins-wet-high-br,0mins-wet-high-br,0mins-wet-high-br-1
+SRR12827996,PRJNA666635-0mins-wet-high-br,0mins-wet-high-br,0mins-wet-high-br-2
+SRR12827997,PRJNA666635-0mins-wet-high-br,0mins-wet-high-br,0mins-wet-high-br-3
+SRR12827998,PRJNA666635-0mins-dry-high-br,0mins-dry-high-br,0mins-dry-high-br-1
+SRR12827999,PRJNA666635-0mins-dry-high-br,0mins-dry-high-br,0mins-dry-high-br-2
+SRR12828000,PRJNA666635-0mins-dry-high-br,0mins-dry-high-br,0mins-dry-high-br-3
+SRR12828001,PRJNA666635-60mins-abamock-low-br,60mins-abamock-low-br,60mins-abamock-low-br-1
+SRR12828002,PRJNA666635-60mins-abamock-low-br,60mins-abamock-low-br,60mins-abamock-low-br-2
+SRR12828003,PRJNA666635-60mins-abamock-low-br,60mins-abamock-low-br,60mins-abamock-low-br-3
+SRR12828004,PRJNA666635-60mins-wetmock-low-br,60mins-wetmock-low-br,60mins-wetmock-low-br-1
+SRR12828005,PRJNA666635-60mins-wetmock-low-br,60mins-wetmock-low-br,60mins-wetmock-low-br-2
+SRR12828006,PRJNA666635-60mins-wetmock-low-br,60mins-wetmock-low-br,60mins-wetmock-low-br-3
+SRR12828007,PRJNA666635-60mins-drymock-low-br,60mins-drymock-low-br,60mins-drymock-low-br-1
+SRR12828008,PRJNA666635-0mins-aba-high-br,0mins-aba-high-br,0mins-aba-high-br-1
+SRR12828009,PRJNA666635-60mins-drymock-low-br,60mins-drymock-low-br,60mins-drymock-low-br-2
+SRR12828010,PRJNA666635-60mins-drymock-low-br,60mins-drymock-low-br,60mins-drymock-low-br-3
+SRR12828011,PRJNA666635-60mins-drymock-high-br,60mins-drymock-high-br,60mins-drymock-high-br-1
+SRR12828012,PRJNA666635-60mins-drymock-high-br,60mins-drymock-high-br,60mins-drymock-high-br-2
+SRR12828013,PRJNA666635-60mins-drymock-high-br,60mins-drymock-high-br,60mins-drymock-high-br-3
+SRR12828014,PRJNA666635-60mins-dryaba-low-br,60mins-dryaba-low-br,60mins-dryaba-low-br-1
+SRR12828015,PRJNA666635-60mins-dryaba-low-br,60mins-dryaba-low-br,60mins-dryaba-low-br-2
+SRR12828016,PRJNA666635-60mins-dryaba-low-br,60mins-dryaba-low-br,60mins-dryaba-low-br-3
+SRR12828017,PRJNA666635-60mins-dryaba-high-br,60mins-dryaba-high-br,60mins-dryaba-high-br-2
+SRR12828018,PRJNA666635-60mins-dryaba-high-br,60mins-dryaba-high-br,60mins-dryaba-high-br-3
+SRR12828019,PRJNA666635-0mins-aba-high-br,0mins-aba-high-br,0mins-aba-high-br-2
+SRR12828020,PRJNA666635-0mins-aba-high-br,0mins-aba-high-br,0mins-aba-high-br-3
+SRR13179629,PRJNA681601-Cr_SAM,Cr_SAM,Cr_SAM-1
+SRR13179620,PRJNA681601-Cr_Root,Cr_Root,Cr_Root-1
+SRR13179619,PRJNA681601-Cr_Leaf,Cr_Leaf,Cr_Leaf-1
+SRR13179618,PRJNA681601-Cr_Callus,Cr_Callus,Cr_Callus-1
+SRR13179628,PRJNA681601-Cr_BAM,Cr_BAM,Cr_BAM-1
+SRR20074396,PRJNA857489-root tip,root tip,root tip-4
+SRR20074397,PRJNA857489-root tip,root tip,root tip-5
+SRR20074398,PRJNA857489-root tip,root tip,root tip-6
+SRR20074399,PRJNA857489-differentiated root,differentiated root,differentiated root-1
+SRR20074400,PRJNA857489-differentiated root,differentiated root,differentiated root-2
+SRR20074401,PRJNA857489-differentiated root,differentiated root,differentiated root-3
+SRR20074402,PRJNA857489-shoot,shoot,shoot-1
+SRR20074403,PRJNA857489-shoot,shoot,shoot-2
+SRR20074404,PRJNA857489-shoot,shoot,shoot-3
+BA12-S5,CrLFY1-OX-S5,CrLFY1-OX-S5,CrLFY1-OX-S5-1
+BA12-WYS,CrLFY1-OX-WYS,CrLFY1-OX-WYS,CrLFY1-OX-WYS-1
+BA14-S5,CrLFY1-OX-S5,CrLFY1-OX-S5,CrLFY1-OX-S5-2
+BA14-WYS,CrLFY1-OX-WYS,CrLFY1-OX-WYS,CrLFY1-OX-WYS-2
+BA19-S5,CrLFY1-OX-S5,CrLFY1-OX-S5,CrLFY1-OX-S5-3
+BA19-WYS,CrLFY1-OX-WYS,CrLFY1-OX-WYS,CrLFY1-OX-WYS-3
+BD5-S5,CrLFY2-OX-S5,CrLFY2-OX-S5,CrLFY2-OX-S5-1
+BD5-WYS,CrLFY2-OX-WYS,CrLFY2-OX-WYS,CrLFY2-OX-WYS-1
+BF16-S5,CrLFY2-OX-S5,CrLFY2-OX-S5,CrLFY2-OX-S5-2
+BF16-WYS,CrLFY2-OX-WYS,CrLFY2-OX-WYS,CrLFY2-OX-WYS-2
+BF5-S5,CrLFY2-OX-S5,CrLFY2-OX-S5,CrLFY2-OX-S5-3
+BF5-WYS,CrLFY2-OX-WYS,CrLFY2-OX-WYS,CrLFY2-OX-WYS-3
+Cross-S5-1,Cross-S5,Cross-S5,Cross-S5-1
+Cross-S5-2,Cross-S5,Cross-S5,Cross-S5-2
+Cross-S5-3,Cross-S5,Cross-S5,Cross-S5-3
+Cross-WYS-1,Cross-WYS,Cross-WYS,Cross-WYS-1
+Cross-WYS-2,Cross-WYS,Cross-WYS,Cross-WYS-2
+Cross-WYS-3,Cross-WYS,Cross-WYS,Cross-WYS-3
+WT-WYS-4,WT-WYS,WT-WYS,WT-WYS-1
+RNAi-S5-1,RNAi-S5,RNAi-S5,RNAi-S5-1
+RNAi-S5-2,RNAi-S5,RNAi-S5,RNAi-S5-2
+RNAi-S5-3,RNAi-S5,RNAi-S5,RNAi-S5-3
+RNAi-WYS-1,RNAi-WYS,RNAi-WYS,RNAi-WYS-1
+RNAi-WYS-2,RNAi-WYS,RNAi-WYS,RNAi-WYS-2
+RNAi-WYS-3,RNAi-WYS,RNAi-WYS,RNAi-WYS-3
+WT-S5-1,WT-S5,WT-S5,WT-S5-1
+WT-S5-2,WT-S5,WT-S5,WT-S5-2
+WT-S5-3,WT-S5,WT-S5,WT-S5-3
+WT-WYS-2,WT-WYS,WT-WYS,WT-WYS-2
+WT-WYS-3,WT-WYS,WT-WYS,WT-WYS-3

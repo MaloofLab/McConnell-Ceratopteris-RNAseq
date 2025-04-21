@@ -159,6 +159,8 @@ cpm(dge.data, log = TRUE) %>%
   heatmap.2(trace="none",col="bluered", Colv = FALSE, dendrogram = "row", mar=c(10,8))
   
 dev.copy(png, filename = "../output/male_v_herm_heatmap.png", width=1200, height = 900)
+
+write_csv(genes.heatmap, "../output/male_v_herm_heatmap_genes.csv")
   
 ```
 

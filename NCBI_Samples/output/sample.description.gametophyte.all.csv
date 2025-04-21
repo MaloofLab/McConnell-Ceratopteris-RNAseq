@@ -1,0 +1,72 @@
+sample,group,label,label.unique
+ERR3436537,PRJEB33372-mature gametophyte,mature gametophyte,mature gametophyte-1
+SRR29324701,PRJNA1121398-5 DAG WT hermaphrodite,5 DAG WT hermaphrodite,5 DAG WT hermaphrodite-1
+SRR29324700,PRJNA1121398-5 DAG WT hermaphrodite,5 DAG WT hermaphrodite,5 DAG WT hermaphrodite-2
+SRR29324688,PRJNA1121398-5 DAG WT hermaphrodite,5 DAG WT hermaphrodite,5 DAG WT hermaphrodite-3
+SRR29324689,PRJNA1121398-5 DAG WT hermaphrodite,5 DAG WT hermaphrodite,5 DAG WT hermaphrodite-4
+SRR29324682,PRJNA1121398-5 DAG CrHAM KF hermaphrodite,5 DAG CrHAM KF hermaphrodite,5 DAG CrHAM KF hermaphrodite-1
+SRR29324681,PRJNA1121398-5 DAG CrHAM KF hermaphrodite,5 DAG CrHAM KF hermaphrodite,5 DAG CrHAM KF hermaphrodite-2
+SRR29324680,PRJNA1121398-5 DAG CrHAM KF hermaphrodite,5 DAG CrHAM KF hermaphrodite,5 DAG CrHAM KF hermaphrodite-3
+SRR29324679,PRJNA1121398-5 DAG CrHAM KF hermaphrodite,5 DAG CrHAM KF hermaphrodite,5 DAG CrHAM KF hermaphrodite-4
+SRR29324686,PRJNA1121398-5 DAG WT male,5 DAG WT male,5 DAG WT male-1
+SRR29324678,PRJNA1121398-5 DAG WT male,5 DAG WT male,5 DAG WT male-2
+SRR29324699,PRJNA1121398-5 DAG WT male,5 DAG WT male,5 DAG WT male-3
+SRR29324698,PRJNA1121398-5 DAG WT male,5 DAG WT male,5 DAG WT male-4
+SRR29324696,PRJNA1121398-5 DAG CrHAM KF male,5 DAG CrHAM KF male,5 DAG CrHAM KF male-1
+SRR29324695,PRJNA1121398-5 DAG CrHAM KF male,5 DAG CrHAM KF male,5 DAG CrHAM KF male-2
+SRR29324694,PRJNA1121398-5 DAG CrHAM KF male,5 DAG CrHAM KF male,5 DAG CrHAM KF male-3
+SRR29324697,PRJNA1121398-5 DAG CrHAM KF male,5 DAG CrHAM KF male,5 DAG CrHAM KF male-4
+SRR29324693,PRJNA1121398-8 DAG WT hermaphrodite,8 DAG WT hermaphrodite,8 DAG WT hermaphrodite-1
+SRR29324692,PRJNA1121398-8 DAG WT hermaphrodite,8 DAG WT hermaphrodite,8 DAG WT hermaphrodite-2
+SRR29324691,PRJNA1121398-8 DAG WT hermaphrodite,8 DAG WT hermaphrodite,8 DAG WT hermaphrodite-3
+SRR29324690,PRJNA1121398-8 DAG WT hermaphrodite,8 DAG WT hermaphrodite,8 DAG WT hermaphrodite-4
+SRR29324687,PRJNA1121398-8 DAG CrHAM KF hermaphrodite,8 DAG CrHAM KF hermaphrodite,8 DAG CrHAM KF hermaphrodite-1
+SRR29324685,PRJNA1121398-8 DAG CrHAM KF hermaphrodite,8 DAG CrHAM KF hermaphrodite,8 DAG CrHAM KF hermaphrodite-2
+SRR29324684,PRJNA1121398-8 DAG CrHAM KF hermaphrodite,8 DAG CrHAM KF hermaphrodite,8 DAG CrHAM KF hermaphrodite-3
+SRR29324683,PRJNA1121398-8 DAG CrHAM KF hermaphrodite,8 DAG CrHAM KF hermaphrodite,8 DAG CrHAM KF hermaphrodite-4
+SRR30294755,PRJNA1149654-whole gametophyte DMSO,whole gametophyte DMSO,whole gametophyte DMSO-1
+SRR30294754,PRJNA1149654-whole gametophyte DMSO,whole gametophyte DMSO,whole gametophyte DMSO-2
+SRR30294747,PRJNA1149654-whole gametophyte DMSO,whole gametophyte DMSO,whole gametophyte DMSO-3
+SRR30294746,PRJNA1149654-whole gametophyte DMSO,whole gametophyte DMSO,whole gametophyte DMSO-4
+SRR30294745,PRJNA1149654-whole gametophyte IAA,whole gametophyte IAA,whole gametophyte IAA-1
+SRR30294744,PRJNA1149654-whole gametophyte IAA,whole gametophyte IAA,whole gametophyte IAA-2
+SRR30294743,PRJNA1149654-whole gametophyte IAA,whole gametophyte IAA,whole gametophyte IAA-3
+SRR30294742,PRJNA1149654-whole gametophyte IAA,whole gametophyte IAA,whole gametophyte IAA-4
+SRR1313314,PRJNA248887-4.5 DAG gametophyte,4.5 DAG gametophyte,4.5 DAG gametophyte-1
+SRR1313341,PRJNA248887-4.5 DAG gametophyte,4.5 DAG gametophyte,4.5 DAG gametophyte-2
+SRR1313276,PRJNA248887-4.5 DAG gametophyte,4.5 DAG gametophyte,4.5 DAG gametophyte-3
+SRR1314211,PRJNA248887-4.5 DAG gametophyte + antheridogen,4.5 DAG gametophyte + antheridogen,4.5 DAG gametophyte + antheridogen-1
+SRR1314602,PRJNA248887-4.5 DAG gametophyte + antheridogen,4.5 DAG gametophyte + antheridogen,4.5 DAG gametophyte + antheridogen-2
+SRR1314706,PRJNA248887-4.5 DAG gametophyte + antheridogen,4.5 DAG gametophyte + antheridogen,4.5 DAG gametophyte + antheridogen-3
+SRR12605697,PRJNA651769-mature gametophyte,mature gametophyte,mature gametophyte-2
+SRR12605696,PRJNA651770-immature gametophyte,immature gametophyte,immature gametophyte-1
+SRR13179615,PRJNA681601-Cr_Male,Cr_Male,Cr_Male-1
+SRR13179616,PRJNA681601-Cr_Male,Cr_Male,Cr_Male-2
+SRR13179617,PRJNA681601-Cr_Male,Cr_Male,Cr_Male-3
+SRR13179613,PRJNA681601-Cr_Herm,Cr_Herm,Cr_Herm-1
+SRR13179614,PRJNA681601-Cr_Herm,Cr_Herm,Cr_Herm-2
+SRR13179621,PRJNA681601-Cr_Herm,Cr_Herm,Cr_Herm-3
+SRR13179622,PRJNA681601-Cr_Herm,Cr_Herm,Cr_Herm-4
+SRR13179623,PRJNA681601-Cr_Herm,Cr_Herm,Cr_Herm-5
+SRR13179624,PRJNA681601-Cr_Herm,Cr_Herm,Cr_Herm-6
+SRR13179625,PRJNA681601-Cr_Herm,Cr_Herm,Cr_Herm-7
+SRR13179626,PRJNA681601-Cr_Herm,Cr_Herm,Cr_Herm-8
+SRR13179627,PRJNA681601-Cr_Herm,Cr_Herm,Cr_Herm-9
+BA12-gam,CrLFY1-OX-gam,CrLFY1-OX-gam,CrLFY1-OX-gam-1
+BA14-gam,CrLFY1-OX-gam,CrLFY1-OX-gam,CrLFY1-OX-gam-2
+BA19-gam,CrLFY1-OX-gam,CrLFY1-OX-gam,CrLFY1-OX-gam-3
+BD5-gam,CrLFY2-OX-gam,CrLFY2-OX-gam,CrLFY2-OX-gam-1
+BF16-gam,CrLFY2-OX-gam,CrLFY2-OX-gam,CrLFY2-OX-gam-2
+BF5-gam,CrLFY2-OX-gam,CrLFY2-OX-gam,CrLFY2-OX-gam-3
+Cross-gam-1,Cross-gam,Cross-gam,Cross-gam-1
+Cross-gam-2,Cross-gam,Cross-gam,Cross-gam-2
+Cross-gam-3,Cross-gam,Cross-gam,Cross-gam-3
+RNAi-gam-1,RNAi-gam,RNAi-gam,RNAi-gam-1
+RNAi-gam-2,RNAi-gam,RNAi-gam,RNAi-gam-2
+RNAi-gam-3,RNAi-gam,RNAi-gam,RNAi-gam-3
+WT-male_gam-1,WT-male_gam,WT-male_gam,WT-male_gam-1
+WT-male_gam-2,WT-male_gam,WT-male_gam,WT-male_gam-2
+WT-male_gam-3,WT-male_gam,WT-male_gam,WT-male_gam-3
+WT-mature_herm-1,WT-mature_herm,WT-mature_herm,WT-mature_herm-1
+WT-mature_herm-2,WT-mature_herm,WT-mature_herm,WT-mature_herm-2
+WT-mature_herm-3,WT-mature_herm,WT-mature_herm,WT-mature_herm-3

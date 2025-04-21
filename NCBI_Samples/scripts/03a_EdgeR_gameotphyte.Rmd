@@ -100,7 +100,9 @@ sample.description.ncbi <- sample.description.ncbi %>% semi_join(mapped.samples.
 ### Filter for Gametophyte only
 
 ```{r}
-sample.description.ncbi <- sample.description.ncbi %>% filter(str_detect(stage, "gametophyte"))
+sample.description.ncbi <- sample.description.ncbi %>% 
+  filter(str_detect(stage, "gametophyte"),
+         str_detect(description, "spore", negate = TRUE)) 
 
 counts.data.ncbi <- counts.data.ncbi %>% select(gene_ID, matches(sample.description.ncbi$Run))
 ```
@@ -120,6 +122,8 @@ sample.description <- sample.description.ncbi %>%
 counts.data <- full_join(counts.data.ncbi, counts.data.Mc)
 
 colnames(counts.data)[-1] == sample.description$sample
+
+write_csv(sample.description, "../output/sample.description.gametophyte.all.csv")
 ```
 
 remove low read genes:

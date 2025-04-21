@@ -121,6 +121,9 @@ sample.description <- sample.description.ncbi %>%
 counts.data <- full_join(counts.data.ncbi, counts.data.Mc)
 
 colnames(counts.data)[-1] == sample.description$sample
+
+write_csv(sample.description, "../output/sample.description.sporophyte.all.csv")
+
 ```
 
 remove low read genes:
