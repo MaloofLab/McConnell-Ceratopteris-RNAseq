@@ -24,106 +24,119 @@ CrLFY2 <- "Ceric.18G076300"
 
 
 ```{r}
-MADS <- read_tsv("../input/MADS.box.genes.txt") %>% 
-  select(transcriptName)
+MADS <- read_csv("../input/CrMADS_Carr.csv") # These are from Carr thesis
 ```
 ## WGCNA
 
-### All samples
+### gametophyte samples
 ```{r}
-load("../output/WGCNA_allSamples.Rdata")
-module.assignment <- module.assignment %>%
-  mutate(transcriptName = str_remove(geneID, fixed(".v2")))
+load("../output/WGCNA_gametophyte_all.Rdata")
+gmodule.assignment <- module.assignment %>%
+  mutate(geneID = str_remove(geneID, "\\.v2.*"))
 ```
 
 ```{r}
-MADS.modules <- module.assignment %>% semi_join(MADS)
-```
-```{r}
-table(MADS.modules$module)
+MADS.gmodules <- gmodule.assignment %>% semi_join(MADS)
 ```
 
 ```{r}
-module.assignment %>% filter(str_detect(transcriptName, CrLFY1))
-```
-```{r}
-module.assignment %>% filter(str_detect(transcriptName, CrLFY2))
+table(MADS.gmodules$module)
 ```
 
 ```{r}
-MADS.modules %>% filter(str_detect(module, "midnightblue|magenta"))
+gmodule.assignment %>% filter(str_detect(geneID, CrLFY1))
+```
+
+```{r}
+gmodule.assignment %>% filter(str_detect(geneID, CrLFY2))
+```
+
+```{r}
+MADS.gmodules %>% filter(str_detect(module, "pink|turquoise"))
+```
+
+Test for sig. enrichment
+
+
+```{r}
+lfy1.gmodule <- gmodule.assignment %>% filter(str_detect(geneID, CrLFY1)) %>% pull(module)
+
+lfy2.gmodule <- gmodule.assignment %>% filter(str_detect(geneID, CrLFY2)) %>% pull(module)
+
+gfisherinput <- gmodule.assignment %>%
+  mutate(lfy1.module = str_detect(module, lfy1.gmodule),
+         lfy2.module = str_detect(module, lfy2.gmodule),
+         mads.gene=geneID %in% MADS$geneID,
+         mutate(across(-geneID, factor)))
+```
+
+
+```{r}
+fisher.test(gfisherinput$lfy1.module, gfisherinput$mads.gene)
+```
+```{r}
+fisher.test(gfisherinput$lfy2.module, gfisherinput$mads.gene)
 ```
 
 ### Sporophyte samples
 ```{r}
-load("../output/WGCNA_sporophyteSamples.Rdata")
-module.assignment <- module.assignment %>%
-  mutate(transcriptName = str_remove(geneID, fixed(".v2")))
+load("../output/WGCNA_sporophyte_all.Rdata")
+smodule.assignment <- module.assignment %>%
+  mutate(geneID = str_remove(geneID, "\\.v2.*"))
 ```
 
 ```{r}
-MADS.modules <- module.assignment %>% semi_join(MADS)
+MADS.smodules <- smodule.assignment %>% semi_join(MADS)
 ```
 ```{r}
-table(MADS.modules$module)
+table(MADS.smodules$module)
 ```
 
 
 
 ```{r}
-module.assignment %>% filter(str_detect(geneID, CrLFY1))
+smodule.assignment %>% filter(str_detect(geneID, CrLFY1))
 ```
 ```{r}
-module.assignment %>% filter(str_detect(transcriptName, CrLFY2))
+smodule.assignment %>% filter(str_detect(geneID, CrLFY2))
 ```
 ```{r}
-MADS.modules %>% filter(str_detect(module, "blue|brown"))
+MADS.smodules %>% filter(str_detect(module, "blue"))
 ```
 
 
-### Gametophyte samples
-```{r}
-load("../output/WGCNA_gametophyteSamples.Rdata")
-module.assignment <- module.assignment %>%
-  mutate(transcriptName = str_remove(geneID, fixed(".v2")))
-```
-
-```{r}
-MADS.modules <- module.assignment %>% semi_join(MADS)
-```
-```{r}
-table(MADS.modules$module)
-```
-
-```{r}
-module.assignment %>% filter(str_detect(transcriptName, CrLFY1))
-```
-```{r}
-module.assignment %>% filter(str_detect(transcriptName, CrLFY2))
-```
-
-```{r}
-MADS.modules %>% filter(str_detect(module, "turquoise|brown"))
-```
-
-## TGCN
-
-### LFY1 Cutoff 5
-
-```{r}
-read_csv("../output/TGCN_LFY1/results/LFY1_ALL_c5_TGCN.csv") %>% semi_join(MADS, by = c("genes" = "transcriptName" ))
-```
+## TGCN Gametophyte
 
 ### LFY1 Cutoff 6
 
 ```{r}
-read_csv("../output/TGCN_LFY1/results/LFY1_ALL_c6_TGCN.csv") %>% semi_join(MADS, by = c("genes" = "transcriptName" ))
+read_csv("../output/TGCN_LFY1_gam/results/LFY1_gam_c6_TGCN.csv") %>% 
+  mutate(geneID = str_remove(genes, "\\.[0-9]$")) %>%
+  semi_join(MADS)
 ```
 
-### LFY2 Cutoff 3
+### LFY2 Cutoff 5
 
 ```{r}
-read_csv("../output/TGCN_LFY2/results/LFY2_ALL_c3_TGCN.csv") %>% semi_join(MADS, by = c("genes" = "transcriptName" ))
+read_csv("../output/TGCN_LFY2_gam/results/LFY2_gam_c5_TGCN.csv") %>%
+  mutate(geneID = str_remove(genes, "\\.[0-9]$")) %>%
+  semi_join(MADS)
 ```
 
+## TGCN Sporophyte
 
+### LFY1 Cutoff 6
+
+```{r}
+read_csv("../output/TGCN_LFY1_sp/results/LFY1_sp_c6_TGCN.csv") %>% 
+  mutate(geneID = str_remove(genes, "\\.[0-9]$")) %>%
+  semi_join(MADS)
+```
+
+### LFY2 Cutoff 5
+
+```{r}
+read_csv("../output/TGCN_LFY2_sp/results/LFY2_sp_c5_TGCN.csv") %>%
+  mutate(geneID = str_remove(genes, "\\.[0-9]$")) %>%
+  semi_join(MADS)
+```

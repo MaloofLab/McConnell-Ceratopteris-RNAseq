@@ -90,9 +90,11 @@ input_for_LFY2 <- lcpm[str_detect(rownames(lcpm), CrLFY2, negate = TRUE),]
 
 ## LFY1 network
 ```{r, message=FALSE}
-if(dir.exists("../output/TGCN_LFY1"))   system("rm -r ../output/TGCN_LFY1")
+path <- "../output/TGCN_LFY1_gam"
 
-if(!dir.exists("../output/TGCN_LFY1"))  dir.create("../output/TGCN_LFY1")
+if(dir.exists(path))   system(str_c("rm -r ", path))
+
+if(!dir.exists(path))  dir.create(path)
 
 r.lfy1 <- testAllCutoffs(exprData=input_for_LFY1,
                     target=LFY1.expression,
@@ -100,9 +102,9 @@ r.lfy1 <- testAllCutoffs(exprData=input_for_LFY1,
                     train.split=0.7,
                     nfolds=5,
                     t=10,
-                    path="../output/TGCN_LFY1",
+                    path=path,
                     targetName="LFY1",
-                    tissueName="ALL",
+                    tissueName="gam",
                     seed=3333,
                     cutoffs=10:1,
                     n=100, 
@@ -164,9 +166,11 @@ grid.arrange(r.lfy1$nets$c6$GOenrich$plotStats, r.lfy1$nets$c6$GOenrich$plotNter
 
 ## LFY2 network
 ```{r, message=FALSE}
-if(dir.exists("../output/TGCN_LFY2"))   system("rm -r ../output/TGCN_LFY2")
+path <- "../output/TGCN_LFY2_gam"
 
-if(!dir.exists("../output/TGCN_LFY2"))  dir.create("../output/TGCN_LFY2")
+if(dir.exists(path))   system(str_c("rm -r ", path))
+
+if(!dir.exists(path))  dir.create(path)
 
 r.lfy2 <- testAllCutoffs(exprData=input_for_LFY2,
                     target=LFY2.expression,
@@ -174,9 +178,9 @@ r.lfy2 <- testAllCutoffs(exprData=input_for_LFY2,
                     train.split=0.7,
                     nfolds=5,
                     t=10,
-                    path="../output/TGCN_LFY2",
+                    path=path,
                     targetName="LFY2",
-                    tissueName="ALL",
+                    tissueName="gam",
                     seed=3333,
                     cutoffs=10:1,
                     n=100, 
