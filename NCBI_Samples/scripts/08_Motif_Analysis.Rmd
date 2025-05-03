@@ -1,0 +1,111 @@
+---
+title: "08_Motif_Analysis"
+output: html_notebook
+---
+
+```{r}
+library(JASPAR2024)
+library(TFBSTools)
+library(Biostrings)
+```
+
+Get (Arabidopsis) LFY binding site. Fern is similar, although it might be worth creating my own Fern pfm at some point.
+```{r}
+dbfile <- JASPAR2024()@db
+
+pfm.lfy <- getMatrixByID(dbfile, ID = "MA0590.1")
+pwm.lfy <- toPWM(pfm.lfy)
+icm.lfy <- toICM(pfm.lfy)
+```
+
+load genome
+```{r}
+genome <- readDNAStringSet("~/Sequences/ref_genomes/C_richardii_v2.1/assembly/Crichardii_676_v2.0.fa.gz")
+#genome <- genome[stringr::str_detect(names(genome), "Chr")]
+```
+
+load gff
+
+```{r}
+gff <- rtracklayer::import.gff("~/Sequences/ref_genomes/C_richardii_v2.1/annotation/Crichardii_676_v2.1.gene.gff3.gz") 
+gff <- gff[gff$type=="mRNA" & gff$longest==1]
+promoters <- flank(gff, 5000)
+```
+
+search for occurrences
+
+```{r, warning=FALSE}
+system.time(
+hits <- searchSeq(pwm.lfy, genome, strand = "+") # because the site is ~ palindromic we don't need to search both strands.
+)
+```
+
+```{r}
+hits
+```
+
+```{r}
+hits.gr <- as(hits, "GRanges")
+hits.gr
+```
+
+```{r}
+overlaps <- tibble(geneID = promoters$Name,
+                   count = countOverlaps(promoters, hits.gr, type = "any", ignore.strand=TRUE)
+                   )
+overlaps
+```
+
+## load TGCN networks
+
+## TGCN Gametophyte
+
+### LFY1 Cutoff 6
+
+All genes in submodules
+```{r}
+read_csv("../output/TGCN_LFY1_gam/results/LFY1_gam_c6_TGCN.csv") %>% 
+  rename(geneID = genes) %>% 
+  right_join(overlaps) %>%
+  mutate(in.network=!is.na(hubGene))  %>%
+  t.test(count ~ in.network, data = .)
+```
+hub genes only
+```{r}
+read_csv("../output/TGCN_LFY1_gam/results/LFY1_gam_c6_TGCN.csv") %>% 
+  select(geneID=hubGene) %>%
+  distinct() %>% 
+  mutate(in.network=TRUE) %>%
+  right_join(overlaps) %>%
+  mutate(in.network=!is.na(in.network))  %>%
+  t.test(count ~ in.network, data = .)
+```
+
+### LFY2 Cutoff 5
+
+All genes in submodules
+```{r}
+read_csv("../output/TGCN_LFY2_gam/results/LFY2_gam_c5_TGCN.csv") %>% 
+  rename(geneID = genes) %>% 
+  right_join(overlaps) %>%
+  mutate(in.network=!is.na(hubGene)) %>%
+  t.test(count ~ in.network, data = .)
+
+```
+hub genes only
+```{r}
+read_csv("../output/TGCN_LFY2_gam/results/LFY2_gam_c5_TGCN.csv") %>% 
+  select(geneID=hubGene) %>%
+  distinct() %>% 
+  mutate(in.network=TRUE) %>%
+  right_join(overlaps) %>%
+  mutate(in.network=!is.na(in.network)) %>%
+  t.test(count ~ in.network, data = .)
+```
+
+Next steps...
+
+
+Also think about looking at relationship between # of LFY binding sites and correlation
+
+
