@@ -36,6 +36,11 @@ gmodule.assignment <- module.assignment %>%
 ```
 
 ```{r}
+table(gmodule.assignment$module)
+```
+
+
+```{r}
 MADS.gmodules <- gmodule.assignment %>% semi_join(MADS)
 ```
 
@@ -84,6 +89,11 @@ load("../output/WGCNA_sporophyte_all.Rdata")
 smodule.assignment <- module.assignment %>%
   mutate(geneID = str_remove(geneID, "\\.v2.*"))
 ```
+
+```{r}
+table(smodule.assignment$module)
+```
+
 
 ```{r}
 MADS.smodules <- smodule.assignment %>% semi_join(MADS)

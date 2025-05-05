@@ -21,7 +21,7 @@ icm.lfy <- toICM(pfm.lfy)
 load genome
 ```{r}
 genome <- readDNAStringSet("~/Sequences/ref_genomes/C_richardii_v2.1/assembly/Crichardii_676_v2.0.fa.gz")
-#genome <- genome[stringr::str_detect(names(genome), "Chr")]
+genome <- genome[nchar(genome) >= 100000] # only keep reasonably size scaffolds
 ```
 
 load gff
@@ -29,10 +29,9 @@ load gff
 ```{r}
 gff <- rtracklayer::import.gff("~/Sequences/ref_genomes/C_richardii_v2.1/annotation/Crichardii_676_v2.1.gene.gff3.gz") 
 gff <- gff[gff$type=="mRNA" & gff$longest==1]
-promoters <- flank(gff, 5000)
 ```
 
-search for occurrences
+search for occurrences (search entire genome...this makes it easier to try different promoter lenghts later)
 
 ```{r, warning=FALSE}
 system.time(
@@ -50,10 +49,71 @@ hits.gr
 ```
 
 ```{r}
+promoters <- flank(gff, 5000)
+
 overlaps <- tibble(geneID = promoters$Name,
                    count = countOverlaps(promoters, hits.gr, type = "any", ignore.strand=TRUE)
                    )
 overlaps
+```
+
+## WGCNA
+
+### gametophyte samples
+```{r}
+load("../output/WGCNA_gametophyte_all.Rdata")
+gmodule.assignment <- module.assignment
+```
+
+### LFY1
+```{r}
+lfy1.gmodule <- gmodule.assignment %>% filter(str_detect(geneID, CrLFY1)) %>% pull(module)
+
+gmodule.assignment %>%
+  mutate(geneID = str_remove(geneID, "\\.v2")) %>% 
+  right_join(overlaps) %>%
+  mutate(module=ifelse(is.na(module), "none", module),
+         in.network = module==lfy1.gmodule) %>%
+  t.test(count ~ in.network, data = .)
+```
+```{r}
+lfy2.gmodule <- gmodule.assignment %>% filter(str_detect(geneID, CrLFY2)) %>% pull(module)
+
+gmodule.assignment %>%
+  mutate(geneID = str_remove(geneID, "\\.v2")) %>% 
+  right_join(overlaps) %>%
+  mutate(module=ifelse(is.na(module), "none", module),
+         in.network = module==lfy2.gmodule) %>%
+  t.test(count ~ in.network, data = .)
+```
+
+### sporophyte samples
+```{r}
+load("../output/WGCNA_sporophyte_all.Rdata")
+smodule.assignment <- module.assignment
+```
+
+### LFY1
+```{r}
+lfy1.smodule <- smodule.assignment %>% filter(str_detect(geneID, CrLFY1)) %>% pull(module)
+
+smodule.assignment %>%
+  mutate(geneID = str_remove(geneID, "\\.v2")) %>% 
+  right_join(overlaps) %>%
+  mutate(module=ifelse(is.na(module), "none", module),
+         in.network = module==lfy1.smodule) %>%
+  t.test(count ~ in.network, data = .)
+```
+
+```{r}
+lfy2.smodule <- smodule.assignment %>% filter(str_detect(geneID, CrLFY2)) %>% pull(module)
+
+smodule.assignment %>%
+  mutate(geneID = str_remove(geneID, "\\.v2")) %>% 
+  right_join(overlaps) %>%
+  mutate(module=ifelse(is.na(module), "none", module),
+         in.network = module==lfy2.smodule) %>%
+  t.test(count ~ in.network, data = .)
 ```
 
 ## load TGCN networks
@@ -83,9 +143,11 @@ read_csv("../output/TGCN_LFY1_gam/results/LFY1_gam_c6_TGCN.csv") %>%
 
 ### LFY2 Cutoff 5
 
+Note: this gets more significant as I raise the cutoff (e.g. to 7)
+
 All genes in submodules
 ```{r}
-read_csv("../output/TGCN_LFY2_gam/results/LFY2_gam_c5_TGCN.csv") %>% 
+read_csv("../output/TGCN_LFY2_gam/results/LFY2_gam_c6_TGCN.csv") %>% 
   rename(geneID = genes) %>% 
   right_join(overlaps) %>%
   mutate(in.network=!is.na(hubGene)) %>%
@@ -102,6 +164,54 @@ read_csv("../output/TGCN_LFY2_gam/results/LFY2_gam_c5_TGCN.csv") %>%
   mutate(in.network=!is.na(in.network)) %>%
   t.test(count ~ in.network, data = .)
 ```
+
+## TGCN Sporophyte
+
+### LFY1 Cutoff 5
+
+All genes in submodules
+```{r}
+read_csv("../output/TGCN_LFY1_sp/results/LFY1_sp_c5_TGCN.csv", show_col_types = FALSE) %>% 
+  rename(geneID = genes) %>% 
+  right_join(overlaps) %>%
+  mutate(in.network=!is.na(hubGene))  %>%
+  t.test(count ~ in.network, data = .)
+```
+hub genes only
+```{r}
+read_csv("../output/TGCN_LFY1_gam/results/LFY1_gam_c5_TGCN.csv", show_col_types = FALSE) %>% 
+  select(geneID=hubGene) %>%
+  distinct() %>% 
+  mutate(in.network=TRUE) %>%
+  right_join(overlaps) %>%
+  mutate(in.network=!is.na(in.network))  %>%
+  t.test(count ~ in.network, data = .)
+```
+
+### LFY2 Cutoff 4
+
+Note: cutoff of 5 or higher is n.s.
+
+All genes in submodules
+```{r}
+read_csv("../output/TGCN_LFY2_sp/results/LFY2_sp_c4_TGCN.csv", show_col_types = FALSE) %>% 
+  rename(geneID = genes) %>% 
+  right_join(overlaps) %>%
+  mutate(in.network=!is.na(hubGene)) %>%
+  t.test(count ~ in.network, data = .)
+
+```
+hub genes only
+```{r}
+read_csv("../output/TGCN_LFY2_sp/results/LFY2_sp_c4_TGCN.csv", show_col_types = FALSE) %>% 
+  select(geneID=hubGene) %>%
+  distinct() %>% 
+  mutate(in.network=TRUE) %>%
+  right_join(overlaps) %>%
+  mutate(in.network=!is.na(in.network)) %>%
+  t.test(count ~ in.network, data = .)
+```
+
 
 Next steps...
 
