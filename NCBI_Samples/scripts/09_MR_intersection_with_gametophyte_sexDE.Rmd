@@ -1,0 +1,99 @@
+---
+title: "09_MR_intersection_with_gametophyte_sexDE"
+output: html_notebook
+---
+
+Create a mutual rank network and intersect that with male vs hermaphrodite DE genes.
+
+```{r}
+library(tidyverse)
+```
+```{r}
+CrLFY1 <- "Ceric.33G031700.1" 
+
+CrLFY2 <- "Ceric.18G076300.1"
+```
+
+
+```{r}
+sample.description <- read.csv("../output/sample.description.gametophyte.all.csv")
+```
+
+
+load read counts. These should be log2 cpm or Voom transformed or something similar.
+
+```{r}
+lcpm <- read.csv("../output/gam_combined_log2cpm.csv.gz", row.names = 1, check.names = FALSE) 
+rownames(lcpm) <- str_remove(rownames(lcpm), fixed(".v2"))
+head(lcpm)
+dim(lcpm)
+```
+
+remove sample outliers from PCA plot:
+```{r}
+sample.description <- sample.description %>% filter(str_detect(group, "4.5 DAG", negate = TRUE))
+
+lcpm <- lcpm[,sample.description$sample]
+```
+
+Filter to remove 40% least variable genes:
+```{r}
+CV <- apply(lcpm, 1, \(x) abs(sd(x)/mean(x)))
+lcpm <- lcpm[CV > quantile(CV, 0.4),]
+```
+
+
+correlation matrix
+```{r}
+m.cor <- cor(t(lcpm))
+diag(m.cor) <- 0
+```
+
+rank matrix
+```{r}
+m.rank <- apply(m.cor,2,function(x) rank(-abs(x)))
+```
+
+MR matrix
+```{r}
+MR <- sqrt(m.rank * t(m.rank))
+MR[1:10,1:10]
+```
+Create LFY specific subsets of these tables
+```{r}
+cor.lfy <- m.cor[,c(CrLFY1, CrLFY2)] %>%
+  round(3) %>%
+  as_tibble(rownames = "geneID") %>%
+  rename(LFY1.cor = contains(CrLFY1), LFY2.cor = contains(CrLFY2))
+
+MR.lfy <- MR[,c(CrLFY1, CrLFY2)] %>%
+  as_tibble(rownames = "geneID") %>%
+  rename(LFY1.MR = contains(CrLFY1), LFY2.MR = contains(CrLFY2))
+```
+
+
+load DEG list for male vs hermaphrodite
+```{r}
+deg <- read_csv("../../McConnell_Samples/output/DEG_ALL_WT_male_v_herm.csv.gz")
+deg
+```
+
+combine them
+
+```{r}
+deg.cor <- deg %>% left_join(cor.lfy) %>% 
+  left_join(MR.lfy) %>%
+  mutate(LFY1.rank = rank(-abs(LFY1.cor)),
+         LFY2.rank = rank(-abs(LFY2.cor))) %>%
+  select(geneID:FDR, starts_with("LFY"), everything())
+```
+
+```{r}
+deg.cor
+```
+
+```{r}
+write_csv(deg.cor, "../../McConnell_Samples/output/DEG_ALL_WT_male_v_herm_LFY_CORRELATIONS.csv.gz")
+```
+
+
