@@ -1,0 +1,71 @@
+---
+title: "TFBS in LFY1"
+output: html_notebook
+---
+
+For Hannah's Development MS: what is the density of TFBS in the the region upstream of LFY1?
+
+```{r}
+library(JASPAR2024)
+library(TFBSTools)
+library(Biostrings)
+library(tidyverse)
+```
+
+```{r}
+dbfile <- JASPAR2024()@db
+
+pfm <- getMatrixSet(dbfile, opts=list(tax_group="plants", length=8))
+pwm <- toPWM(pfm)
+```
+
+load genome
+```{r}
+genome <- readDNAStringSet("~/Sequences/ref_genomes/C_richardii_v2.1/assembly/Crichardii_676_v2.0.fa")
+```
+
+load gff
+
+```{r}
+gff <- rtracklayer::import.gff("~/Sequences/ref_genomes/C_richardii_v2.1/annotation/Crichardii_676_v2.1.gene.gff3.gz") 
+gff <- gff[gff$type=="mRNA" & gff$longest==1]
+
+upstream <- promoters(gff, upstream=20000, downstream=500)
+
+lfy1.upstream.gff <- upstream[upstream$Name=="Ceric.33G031700.1"]
+
+lfy1.upstream.gff
+```
+
+```{r}
+lfy1.upstream.seq <- genome[seqnames(lfy1.upstream.gff)] %>%
+  subseq(start=start(lfy1.upstream.gff), end = end(lfy1.upstream.gff))
+```
+
+
+```{r, warning=FALSE}
+system.time(
+hits <- searchSeq(pwm, lfy1.upstream.seq) 
+)
+```
+
+```{r}
+hits.df <- as(hits, "data.frame")
+hits.df
+```
+
+```{r}
+hits.df$TF %>% table() %>% hist()
+```
+
+
+```{r}
+hits.df %>%
+  mutate(position=-start+500) %>%
+  group_by(TF) %>%
+  filter(n() < 50) %>% 
+  ggplot(aes(x=position)) +
+  geom_density()
+```
+
+
