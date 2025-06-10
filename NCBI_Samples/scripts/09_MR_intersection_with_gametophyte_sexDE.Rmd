@@ -16,32 +16,30 @@ CrLFY2 <- "Ceric.18G076300.1"
 
 
 ```{r}
-sample.description <- read.csv("../output/sample.description.gametophyte.all.csv")
+sample.description <- read.csv("../output/sample.description.gametophyte.no4.5DAG.csv")
 ```
 
 
 load read counts. These should be log2 cpm or Voom transformed or something similar.
 
 ```{r}
-lcpm <- read.csv("../output/gam_combined_log2cpm.csv.gz", row.names = 1, check.names = FALSE) 
+lcpm <- read.csv("../output/gam_combined_log2cpm_no4.5DAG.csv.gz", row.names = 1, check.names = FALSE) 
 rownames(lcpm) <- str_remove(rownames(lcpm), fixed(".v2"))
 head(lcpm)
 dim(lcpm)
 ```
 
-remove sample outliers from PCA plot:
+load DEG list for male vs hermaphrodite
 ```{r}
-sample.description <- sample.description %>% filter(str_detect(group, "4.5 DAG", negate = TRUE))
-
-lcpm <- lcpm[,sample.description$sample]
+deg <- read_csv("../../McConnell_Samples/output/DEG_ALL_WT_male_v_herm.csv.gz") %>%
+  slice_sample(n=nrow(.))
+deg
 ```
 
-Filter to remove 40% least variable genes:
+Filter to keep the genes in the deg set
 ```{r}
-CV <- apply(lcpm, 1, \(x) abs(sd(x)/mean(x)))
-lcpm <- lcpm[CV > quantile(CV, 0.4),]
+lcpm <- lcpm[deg$geneID,]
 ```
-
 
 correlation matrix
 ```{r}
@@ -51,6 +49,7 @@ diag(m.cor) <- 0
 
 rank matrix
 ```{r}
+mem.maxVSize(30000)
 m.rank <- apply(m.cor,2,function(x) rank(-abs(x)))
 ```
 
@@ -72,20 +71,16 @@ MR.lfy <- MR[,c(CrLFY1, CrLFY2)] %>%
 ```
 
 
-load DEG list for male vs hermaphrodite
-```{r}
-deg <- read_csv("../../McConnell_Samples/output/DEG_ALL_WT_male_v_herm.csv.gz")
-deg
-```
 
 combine them
 
 ```{r}
-deg.cor <- deg %>% left_join(cor.lfy) %>% 
+deg.cor <- deg %>% right_join(cor.lfy) %>% 
   left_join(MR.lfy) %>%
   mutate(LFY1.rank = rank(-abs(LFY1.cor)),
          LFY2.rank = rank(-abs(LFY2.cor))) %>%
-  select(geneID:FDR, starts_with("LFY"), everything())
+  select(geneID:FDR, starts_with("LFY"), everything()) %>%
+  mutate(FDR.lt.0.05=FDR<0.05)
 ```
 
 ```{r}
@@ -96,4 +91,43 @@ deg.cor
 write_csv(deg.cor, "../../McConnell_Samples/output/DEG_ALL_WT_male_v_herm_LFY_CORRELATIONS.csv.gz")
 ```
 
+```{r}
+deg.cor %>%
+  ggplot(aes(x=logFC, y=LFY1.cor)) +
+  geom_point(alpha=.05)
+```
+```{r}
+deg.cor %>%
+  ggplot(aes(x=logFC, y=LFY2.cor)) +
+  geom_point(alpha=.1)
+```
+```{r}
+deg.cor %>%
+  ggplot(aes(x=LFY1.MR, y=logFC)) +
+  geom_point(alpha=.1)
+```
+```{r}
+deg.cor %>%
+  ggplot(aes(x=LFY1.rank, y=logFC)) +
+  geom_point(alpha=.1)
+```
+
+```{r}
+deg.cor %>%
+  ggplot(aes(x=LFY2.MR, y=logFC)) +
+  geom_point(alpha=.1)
+```
+
+
+```{r}
+deg.cor %>%
+  ggplot(aes(x=LFY2.rank, y=logFC)) +
+  geom_point(alpha=.1)
+```
+
+```{r}
+deg.cor %>%
+  arrange(LFY1.rank) %>%
+  slice_tail(n=14000)
+```
 
