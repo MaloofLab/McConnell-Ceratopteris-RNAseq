@@ -155,7 +155,7 @@ DT::datatable(r.lfy1$nets$c6$net$modules)
 
 
 ```{r}
-knitr::include_graphics("../output/TGCN_LFY1/results/LFY1_ALL_c6_TGCN_crossTabPlot.png")
+knitr::include_graphics("../output/TGCN_LFY1_gam/results/LFY1_gam_c6_TGCN_crossTabPlot.png")
 ```
 
 
@@ -227,7 +227,7 @@ DT::datatable(r.lfy2$nets$c5$net$modules)
 ```
 
 ```{r}
-knitr::include_graphics("../output/TGCN_LFY2/results/LFY2_ALL_c5_TGCN_crossTabPlot.png")
+knitr::include_graphics("../output/TGCN_LFY2_gam/results/LFY2_gam_c5_TGCN_crossTabPlot.png")
 ```
 
 ```{r}
@@ -242,7 +242,7 @@ grid.arrange(r.lfy2$nets$c5$GOenrich$plotStats, r.lfy2$nets$c5$GOenrich$plotNter
 #### C5
 
 ```{r}
-LFY1.c5 <- read_csv("../output/TGCN_LFY1/results/LFY1_ALL_c5_TGCN.csv")
+LFY1.c5 <- read_csv("../output/TGCN_LFY1_gam/results/LFY1_gam_c5_TGCN.csv")
 LFY1.c5
 ```
 
@@ -262,7 +262,7 @@ rbind(LFY1=LFY1.expression,lcpm[unique(LFY1.c5$hubGene),]) %>%
 #### C6
 
 ```{r}
-LFY1.c6 <- read_csv("../output/TGCN_LFY1/results/LFY1_ALL_c6_TGCN.csv")
+LFY1.c6 <- read_csv("../output/TGCN_LFY1_gam/results/LFY1_gam_c6_TGCN.csv")
 LFY1.c6
 ```
 
@@ -282,7 +282,7 @@ rbind(LFY1=LFY1.expression,lcpm[unique(LFY1.c5$hubGene),]) %>%
 ## LFY2 C5
 
 ```{r}
-LFY2.c5 <- read_csv("../output/TGCN_LFY2/results/LFY2_ALL_c5_TGCN.csv")
+LFY2.c5 <- read_csv("../output/TGCN_LFY2_gam/results/LFY2_gam_c5_TGCN.csv")
 LFY2.c5
 ```
 

@@ -33,13 +33,6 @@ head(counts.data)
 ```
 
 ```{r}
-counts.data %>% filter(str_detect(gene_ID, "__"))
-```
-```{r}
-counts.data <- counts.data %>% filter(str_detect(gene_ID, "__", negate = TRUE))
-```
-
-```{r}
 counts.data <- counts.data %>%
   rename_with(.fn = ~ str_remove(.x, "RESUB-")) %>%
   rename_with(.fn = ~ str_replace(.x, "(male|mature)-", "\\1_"))
@@ -62,6 +55,22 @@ sample.description <- tibble(sample=colnames(counts.data)[-1]) %>%
 sample.description
 
 ```
+
+Total of mapped reads
+```{r}
+counts.data[-1] %>% colSums()
+counts.data[-1] %>% colSums() %>% mean()
+```
+
+```{r}
+counts.data %>% filter(str_detect(gene_ID, "__")) %>% magrittr::extract(-1) %>% colSums()
+counts.data %>% filter(str_detect(gene_ID, "__")) %>% magrittr::extract(-1) %>% colSums() %>% mean()
+```
+
+```{r}
+counts.data <- counts.data %>% filter(str_detect(gene_ID, "__", negate = TRUE))
+```
+
 
 remove low read genes:
 
@@ -150,7 +159,7 @@ genes.heatmap <- bind_rows( {
   
 )
 
-cpm(dge.data, log = TRUE) %>%
+hm <- cpm(dge.data, log = TRUE) %>%
   as_tibble(rownames = "geneID") %>%
   semi_join(genes.heatmap) %>%
   column_to_rownames("geneID") %>%
@@ -158,10 +167,13 @@ cpm(dge.data, log = TRUE) %>%
   as.matrix() %>%
   heatmap.2(trace="none",col="bluered", Colv = FALSE, dendrogram = "row", mar=c(10,8))
   
-dev.copy(png, filename = "../output/male_v_herm_heatmap.png", width=1200, height = 900)
+#dev.copy(png, filename = "../output/male_v_herm_heatmap.png", width=1200, height = 900)
 
-write_csv(genes.heatmap, "../output/male_v_herm_heatmap_genes.csv")
-  
+dev.copy(png, filename = "../output/male_v_herm_heatmap_tall.png", width=1200, height = 1800)
+
+genes.heatmap.reorder <- genes.heatmap[rev(match(colnames(hm$carpet),genes.heatmap$geneID)),]
+
+write_csv(genes.heatmap.reorder, "../output/male_v_herm_heatmap_genes_ordered.csv")
 ```
 
 

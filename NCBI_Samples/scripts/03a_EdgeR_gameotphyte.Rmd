@@ -130,6 +130,7 @@ remove low read genes:
 
 ```{r}
 counts.data <- counts.data[rowSums(counts.data[,-1] > 5) >= 3,]
+dim(counts.data)
 ```
 
 ```{r}

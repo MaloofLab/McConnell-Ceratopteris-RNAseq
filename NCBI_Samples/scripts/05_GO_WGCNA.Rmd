@@ -22,7 +22,7 @@ head(GOs)
 tail(GOs)
 ```
 
-how will do the gene IDs match up?
+how  do the gene IDs match up?
 ```{r}
 moduleGOs <- module.assignment %>%
   mutate(geneID2 = str_remove(geneID, fixed(".v2"))) %>%

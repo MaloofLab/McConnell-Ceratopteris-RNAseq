@@ -3,10 +3,11 @@ title: "08_Motif_Analysis"
 output: html_notebook
 ---
 
-```{r}
+```{r, message=FALSE}
 library(JASPAR2024)
 library(TFBSTools)
 library(Biostrings)
+library(tidyverse)
 ```
 
 Get (Arabidopsis) LFY binding site. Fern is similar, although it might be worth creating my own Fern pfm at some point.
@@ -56,6 +57,21 @@ overlaps <- tibble(geneID = promoters$Name,
                    )
 overlaps
 ```
+
+## LFY1 gametophyte sex cluster
+
+```{r}
+lfy1.gam.sex.cluster <- read_csv("../output/LFY1_gam_sex_cluster_noSexSamples.csv")
+```
+
+```{r}
+lfy1.gam.sex.cluster %>%
+  right_join(overlaps) %>%
+  t.test(count ~ in_LFY1_cluster, data = .)
+```
+
+No evidence for enrichment.  Mild evidence for anti-enrichment.
+
 
 ## WGCNA
 

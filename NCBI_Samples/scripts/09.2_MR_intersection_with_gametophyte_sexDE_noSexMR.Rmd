@@ -1,0 +1,312 @@
+---
+title: "09_MR_intersection_with_gametophyte_sexDE"
+output: html_notebook
+---
+
+Create a mutual rank network and intersect that with male vs hermaphrodite DE genes.  For this version, remove the male vs hermaphrodite samples from the MR/Correlation calculation.
+
+```{r, message=FALSE}
+library(tidyverse)
+library(dbscan)    # Contains both DBSCAN and HDBSCAN implementations
+library(patchwork)   # For arranging multiple plots
+library(topGO)
+conflicted::conflicts_prefer(dplyr::rename, dplyr::filter, dplyr::select)
+```
+
+```{r}
+CrLFY1 <- "Ceric.33G031700.1" 
+
+CrLFY2 <- "Ceric.18G076300.1"
+```
+
+load sample info
+```{r}
+sample.description <- read.csv("../output/sample.description.gametophyte.no4.5DAG.csv")
+```
+
+remove sex samples
+```{r}
+sample.description <- sample.description %>%
+  filter(!str_detect(group, "WT-male_gam|WT-mature_herm"))
+```
+
+
+load reads
+
+```{r}
+lcpm <- read.csv("../output/gam_combined_log2cpm_no4.5DAG.csv.gz", row.names = 1, check.names = FALSE)
+
+lcpm <- lcpm[,sample.description$sample]
+rownames(lcpm) <- str_remove(rownames(lcpm), fixed(".v2"))
+head(lcpm)
+dim(lcpm)
+```
+
+load DEG list for male vs hermaphrodite
+```{r}
+deg <- read_csv("../../McConnell_Samples/output/DEG_ALL_WT_male_v_herm.csv.gz") %>%
+  slice_sample(n=nrow(.))
+deg
+```
+
+Filter to keep the genes in the deg set
+```{r}
+lcpm <- lcpm[deg$geneID,]
+```
+
+Calculate MR matrix
+```{r, eval=FALSE}
+# correlation matrix
+m.cor <- cor(t(lcpm))
+diag(m.cor) <- 0
+
+# rank matrix
+mem.maxVSize(30000)
+m.rank <- apply(m.cor,2,function(x) rank(-abs(x)))
+
+# mutual rank matrix
+MR <- sqrt(m.rank * t(m.rank))
+
+# Create LFY specific subsets of these tables
+cor.lfy <- m.cor[,c(CrLFY1, CrLFY2)] %>%
+  round(3) %>%
+  as_tibble(rownames = "geneID") %>%
+  rename(LFY1.cor = contains(CrLFY1), LFY2.cor = contains(CrLFY2))
+
+MR.lfy <- MR[,c(CrLFY1, CrLFY2)] %>%
+  as_tibble(rownames = "geneID") %>%
+  rename(LFY1.MR = contains(CrLFY1), LFY2.MR = contains(CrLFY2))
+
+# Combine DEGs with LFY correlations and MR
+deg.cor <- deg %>% right_join(cor.lfy) %>% 
+  left_join(MR.lfy) %>%
+  mutate(LFY1.rank = rank(-abs(LFY1.cor)),
+         LFY2.rank = rank(-abs(LFY2.cor))) %>%
+  select(geneID:FDR, starts_with("LFY"), everything()) %>%
+  mutate(FDR.lt.0.05=FDR<0.05)
+
+write_csv(deg.cor, "../../McConnell_Samples/output/DEG_ALL_WT_male_v_herm_LFY_CORRELATIONS_v2_noSexMR.csv.gz")
+```
+
+```{r}
+deg.cor <- read_csv("../../McConnell_Samples/output/DEG_ALL_WT_male_v_herm_LFY_CORRELATIONS_v2_noSexMR.csv.gz")
+```
+
+
+```{r}
+deg.cor %>%
+  ggplot(aes(x=logFC, y=LFY1.cor)) +
+  geom_point(alpha=.05)
+
+ggsave("../output/LFY1_cor_logFC.png", width=6, height=4)
+```
+
+```{r}
+deg.cor %>%
+  ggplot(aes(x=logFC, y=LFY2.cor)) +
+  geom_point(alpha=.1)
+```
+
+```{r}
+deg.cor %>%
+  ggplot(aes(x=LFY1.MR, y=logFC)) +
+  geom_point(alpha=.1)
+```
+
+```{r}
+deg.cor %>%
+  ggplot(aes(x=LFY1.rank, y=logFC)) +
+  geom_point(alpha=.1)
+```
+
+```{r}
+deg.cor %>%
+  ggplot(aes(x=LFY2.MR, y=logFC)) +
+  geom_point(alpha=.1)
+```
+
+
+```{r}
+deg.cor %>%
+  ggplot(aes(x=LFY2.rank, y=logFC)) +
+  geom_point(alpha=.1)
+```
+
+```{r}
+deg.cor %>%
+  arrange(LFY1.rank) %>%
+  slice_tail(n=14000)
+```
+
+## Color points by WGCNA Cluster
+
+```{r}
+# Load WGCNA module assignment
+load("../output/WGCNA_gametophyte_all_no4.5DAG_noSex.Rdata")
+
+module.assignment <- module.assignment %>%
+  mutate(geneID = str_remove(geneID, fixed(".v2"))) %>%
+  select(geneID, module)
+```
+
+```{r}
+pl.df <- deg.cor %>%
+  left_join(module.assignment, by = c("geneID" = "geneID")) %>%
+  mutate(module = ifelse(is.na(module), "grey80", module)) %>%
+  select(geneID, module, everything())
+
+pl.df %>%
+  ggplot(aes(x = LFY1.MR, y = logFC)) +
+  geom_point(color = pl.df$module, alpha = 0.1) 
+```
+
+```{r}
+pl.df <- deg.cor %>%
+  left_join(module.assignment, by = c("geneID" = "geneID")) %>%
+  mutate(module = ifelse(is.na(module), "none", module),
+         module = ifelse(module=="turquoise", "blue", "red")) %>%
+  select(geneID, module, everything()) %>%
+  arrange(desc(module))
+
+pl.df %>%
+  ggplot(aes(x = LFY1.MR, y = logFC)) +
+  geom_point(color = pl.df$module, alpha = 0.1) 
+```
+
+## Try to ID clusters
+
+RANK
+```{r}
+# 1. DBSCAN approach
+
+# Normalize/scale data (optional but recommended)
+# This helps when variables have different ranges
+scaled_data <- scale(deg.cor[, c("logFC", "LFY1.rank")])
+
+# Optionally, find the optimal DBSCAN parameters using kNNdistplot
+# This helps determine a good eps value.  K should be minpt -1 
+kNNdistplot(scaled_data[, c("logFC", "LFY1.rank")], k = 499)
+abline(h = 0.2, col = "red") # Adjust this line to find the "elbow"
+
+dbscan_result <- dbscan(scaled_data[, c("logFC", "LFY1.rank")], eps = 0.25, minPts = 500, borderPoints = TRUE)
+deg.cor$dbscan_cluster <- as.factor(dbscan_result$cluster)
+
+# Create plots to compare the results
+plot1 <- ggplot(deg.cor, aes(x = LFY1.rank, y = logFC,  color = dbscan_cluster)) +
+  geom_point(alpha = 0.1) +
+  #scale_color_brewer(name = "Cl", type = "qual") +
+  ggtitle(str_c("DBSCAN Clustering, border points, eps: 0.25")) +
+  theme_minimal()
+
+print(plot1)
+
+hdbscan_result <- hdbscan(scaled_data[, c("logFC", "LFY1.rank")], minPts = 500)
+deg.cor$hdbscan_cluster <- as.factor(hdbscan_result$cluster)
+
+plot2 <- ggplot(deg.cor, aes(x = LFY1.rank, y = logFC, color = hdbscan_cluster)) +
+  geom_point(alpha = 0.1) +
+  scale_color_discrete(name = "HDBSCAN Cluster") +
+  ggtitle("HDBSCAN Clustering") +
+  theme_minimal()
+
+print(plot2)
+
+```
+
+MR
+```{r}
+# 1. DBSCAN approach
+
+# Normalize/scale data (optional but recommended)
+# This helps when variables have different ranges
+scaled_data <- scale(deg.cor[, c("logFC", "LFY1.MR")])
+
+# Optionally, find the optimal DBSCAN parameters using kNNdistplot
+# This helps determine a good eps value.  K should be minpt -1 
+kNNdistplot(scaled_data[, c("logFC", "LFY1.MR")], k = 499)
+abline(h = 0.2, col = "red") # Adjust this line to find the "elbow"
+
+dbscan_result <- dbscan(scaled_data[, c("logFC", "LFY1.MR")], eps = 0.25, minPts = 500, borderPoints = TRUE)
+deg.cor$dbscan_cluster <- as.factor(dbscan_result$cluster)
+
+# Create plots to compare the results
+plot1 <- ggplot(deg.cor, aes(x = LFY1.MR, y = logFC, color = dbscan_cluster)) +
+  geom_point(alpha = 0.2) +
+  scale_color_brewer(name = "Cl", type = "qual") +
+  ggtitle(str_c("DBSCAN Clustering, border points, eps: 0.25")) +
+  guides(color = guide_legend(override.aes = list(alpha = 1)))
+
+
+print(plot1)
+
+hdbscan_result <- hdbscan(scaled_data[, c("logFC", "LFY1.MR")], minPts = 500)
+deg.cor$hdbscan_cluster <- as.factor(hdbscan_result$cluster)
+
+plot2 <- ggplot(deg.cor, aes(x = LFY1.MR, y = logFC, color = hdbscan_cluster)) +
+  geom_point(alpha = 0.2) +
+  #scale_color_discrete(name = "HDBSCAN Cluster") +
+  ggtitle("HDBSCAN Clustering") +
+  scale_color_brewer(name = "Cl", type = "qual") +
+  guides(color = guide_legend(override.aes = list(alpha = 1)))
+
+
+print(plot2)
+
+```
+Mutual Rank DBSCAN is the best...
+
+Create a column for being in cluster 2 and save output
+```{r}
+deg.cor <- deg.cor %>%
+  mutate(in_LFY1_cluster = dbscan_cluster == 2) %>%
+  select(geneID, in_LFY1_cluster, everything(), -starts_with("LFY2"))
+
+write_csv(deg.cor, "../output/LFY1_gam_sex_cluster_noSexSamples.csv")
+```
+
+
+```{r}
+deg.cor %>%
+  arrange(desc(in_LFY1_cluster), logFC) %>%
+  select(geneID, logFC, FDR, LFY1.cor, LFY1.MR, LFY1.rank, in_LFY1_cluster)
+```
+
+Where is this cluster on the cor.plot?
+
+```{r}
+deg.cor %>%
+  ggplot(aes(x = logFC, y = LFY1.cor, color = dbscan_cluster)) +
+  geom_point(alpha = 0.1) +
+  scale_color_brewer(name = "Cl", type = "qual") +
+  guides(color = guide_legend(override.aes = list(alpha = 1)))
+```
+
+## GO enrichment
+
+```{r}
+gene2GO.list <- deg.cor %>% 
+  rowwise() %>%
+  mutate(GOlist = str_split(GO, pattern = " ")) %>%
+  ungroup() %>%
+  mutate(GOlist = set_names(GOlist, geneID)) %>%
+  pull(GOlist)
+
+cluster.genes <- deg.cor %>%
+  mutate(cluster.genes = as.numeric(in_LFY1_cluster)) %>% 
+  pull(cluster.genes, name = geneID) %>% as.factor()
+
+go.data.cluster <- new("topGOdata", ontology = "BP", description = "In LFY1 Cluster", allGenes = cluster.genes, annot = annFUN.gene2GO, gene2GO = gene2GO.list)
+
+result.cluster <- runTest(go.data.cluster, algorithm = "weight01", statistic = "fisher")
+
+GO.results <- GenTable(go.data.cluster, result.cluster, topNodes = sum(result.cluster@score < 0.05 )) %>%
+  dplyr::rename_with( \(x) str_replace(x, "result1|apply.*", "p.value")) %>%
+  mutate(p.value = as.numeric(p.value))
+
+GO.results
+```
+
+```{r, message=FALSE}
+write_csv(GO.results, file = "../output/LFY1_Sex_Cluster_GO_noSexSamples.csv")
+```
+
