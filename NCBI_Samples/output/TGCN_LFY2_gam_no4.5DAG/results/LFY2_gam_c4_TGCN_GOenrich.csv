@@ -1,0 +1,36 @@
+"query","GO.ID","Term","Annotated","Significant","Expected","p_value","source","logPval"
+"Ceric.01G116000.1","GO:0010215","cellulose microfibril organization",5,1,0,0.0025,"BP",2.60205999132796
+"Ceric.01G116000.1","GO:0016049","cell growth",8,1,0,0.004,"BP",2.39794000867204
+"Ceric.01G116000.1","GO:0000079","regulation of cyclin-dependent protein s...",14,1,0.01,0.007,"BP",2.15490195998574
+"Ceric.01G116000.1","GO:0042254","ribosome biogenesis",61,1,0.03,0.0303,"BP",1.5185573714977
+"Ceric.01G116000.1","GO:0016567","protein ubiquitination",64,1,0.03,0.0317,"BP",1.49894073778225
+"Ceric.03G029200.1","GO:0010189","vitamin E biosynthetic process",3,1,0,0.0015,"BP",2.82390874094432
+"Ceric.03G029200.1","GO:0032259","methylation",37,1,0.02,0.0184,"BP",1.73518217699046
+"Ceric.03G029200.1","GO:0019290","siderophore biosynthetic process",38,1,0.02,0.0189,"BP",1.72353819582676
+"Ceric.07G041400.1","GO:0030001","metal ion transport",166,1,0.08,0.081,"BP",1.09151498112135
+"Ceric.08G028400.1","GO:0048193","Golgi vesicle transport",36,1,0.01,0.013,"BP",1.88605664769316
+"Ceric.08G028400.1","GO:0006633","fatty acid biosynthetic process",86,1,0.03,0.032,"BP",1.49485002168009
+"Ceric.08G028400.1","GO:0006470","protein dephosphorylation",124,1,0.05,0.046,"BP",1.33724216831843
+"Ceric.08G035200.1","GO:0010215","cellulose microfibril organization",5,1,0,0.0019,"BP",2.72124639904717
+"Ceric.08G035200.1","GO:0016049","cell growth",8,1,0,0.003,"BP",2.52287874528034
+"Ceric.08G035200.1","GO:0006694","steroid biosynthetic process",27,1,0.01,0.0101,"BP",1.99567862621736
+"Ceric.19G025600.1","GO:0006556","S-adenosylmethionine biosynthetic proces...",5,1,0,0.0013,"BP",2.88605664769316
+"Ceric.19G025600.1","GO:0006414","translational elongation",25,1,0.01,0.0063,"BP",2.20065945054642
+"Ceric.1Z072500.1","GO:0006595","polyamine metabolic process",13,1,0,0.0016,"BP",2.79588001734407
+"Ceric.21G017300.1","GO:0006635","fatty acid beta-oxidation",7,1,0,0.0018,"BP",2.74472749489669
+"Ceric.21G017300.1","GO:0006869","lipid transport",47,1,0.01,0.0118,"BP",1.92811799269387
+"Ceric.26G010600.1","GO:0010411","xyloglucan metabolic process",21,1,0.01,0.0079,"BP",2.10237290870956
+"Ceric.26G010600.1","GO:0042546","cell wall biogenesis",35,1,0.01,0.0131,"BP",1.88272870434424
+"Ceric.26G010600.1","GO:0000160","phosphorelay signal transduction system",58,1,0.02,0.0217,"BP",1.66354026615147
+"Ceric.26G010600.1","GO:0042545","cell wall modification",70,1,0.03,0.0261,"BP",1.58335949266172
+"Ceric.30G051000.1","GO:0071266","'de novo' L-methionine biosynthetic proc...",1,1,0,0.00063,"BP",3.20065945054642
+"Ceric.30G051000.1","GO:0006436","tryptophanyl-tRNA aminoacylation",4,1,0,0.00251,"BP",2.60032627851896
+"Ceric.30G051000.1","GO:0000162","tryptophan biosynthetic process",4,1,0,0.00251,"BP",2.60032627851896
+"Ceric.31G011800.1","GO:0006470","protein dephosphorylation",124,1,0.02,0.016,"BP",1.79588001734408
+"Ceric.31G037000.1","GO:0006470","protein dephosphorylation",124,2,0.06,0.0014,"BP",2.85387196432176
+"Ceric.34G011800.1","GO:0006621","protein retention in ER lumen",6,1,0.01,0.0053,"BP",2.27572413039921
+"Ceric.34G011800.1","GO:0006817","phosphate ion transport",16,1,0.01,0.014,"BP",1.85387196432176
+"Ceric.34G011800.1","GO:0006814","sodium ion transport",17,1,0.01,0.0148,"BP",1.82973828460504
+"Ceric.34G011800.1","GO:0000160","phosphorelay signal transduction system",58,1,0.05,0.0498,"BP",1.30277065724028
+"Ceric.34G055100.1","GO:0006633","fatty acid biosynthetic process",86,1,0.02,0.021,"BP",1.67778070526608
+"hubs","GO:0006621","protein retention in ER lumen",6,1,0,0.0038,"BP",2.42021640338319

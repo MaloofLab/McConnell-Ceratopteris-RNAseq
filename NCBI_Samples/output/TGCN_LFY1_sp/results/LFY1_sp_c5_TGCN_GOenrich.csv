@@ -1,0 +1,62 @@
+"query","GO.ID","Term","Annotated","Significant","Expected","p_value","source","logPval"
+"Ceric.01G002000.1","GO:0006468","protein phosphorylation",1048,3,0.62,0.016,"BP",1.79588001734408
+"Ceric.01G002000.1","GO:0009664","plant-type cell wall organization",54,1,0.03,0.032,"BP",1.49485002168009
+"Ceric.01G018500.1","GO:0006270","DNA replication initiation",8,2,0.01,6.2e-05,"BP",4.20760831050175
+"Ceric.01G018500.1","GO:0009186","deoxyribonucleoside diphosphate metaboli...",4,1,0.01,0.0062,"BP",2.20760831050175
+"Ceric.01G018500.1","GO:0032502","developmental process",36,2,0.06,0.0071,"BP",2.14874165128092
+"Ceric.01G018500.1","GO:0006284","base-excision repair",19,1,0.03,0.029,"BP",1.53760200210104
+"Ceric.01G018500.1","GO:0007275","multicellular organism development",26,1,0.04,0.0395,"BP",1.40340290437354
+"Ceric.02G095800.1","GO:0006508","proteolysis",375,2,0.22,0.018,"BP",1.74472749489669
+"Ceric.02G095800.1","GO:0009308","amine metabolic process",32,1,0.02,0.019,"BP",1.72124639904717
+"Ceric.02G095800.1","GO:0005975","carbohydrate metabolic process",477,2,0.28,0.029,"BP",1.53760200210104
+"Ceric.02G100800.1","GO:0006030","chitin metabolic process",6,1,0,0.0014,"BP",2.85387196432176
+"Ceric.03G063200.1","GO:0009664","plant-type cell wall organization",54,2,0.08,0.0026,"BP",2.58502665202918
+"Ceric.03G063200.1","GO:0016310","phosphorylation",1081,3,1.54,0.044,"BP",1.35654732351381
+"Ceric.04G069400.1","GO:0032502","developmental process",36,2,0.02,0.0018,"BP",2.74472749489669
+"Ceric.04G069400.1","GO:0007275","multicellular organism development",26,1,0.01,0.0123,"BP",1.9100948885606
+"Ceric.04G069400.1","GO:0006355","regulation of DNA-templated transcriptio...",625,2,0.3,0.03,"BP",1.52287874528034
+"Ceric.07G019400.1","GO:0034755","iron ion transmembrane transport",4,1,0,0.00095,"BP",3.02227639471115
+"Ceric.11G079100.1","GO:0010411","xyloglucan metabolic process",21,1,0,0.005,"BP",2.30102999566398
+"Ceric.11G079100.1","GO:0042546","cell wall biogenesis",35,1,0.01,0.0083,"BP",2.08092190762393
+"Ceric.11G079100.1","GO:0006979","response to oxidative stress",120,1,0.03,0.0284,"BP",1.54668165995296
+"Ceric.18G076300.1","GO:0006355","regulation of DNA-templated transcriptio...",625,2,0.3,0.03,"BP",1.52287874528034
+"Ceric.1Z166400.1","GO:0006102","isocitrate metabolic process",2,1,0,0.00048,"BP",3.31875876262441
+"Ceric.1Z166400.1","GO:0006086","acetyl-CoA biosynthetic process from pyr...",6,1,0,0.00143,"BP",2.84466396253494
+"Ceric.22G030500.1","GO:0010411","xyloglucan metabolic process",21,1,0.01,0.012,"BP",1.92081875395238
+"Ceric.22G030500.1","GO:0042546","cell wall biogenesis",35,1,0.02,0.021,"BP",1.67778070526608
+"Ceric.22G030500.1","GO:0008152","metabolic process",6118,5,3.64,0.042,"BP",1.3767507096021
+"Ceric.26G010000.1","GO:0007076","mitotic chromosome condensation",6,2,0.01,1.5e-05,"BP",4.82390874094432
+"Ceric.26G010000.1","GO:0006270","DNA replication initiation",8,2,0.01,2.8e-05,"BP",4.55284196865778
+"Ceric.26G010000.1","GO:1990426","mitotic recombination-dependent replicat...",1,1,0,0.0011,"BP",2.95860731484178
+"Ceric.26G010000.1","GO:0000724","double-strand break repair via homologou...",5,1,0.01,0.0053,"BP",2.27572413039921
+"Ceric.26G010000.1","GO:0046856","phosphatidylinositol dephosphorylation",16,1,0.02,0.017,"BP",1.76955107862173
+"Ceric.26G010000.1","GO:0051276","chromosome organization",48,3,0.05,0.0256,"BP",1.59176003468815
+"Ceric.26G010000.1","GO:0006338","chromatin remodeling",34,1,0.04,0.0359,"BP",1.44490555142168
+"Ceric.26G010000.1","GO:0006260","DNA replication",79,4,0.08,0.0449,"BP",1.34775365899668
+"Ceric.26G039900.1","GO:0005975","carbohydrate metabolic process",477,2,0.23,0.018,"BP",1.74472749489669
+"Ceric.26G039900.1","GO:0006355","regulation of DNA-templated transcriptio...",625,2,0.3,0.03,"BP",1.52287874528034
+"Ceric.26G066400.1","GO:0030036","actin cytoskeleton organization",28,1,0,0.0033,"BP",2.48148606012211
+"Ceric.28G006500.1","GO:0006979","response to oxidative stress",120,1,0.01,0.014,"BP",1.85387196432176
+"Ceric.30G060700.1","GO:0009089","lysine biosynthetic process via diaminop...",9,1,0,0.0032,"BP",2.49485002168009
+"Ceric.30G060700.1","GO:0006096","glycolytic process",50,1,0.02,0.0178,"BP",1.74957999769111
+"Ceric.30G060700.1","GO:0006979","response to oxidative stress",120,1,0.04,0.0422,"BP",1.37468754903833
+"Ceric.31G036600.1","GO:0032502","developmental process",36,2,0.02,0.0018,"BP",2.74472749489669
+"Ceric.31G036600.1","GO:0007275","multicellular organism development",26,1,0.01,0.0123,"BP",1.9100948885606
+"Ceric.31G036600.1","GO:0046274","lignin catabolic process",26,1,0.01,0.0123,"BP",1.9100948885606
+"Ceric.31G036600.1","GO:0006355","regulation of DNA-templated transcriptio...",625,2,0.3,0.03,"BP",1.52287874528034
+"Ceric.33G016000.1","GO:0007031","peroxisome organization",17,1,0.01,0.012,"BP",1.92081875395238
+"Ceric.33G016000.1","GO:0007275","multicellular organism development",26,1,0.02,0.018,"BP",1.74472749489669
+"Ceric.33G016000.1","GO:0006511","ubiquitin-dependent protein catabolic pr...",47,1,0.03,0.033,"BP",1.48148606012211
+"Ceric.33G049200.1","GO:0030001","metal ion transport",177,3,0.32,0.0035,"BP",2.45593195564972
+"Ceric.33G049200.1","GO:0009186","deoxyribonucleoside diphosphate metaboli...",4,1,0.01,0.0071,"BP",2.14874165128092
+"Ceric.33G049200.1","GO:0006270","DNA replication initiation",8,1,0.01,0.0142,"BP",1.84771165561694
+"Ceric.33G049200.1","GO:0005975","carbohydrate metabolic process",477,3,0.85,0.0497,"BP",1.30364361126667
+"Ceric.34G003800.1","GO:0000272","polysaccharide catabolic process",12,1,0,0.0043,"BP",2.36653154442041
+"Ceric.34G003800.1","GO:0006284","base-excision repair",19,1,0.01,0.0068,"BP",2.16749108729376
+"Ceric.34G003800.1","GO:0006260","DNA replication",79,1,0.03,0.0279,"BP",1.5543957967264
+"Ceric.36G021500.1","GO:0006221","pyrimidine nucleotide biosynthetic proce...",19,1,0,0.0045,"BP",2.34678748622466
+"Ceric.36G021500.1","GO:0000160","phosphorelay signal transduction system",60,1,0.01,0.0142,"BP",1.84771165561694
+"Ceric.38G046200.1","GO:0007275","multicellular organism development",26,3,0.02,5.2e-07,"BP",6.2839966563652
+"Ceric.38G046200.1","GO:0006355","regulation of DNA-templated transcriptio...",625,3,0.45,0.0069,"BP",2.16115090926274
+"hubs","GO:0007275","multicellular organism development",26,1,0.02,0.018,"BP",1.74472749489669
+"hubs","GO:0009308","amine metabolic process",32,1,0.02,0.023,"BP",1.63827216398241

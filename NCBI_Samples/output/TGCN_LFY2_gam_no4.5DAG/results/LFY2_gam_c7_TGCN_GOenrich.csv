@@ -1,0 +1,9 @@
+"query","GO.ID","Term","Annotated","Significant","Expected","p_value","source","logPval"
+"Ceric.19G025600.1","GO:0006556","S-adenosylmethionine biosynthetic proces...",5,1,0,0.0013,"BP",2.88605664769316
+"Ceric.19G025600.1","GO:0006414","translational elongation",25,1,0.01,0.0063,"BP",2.20065945054642
+"Ceric.1Z072500.1","GO:0006595","polyamine metabolic process",13,1,0,0.0016,"BP",2.79588001734407
+"Ceric.30G051000.1","GO:0071266","'de novo' L-methionine biosynthetic proc...",1,1,0,0.00063,"BP",3.20065945054642
+"Ceric.30G051000.1","GO:0006436","tryptophanyl-tRNA aminoacylation",4,1,0,0.00251,"BP",2.60032627851896
+"Ceric.30G051000.1","GO:0000162","tryptophan biosynthetic process",4,1,0,0.00251,"BP",2.60032627851896
+"Ceric.31G037000.1","GO:0006470","protein dephosphorylation",124,2,0.06,0.0014,"BP",2.85387196432176
+"hubs","GO:0006470","protein dephosphorylation",124,1,0.02,0.016,"BP",1.79588001734408

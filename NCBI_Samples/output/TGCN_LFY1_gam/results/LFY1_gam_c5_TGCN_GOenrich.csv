@@ -1,0 +1,51 @@
+"query","GO.ID","Term","Annotated","Significant","Expected","p_value","source","logPval"
+"Ceric.02G031800.1","GO:0007018","microtubule-based movement",84,3,0.07,3.8e-05,"BP",4.42021640338319
+"Ceric.02G031800.1","GO:0042546","cell wall biogenesis",35,1,0.03,0.03,"BP",1.52287874528034
+"Ceric.02G047600.1","GO:0001678","intracellular glucose homeostasis",5,1,0,0.0031,"BP",2.50863830616573
+"Ceric.02G047600.1","GO:0046835","carbohydrate phosphorylation",7,1,0,0.0044,"BP",2.35654732351381
+"Ceric.02G047600.1","GO:0006816","calcium ion transport",16,1,0.01,0.01,"BP",2
+"Ceric.05G020100.1","GO:0019953","sexual reproduction",7,1,0,0.0026,"BP",2.58502665202918
+"Ceric.05G020100.1","GO:0019290","siderophore biosynthetic process",38,1,0.01,0.0142,"BP",1.84771165561694
+"Ceric.08G003100.1","GO:0006421","asparaginyl-tRNA aminoacylation",2,1,0,0.0027,"BP",2.56863623584101
+"Ceric.08G003100.1","GO:0006429","leucyl-tRNA aminoacylation",3,1,0,0.0041,"BP",2.38721614328026
+"Ceric.08G003100.1","GO:0010215","cellulose microfibril organization",5,1,0.01,0.0069,"BP",2.16115090926274
+"Ceric.08G003100.1","GO:0016049","cell growth",8,1,0.01,0.0109,"BP",1.96257350205938
+"Ceric.08G003100.1","GO:0006418","tRNA aminoacylation for protein translat...",44,3,0.06,0.0431,"BP",1.36552272983927
+"Ceric.10G011000.1","GO:0031122","cytoplasmic microtubule organization",19,1,0.01,0.0071,"BP",2.14874165128092
+"Ceric.10G011000.1","GO:0007020","microtubule nucleation",20,1,0.01,0.0075,"BP",2.1249387366083
+"Ceric.10G011000.1","GO:0006662","glycerol ether metabolic process",35,1,0.01,0.0131,"BP",1.88272870434424
+"Ceric.12G075500.1","GO:0006635","fatty acid beta-oxidation",7,1,0.01,0.0052,"BP",2.2839966563652
+"Ceric.12G075500.1","GO:0006418","tRNA aminoacylation for protein translat...",44,1,0.03,0.0325,"BP",1.48811663902113
+"Ceric.15G045600.1","GO:0009873","ethylene-activated signaling pathway",3,1,0,0.0011,"BP",2.95860731484178
+"Ceric.15G045600.1","GO:0000162","tryptophan biosynthetic process",4,1,0,0.0015,"BP",2.82390874094432
+"Ceric.15G045600.1","GO:0006662","glycerol ether metabolic process",35,1,0.01,0.0131,"BP",1.88272870434424
+"Ceric.18G015200.1","GO:0006633","fatty acid biosynthetic process",88,1,0.02,0.022,"BP",1.65757731917779
+"Ceric.21G041100.1","GO:0006491","N-glycan processing",1,1,0,0.0025,"BP",2.60205999132796
+"Ceric.21G041100.1","GO:0015940","pantothenate biosynthetic process",2,1,0,0.005,"BP",2.30102999566398
+"Ceric.21G041100.1","GO:0006429","leucyl-tRNA aminoacylation",3,1,0.01,0.0075,"BP",2.1249387366083
+"Ceric.21G041100.1","GO:0006368","transcription elongation by RNA polymera...",6,1,0.01,0.0149,"BP",1.82681373158773
+"Ceric.21G041100.1","GO:0006189","'de novo' IMP biosynthetic process",6,1,0.01,0.0149,"BP",1.82681373158773
+"Ceric.21G041100.1","GO:0006183","GTP biosynthetic process",8,1,0.02,0.0198,"BP",1.70333480973847
+"Ceric.21G041100.1","GO:0006228","UTP biosynthetic process",8,1,0.02,0.0198,"BP",1.70333480973847
+"Ceric.21G041100.1","GO:0006241","CTP biosynthetic process",8,1,0.02,0.0198,"BP",1.70333480973847
+"Ceric.21G041100.1","GO:0006839","mitochondrial transport",16,1,0.04,0.0393,"BP",1.40560744962457
+"Ceric.21G041100.1","GO:0055085","transmembrane transport",571,4,1.43,0.0497,"BP",1.30364361126667
+"Ceric.22G010700.1","GO:0000103","sulfate assimilation",8,1,0,0.005,"BP",2.30102999566398
+"Ceric.22G010700.1","GO:0005975","carbohydrate metabolic process",451,2,0.28,0.028,"BP",1.55284196865778
+"Ceric.23G000900.1","GO:0006334","nucleosome assembly",21,1,0.02,0.016,"BP",1.79588001734408
+"Ceric.23G000900.1","GO:0003333","amino acid transmembrane transport",27,1,0.02,0.02,"BP",1.69897000433602
+"Ceric.23G000900.1","GO:0019290","siderophore biosynthetic process",38,1,0.03,0.028,"BP",1.55284196865778
+"Ceric.25G026400.1","GO:0019290","siderophore biosynthetic process",38,1,0.01,0.014,"BP",1.85387196432176
+"Ceric.32G023200.1","GO:0016560","protein import into peroxisome matrix, d...",3,1,0,0.003,"BP",2.52287874528034
+"Ceric.32G023200.1","GO:0015780","nucleotide-sugar transmembrane transport",4,1,0,0.004,"BP",2.39794000867204
+"Ceric.32G023200.1","GO:0009107","lipoate biosynthetic process",5,1,0,0.005,"BP",2.30102999566398
+"Ceric.32G023200.1","GO:0008643","carbohydrate transport",6,1,0.01,0.006,"BP",2.22184874961636
+"Ceric.32G023200.1","GO:0031122","cytoplasmic microtubule organization",19,1,0.02,0.019,"BP",1.72124639904717
+"Ceric.32G023200.1","GO:0007020","microtubule nucleation",20,1,0.02,0.02,"BP",1.69897000433602
+"Ceric.32G054800.1","GO:0006499","N-terminal protein myristoylation",2,1,0,5e-04,"BP",3.30102999566398
+"Ceric.35G028100.1","GO:0042545","cell wall modification",70,2,0.05,0.0011,"BP",2.95860731484178
+"Ceric.35G028100.1","GO:0031122","cytoplasmic microtubule organization",19,1,0.01,0.0142,"BP",1.84771165561694
+"Ceric.35G028100.1","GO:0007020","microtubule nucleation",20,1,0.01,0.0149,"BP",1.82681373158773
+"Ceric.35G028100.1","GO:0006486","protein glycosylation",37,1,0.03,0.0274,"BP",1.56224943717961
+"Ceric.37G066000.1","GO:0006351","DNA-templated transcription",728,2,0.27,0.032,"BP",1.49485002168009
+"hubs","GO:0019953","sexual reproduction",7,1,0,0.0035,"BP",2.45593195564972

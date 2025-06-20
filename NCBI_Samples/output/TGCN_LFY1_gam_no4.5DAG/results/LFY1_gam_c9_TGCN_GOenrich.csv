@@ -1,0 +1,9 @@
+"query","GO.ID","Term","Annotated","Significant","Expected","p_value","source","logPval"
+"Ceric.10G068300.1","GO:0019290","siderophore biosynthetic process",38,1,0.01,0.0095,"BP",2.02227639471115
+"Ceric.10G068300.1","GO:0007264","small GTPase-mediated signal transductio...",92,1,0.02,0.0229,"BP",1.64016451766011
+"Ceric.10G068300.1","GO:0006886","intracellular protein transport",194,1,0.05,0.0481,"BP",1.31785492362617
+"Ceric.20G064100.1","GO:0006556","S-adenosylmethionine biosynthetic proces...",5,1,0,0.0044,"BP",2.35654732351381
+"Ceric.20G064100.1","GO:0006559","L-phenylalanine catabolic process",8,1,0.01,0.007,"BP",2.15490195998574
+"Ceric.20G064100.1","GO:0006555","methionine metabolic process",12,1,0.01,0.0105,"BP",1.97881070093006
+"Ceric.20G064100.1","GO:0008152","metabolic process",5817,7,5.11,0.0345,"BP",1.46218090492673
+"hubs","GO:0008152","metabolic process",5817,1,0.73,0.73,"BP",0.136677139879544

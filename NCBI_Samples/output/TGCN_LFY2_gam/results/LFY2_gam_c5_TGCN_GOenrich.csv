@@ -1,0 +1,33 @@
+"query","GO.ID","Term","Annotated","Significant","Expected","p_value","source","logPval"
+"Ceric.06G079300.1","GO:0006635","fatty acid beta-oxidation",7,1,0,0.00087,"BP",3.06048074738138
+"Ceric.08G028400.1","GO:0007264","small GTPase-mediated signal transductio...",92,2,0.06,0.0013,"BP",2.88605664769316
+"Ceric.08G028400.1","GO:0006886","intracellular protein transport",194,2,0.12,0.0056,"BP",2.2518119729938
+"Ceric.08G028400.1","GO:0006535","cysteine biosynthetic process from serin...",17,1,0.01,0.0106,"BP",1.97469413473523
+"Ceric.08G028400.1","GO:0006913","nucleocytoplasmic transport",59,1,0.04,0.0363,"BP",1.44009337496389
+"Ceric.08G035200.1","GO:0010215","cellulose microfibril organization",5,1,0,0.00062,"BP",3.20760831050175
+"Ceric.08G035200.1","GO:0016049","cell growth",8,1,0,0.001,"BP",3
+"Ceric.1Z119300.1","GO:0006189","'de novo' IMP biosynthetic process",6,1,0,0.003,"BP",2.52287874528034
+"Ceric.21G002900.1","GO:0006556","S-adenosylmethionine biosynthetic proces...",5,1,0,0.0025,"BP",2.60205999132796
+"Ceric.21G002900.1","GO:0000079","regulation of cyclin-dependent protein s...",14,1,0.01,0.007,"BP",2.15490195998574
+"Ceric.21G002900.1","GO:0007264","small GTPase-mediated signal transductio...",92,1,0.05,0.0452,"BP",1.34486156518862
+"Ceric.21G017300.1","GO:0006635","fatty acid beta-oxidation",7,1,0,0.0017,"BP",2.76955107862173
+"Ceric.21G017300.1","GO:0006869","lipid transport",47,1,0.01,0.0117,"BP",1.93181413825384
+"Ceric.28G067600.1","GO:0006556","S-adenosylmethionine biosynthetic proces...",5,1,0.01,0.011,"BP",1.95860731484178
+"Ceric.28G067600.1","GO:0010215","cellulose microfibril organization",5,1,0.01,0.011,"BP",1.95860731484178
+"Ceric.28G067600.1","GO:0015693","magnesium ion transport",7,1,0.02,0.016,"BP",1.79588001734408
+"Ceric.28G067600.1","GO:0016049","cell growth",8,1,0.02,0.018,"BP",1.74472749489669
+"Ceric.28G067600.1","GO:0000079","regulation of cyclin-dependent protein s...",14,1,0.03,0.031,"BP",1.50863830616573
+"Ceric.28G067600.1","GO:0010411","xyloglucan metabolic process",21,1,0.05,0.046,"BP",1.33724216831843
+"Ceric.29G055600.1","GO:0006556","S-adenosylmethionine biosynthetic proces...",5,1,0,0.0037,"BP",2.431798275933
+"Ceric.29G055600.1","GO:0006012","galactose metabolic process",10,1,0.01,0.0075,"BP",2.1249387366083
+"Ceric.29G055600.1","GO:0006694","steroid biosynthetic process",28,1,0.02,0.0208,"BP",1.68193666503724
+"Ceric.30G051000.1","GO:0000162","tryptophan biosynthetic process",4,1,0,0.003,"BP",2.52287874528034
+"Ceric.30G051000.1","GO:0000105","L-histidine biosynthetic process",8,1,0.01,0.006,"BP",2.22184874961636
+"Ceric.31G037000.1","GO:0010215","cellulose microfibril organization",5,1,0.01,0.012,"BP",1.92081875395238
+"Ceric.31G037000.1","GO:0006635","fatty acid beta-oxidation",7,1,0.02,0.017,"BP",1.76955107862173
+"Ceric.31G037000.1","GO:0016049","cell growth",8,1,0.02,0.019,"BP",1.72124639904717
+"Ceric.31G037000.1","GO:0006470","protein dephosphorylation",124,2,0.29,0.034,"BP",1.46852108295774
+"Ceric.33G060000.1","GO:0006556","S-adenosylmethionine biosynthetic proces...",5,1,0,0.0019,"BP",2.72124639904717
+"Ceric.33G060000.1","GO:0000079","regulation of cyclin-dependent protein s...",14,1,0.01,0.0052,"BP",2.2839966563652
+"Ceric.33G060000.1","GO:0007264","small GTPase-mediated signal transductio...",92,1,0.03,0.0341,"BP",1.4672456210075
+"hubs","GO:0006470","protein dephosphorylation",124,1,0.02,0.015,"BP",1.82390874094432

@@ -1,0 +1,24 @@
+"query","GO.ID","Term","Annotated","Significant","Expected","p_value","source","logPval"
+"Ceric.02G031800.1","GO:0007018","microtubule-based movement",84,3,0.07,3.8e-05,"BP",4.42021640338319
+"Ceric.02G031800.1","GO:0042546","cell wall biogenesis",35,1,0.03,0.03,"BP",1.52287874528034
+"Ceric.04G085600.1","GO:0045893","positive regulation of DNA-templated tra...",6,1,0.01,0.006,"BP",2.22184874961636
+"Ceric.10G068300.1","GO:0019290","siderophore biosynthetic process",38,1,0.01,0.0095,"BP",2.02227639471115
+"Ceric.10G068300.1","GO:0007264","small GTPase-mediated signal transductio...",92,1,0.02,0.0229,"BP",1.64016451766011
+"Ceric.10G068300.1","GO:0006886","intracellular protein transport",194,1,0.05,0.0481,"BP",1.31785492362617
+"Ceric.11G077600.1","GO:0032012","regulation of ARF protein signal transdu...",5,1,0.01,0.005,"BP",2.30102999566398
+"Ceric.11G077600.1","GO:0006886","intracellular protein transport",194,2,0.19,0.015,"BP",1.82390874094432
+"Ceric.11G077600.1","GO:0006486","protein glycosylation",37,1,0.04,0.037,"BP",1.431798275933
+"Ceric.11G077600.1","GO:0006418","tRNA aminoacylation for protein translat...",44,1,0.04,0.043,"BP",1.36653154442041
+"Ceric.11G077600.1","GO:0006096","glycolytic process",48,1,0.05,0.047,"BP",1.32790214206428
+"Ceric.20G064100.1","GO:0006556","S-adenosylmethionine biosynthetic proces...",5,1,0,0.0044,"BP",2.35654732351381
+"Ceric.20G064100.1","GO:0006559","L-phenylalanine catabolic process",8,1,0.01,0.007,"BP",2.15490195998574
+"Ceric.20G064100.1","GO:0006555","methionine metabolic process",12,1,0.01,0.0105,"BP",1.97881070093006
+"Ceric.20G064100.1","GO:0008152","metabolic process",5817,7,5.11,0.0345,"BP",1.46218090492673
+"Ceric.22G041500.1","GO:0006108","malate metabolic process",13,1,0.01,0.0065,"BP",2.18708664335714
+"Ceric.22G049900.1","GO:0019427","acetyl-CoA biosynthetic process from ace...",2,1,0,0.0015,"BP",2.82390874094432
+"Ceric.22G049900.1","GO:0006006","glucose metabolic process",21,1,0.02,0.0157,"BP",1.80410034759077
+"Ceric.22G049900.1","GO:0006508","proteolysis",353,2,0.27,0.0261,"BP",1.58335949266172
+"Ceric.29G050300.1","GO:0048193","Golgi vesicle transport",36,2,0.01,0.0048,"BP",2.31875876262441
+"Ceric.29G050300.1","GO:0006888","endoplasmic reticulum to Golgi vesicle-m...",17,1,0.01,0.0064,"BP",2.19382002601611
+"Ceric.29G050300.1","GO:0009765","photosynthesis, light harvesting",44,1,0.02,0.0165,"BP",1.78251605578609
+"hubs","GO:0006006","glucose metabolic process",21,1,0.01,0.0079,"BP",2.10237290870956

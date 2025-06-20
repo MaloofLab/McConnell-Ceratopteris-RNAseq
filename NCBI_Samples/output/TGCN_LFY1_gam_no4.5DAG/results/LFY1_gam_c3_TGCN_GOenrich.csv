@@ -1,0 +1,89 @@
+"query","GO.ID","Term","Annotated","Significant","Expected","p_value","source","logPval"
+"Ceric.02G031800.1","GO:0007018","microtubule-based movement",84,3,0.07,3.8e-05,"BP",4.42021640338319
+"Ceric.02G031800.1","GO:0042546","cell wall biogenesis",35,1,0.03,0.03,"BP",1.52287874528034
+"Ceric.03G020800.1","GO:0030091","protein repair",7,1,0.01,0.0061,"BP",2.21467016498923
+"Ceric.03G020800.1","GO:0006241","CTP biosynthetic process",8,1,0.01,0.007,"BP",2.15490195998574
+"Ceric.03G020800.1","GO:0006183","GTP biosynthetic process",8,1,0.01,0.007,"BP",2.15490195998574
+"Ceric.03G020800.1","GO:0006228","UTP biosynthetic process",8,1,0.01,0.007,"BP",2.15490195998574
+"Ceric.03G020800.1","GO:0019290","siderophore biosynthetic process",38,1,0.03,0.0329,"BP",1.48280410205003
+"Ceric.03G020800.1","GO:0000398","mRNA splicing, via spliceosome",38,1,0.03,0.0329,"BP",1.48280410205003
+"Ceric.03G020800.1","GO:0009664","plant-type cell wall organization",47,1,0.04,0.0406,"BP",1.39147396642281
+"Ceric.04G085600.1","GO:0045893","positive regulation of DNA-templated tra...",6,1,0.01,0.006,"BP",2.22184874961636
+"Ceric.04G105500.1","GO:0006873","intracellular monoatomic ion homeostasis",10,1,0.01,0.0063,"BP",2.20065945054642
+"Ceric.04G105500.1","GO:0009725","response to hormone",55,1,0.03,0.034,"BP",1.46852108295774
+"Ceric.07G045100.1","GO:0006913","nucleocytoplasmic transport",59,1,0.02,0.022,"BP",1.65757731917779
+"Ceric.07G045100.1","GO:0007264","small GTPase-mediated signal transductio...",92,1,0.03,0.034,"BP",1.46852108295774
+"Ceric.10G011000.1","GO:0031122","cytoplasmic microtubule organization",19,1,0.01,0.014,"BP",1.85387196432176
+"Ceric.10G011000.1","GO:0007020","microtubule nucleation",20,1,0.02,0.015,"BP",1.82390874094432
+"Ceric.10G011000.1","GO:0006413","translational initiation",31,1,0.02,0.023,"BP",1.63827216398241
+"Ceric.10G011000.1","GO:0006412","translation",449,3,0.34,0.025,"BP",1.60205999132796
+"Ceric.10G068300.1","GO:0019290","siderophore biosynthetic process",38,1,0.01,0.0095,"BP",2.02227639471115
+"Ceric.10G068300.1","GO:0007264","small GTPase-mediated signal transductio...",92,1,0.02,0.0229,"BP",1.64016451766011
+"Ceric.10G068300.1","GO:0006886","intracellular protein transport",194,1,0.05,0.0481,"BP",1.31785492362617
+"Ceric.11G077600.1","GO:0032012","regulation of ARF protein signal transdu...",5,1,0.01,0.005,"BP",2.30102999566398
+"Ceric.11G077600.1","GO:0006886","intracellular protein transport",194,2,0.19,0.015,"BP",1.82390874094432
+"Ceric.11G077600.1","GO:0006486","protein glycosylation",37,1,0.04,0.037,"BP",1.431798275933
+"Ceric.11G077600.1","GO:0006418","tRNA aminoacylation for protein translat...",44,1,0.04,0.043,"BP",1.36653154442041
+"Ceric.11G077600.1","GO:0006096","glycolytic process",48,1,0.05,0.047,"BP",1.32790214206428
+"Ceric.12G014800.1","GO:0006952","defense response",34,2,0.03,0.00037,"BP",3.431798275933
+"Ceric.12G014800.1","GO:0006749","glutathione metabolic process",8,1,0.01,0.00701,"BP",2.15428198203334
+"Ceric.12G014800.1","GO:0006075","(1->3)-beta-D-glucan biosynthetic proces...",16,1,0.01,0.01397,"BP",1.85480359388582
+"Ceric.12G095800.1","GO:0007096","regulation of exit from mitosis",1,1,0,0.00063,"BP",3.20065945054642
+"Ceric.12G095800.1","GO:0007018","microtubule-based movement",84,2,0.05,0.00107,"BP",2.97061622231479
+"Ceric.12G095800.1","GO:0046856","phosphatidylinositol dephosphorylation",16,1,0.01,0.01,"BP",2
+"Ceric.12G095800.1","GO:0006508","proteolysis",353,2,0.22,0.01789,"BP",1.74738965943263
+"Ceric.13G071000.1","GO:0009664","plant-type cell wall organization",47,2,0.05,0.0012,"BP",2.92081875395238
+"Ceric.13G071000.1","GO:0031122","cytoplasmic microtubule organization",19,1,0.02,0.0213,"BP",1.67162039656126
+"Ceric.13G071000.1","GO:0046274","lignin catabolic process",19,1,0.02,0.0213,"BP",1.67162039656126
+"Ceric.13G071000.1","GO:0007020","microtubule nucleation",20,1,0.02,0.0224,"BP",1.64975198166584
+"Ceric.13G071000.1","GO:0006334","nucleosome assembly",20,1,0.02,0.0224,"BP",1.64975198166584
+"Ceric.17G019100.1","GO:0006166","purine ribonucleoside salvage",2,1,0,0.0015,"BP",2.82390874094432
+"Ceric.17G019100.1","GO:0006850","mitochondrial pyruvate transmembrane tra...",3,1,0,0.0023,"BP",2.63827216398241
+"Ceric.17G019100.1","GO:0006352","DNA-templated transcription initiation",37,1,0.03,0.0275,"BP",1.56066730616974
+"Ceric.17G023000.1","GO:0006694","steroid biosynthetic process",27,1,0.01,0.0068,"BP",2.16749108729376
+"Ceric.17G023000.1","GO:0042545","cell wall modification",70,1,0.02,0.0175,"BP",1.75696195131371
+"Ceric.17G048700.1","GO:0042545","cell wall modification",70,3,0.11,0.00013,"BP",3.88605664769316
+"Ceric.17G048700.1","GO:0006542","glutamine biosynthetic process",6,1,0.01,0.009,"BP",2.04575749056068
+"Ceric.17G048700.1","GO:0006979","response to oxidative stress",110,2,0.17,0.01138,"BP",1.94385773794095
+"Ceric.17G048700.1","GO:0031122","cytoplasmic microtubule organization",19,1,0.03,0.02825,"BP",1.54898154784454
+"Ceric.17G048700.1","GO:0007020","microtubule nucleation",20,1,0.03,0.02971,"BP",1.52709734819634
+"Ceric.17G050800.1","GO:0006355","regulation of DNA-templated transcriptio...",607,2,0.3,0.031,"BP",1.50863830616573
+"Ceric.17G050800.1","GO:0006260","DNA replication",78,1,0.04,0.039,"BP",1.4089353929735
+"Ceric.17G050800.1","GO:0007049","cell cycle",100,1,0.05,0.049,"BP",1.30980391997149
+"Ceric.1Z138800.1","GO:0006334","nucleosome assembly",20,1,0.01,0.01,"BP",2
+"Ceric.1Z138800.1","GO:0010411","xyloglucan metabolic process",21,1,0.01,0.01,"BP",2
+"Ceric.1Z138800.1","GO:0042546","cell wall biogenesis",35,1,0.02,0.017,"BP",1.76955107862173
+"Ceric.1Z138800.1","GO:0042545","cell wall modification",70,1,0.04,0.035,"BP",1.45593195564972
+"Ceric.1Z139800.1","GO:0070588","calcium ion transmembrane transport",13,1,0.01,0.0097,"BP",2.01322826573376
+"Ceric.1Z139800.1","GO:0006950","response to stress",409,2,0.31,0.0343,"BP",1.46470587995723
+"Ceric.1Z211400.1","GO:0009408","response to heat",13,1,0.01,0.0065,"BP",2.18708664335714
+"Ceric.1Z211400.1","GO:0016485","protein processing",14,1,0.01,0.007,"BP",2.15490195998574
+"Ceric.1Z211400.1","GO:0007018","microtubule-based movement",84,1,0.04,0.0415,"BP",1.38195190328791
+"Ceric.20G064100.1","GO:0006556","S-adenosylmethionine biosynthetic proces...",5,1,0,0.0044,"BP",2.35654732351381
+"Ceric.20G064100.1","GO:0006559","L-phenylalanine catabolic process",8,1,0.01,0.007,"BP",2.15490195998574
+"Ceric.20G064100.1","GO:0006555","methionine metabolic process",12,1,0.01,0.0105,"BP",1.97881070093006
+"Ceric.20G064100.1","GO:0008152","metabolic process",5817,7,5.11,0.0345,"BP",1.46218090492673
+"Ceric.21G001400.1","GO:0006508","proteolysis",353,2,0.27,0.026,"BP",1.58502665202918
+"Ceric.21G001400.1","GO:0006096","glycolytic process",48,1,0.04,0.036,"BP",1.44369749923271
+"Ceric.22G041500.1","GO:0006108","malate metabolic process",13,1,0.01,0.0065,"BP",2.18708664335714
+"Ceric.22G049900.1","GO:0019427","acetyl-CoA biosynthetic process from ace...",2,1,0,0.0015,"BP",2.82390874094432
+"Ceric.22G049900.1","GO:0006006","glucose metabolic process",21,1,0.02,0.0157,"BP",1.80410034759077
+"Ceric.22G049900.1","GO:0006508","proteolysis",353,2,0.27,0.0261,"BP",1.58335949266172
+"Ceric.24G077200.1","GO:0046856","phosphatidylinositol dephosphorylation",16,1,0,0.004,"BP",2.39794000867204
+"Ceric.26G061600.1","GO:0007034","vacuolar transport",18,1,0,0.0045,"BP",2.34678748622466
+"Ceric.26G061600.1","GO:0006633","fatty acid biosynthetic process",86,1,0.02,0.0215,"BP",1.66756154008439
+"Ceric.29G023400.1","GO:0046856","phosphatidylinositol dephosphorylation",16,1,0.01,0.008,"BP",2.09691001300806
+"Ceric.29G023400.1","GO:0006855","xenobiotic transmembrane transport",28,1,0.01,0.014,"BP",1.85387196432176
+"Ceric.29G023400.1","GO:0009664","plant-type cell wall organization",47,1,0.02,0.023,"BP",1.63827216398241
+"Ceric.29G050300.1","GO:0048193","Golgi vesicle transport",36,2,0.01,0.0048,"BP",2.31875876262441
+"Ceric.29G050300.1","GO:0006888","endoplasmic reticulum to Golgi vesicle-m...",17,1,0.01,0.0064,"BP",2.19382002601611
+"Ceric.29G050300.1","GO:0009765","photosynthesis, light harvesting",44,1,0.02,0.0165,"BP",1.78251605578609
+"Ceric.29G082500.1","GO:0006556","S-adenosylmethionine biosynthetic proces...",5,1,0,0.0019,"BP",2.72124639904717
+"Ceric.30G028700.1","GO:0019310","inositol catabolic process",2,1,0,0.001,"BP",3
+"Ceric.35G028100.1","GO:0006486","protein glycosylation",37,1,0.01,0.014,"BP",1.85387196432176
+"Ceric.35G028100.1","GO:0042545","cell wall modification",70,1,0.03,0.026,"BP",1.58502665202918
+"Ceric.38G021900.1","GO:0001932","regulation of protein phosphorylation",21,2,0.01,6.6e-06,"BP",5.18045606445813
+"hubs","GO:0006873","intracellular monoatomic ion homeostasis",10,1,0.01,0.012,"BP",1.92081875395238
+"hubs","GO:0046856","phosphatidylinositol dephosphorylation",16,1,0.02,0.02,"BP",1.69897000433602
+"hubs","GO:0006006","glucose metabolic process",21,1,0.03,0.026,"BP",1.58502665202918
+"hubs","GO:0006855","xenobiotic transmembrane transport",28,1,0.04,0.035,"BP",1.45593195564972

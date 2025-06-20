@@ -1,0 +1,8 @@
+"query","GO.ID","Term","Annotated","Significant","Expected","p_value","source","logPval"
+"Ceric.02G081900.1","GO:0006508","proteolysis",375,3,0.4,0.0061,"BP",2.21467016498923
+"Ceric.02G081900.1","GO:0006486","protein glycosylation",37,1,0.04,0.039,"BP",1.4089353929735
+"Ceric.02G081900.1","GO:0008152","metabolic process",6118,9,6.55,0.0421,"BP",1.37571790416433
+"Ceric.33G031700.1","GO:0006355","regulation of DNA-templated transcriptio...",625,4,0.45,4e-04,"BP",3.39794000867204
+"Ceric.33G031700.1","GO:0032502","developmental process",36,2,0.03,0.003,"BP",2.52287874528034
+"Ceric.33G031700.1","GO:0007275","multicellular organism development",26,1,0.02,0.0184,"BP",1.73518217699046
+"hubs","GO:0006355","regulation of DNA-templated transcriptio...",625,1,0.07,0.074,"BP",1.13076828026902
