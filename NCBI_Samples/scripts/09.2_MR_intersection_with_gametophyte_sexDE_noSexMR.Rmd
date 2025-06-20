@@ -164,13 +164,16 @@ pl.df %>%
 pl.df <- deg.cor %>%
   left_join(module.assignment, by = c("geneID" = "geneID")) %>%
   mutate(module = ifelse(is.na(module), "none", module),
-         module = ifelse(module=="turquoise", "blue", "red")) %>%
+         module = ifelse(module=="turquoise", "turquoise", "grey95")) %>%
   select(geneID, module, everything()) %>%
-  arrange(desc(module))
+  arrange((module))
 
 pl.df %>%
   ggplot(aes(x = LFY1.MR, y = logFC)) +
-  geom_point(color = pl.df$module, alpha = 0.1) 
+  geom_point(color = pl.df$module, alpha = 0.3) + theme_minimal()
+```
+```{r}
+newdata <- read_csv("")
 ```
 
 ## Try to ID clusters
@@ -230,7 +233,9 @@ dbscan_result <- dbscan(scaled_data[, c("logFC", "LFY1.MR")], eps = 0.25, minPts
 deg.cor$dbscan_cluster <- as.factor(dbscan_result$cluster)
 
 # Create plots to compare the results
-plot1 <- ggplot(deg.cor, aes(x = LFY1.MR, y = logFC, color = dbscan_cluster)) +
+plot1 <- deg.cor %>% 
+  arrange(dbscan_cluster) %>%
+  ggplot(aes(x = LFY1.MR, y = logFC, color = dbscan_cluster)) +
   geom_point(alpha = 0.2) +
   scale_color_brewer(name = "Cl", type = "qual") +
   ggtitle(str_c("DBSCAN Clustering, border points, eps: 0.25")) +
@@ -239,10 +244,21 @@ plot1 <- ggplot(deg.cor, aes(x = LFY1.MR, y = logFC, color = dbscan_cluster)) +
 
 print(plot1)
 
+plot1.alt <- deg.cor %>% 
+  arrange(desc(dbscan_cluster)) %>%
+  ggplot(aes(x = LFY1.MR, y = logFC, color = dbscan_cluster)) +
+  geom_point(alpha = 0.2) +
+  scale_color_brewer(name = "Cl", type = "qual") +
+  ggtitle(str_c("DBSCAN Clustering, border points, eps: 0.25")) +
+  guides(color = guide_legend(override.aes = list(alpha = 1)))
+
+
+print(plot1.alt)
+
 hdbscan_result <- hdbscan(scaled_data[, c("logFC", "LFY1.MR")], minPts = 500)
 deg.cor$hdbscan_cluster <- as.factor(hdbscan_result$cluster)
 
-plot2 <- ggplot(deg.cor, aes(x = LFY1.MR, y = logFC, color = hdbscan_cluster)) +
+plot2 <- deg.cor %>% ggplot(aes(x = LFY1.MR, y = logFC, color = hdbscan_cluster)) +
   geom_point(alpha = 0.2) +
   #scale_color_discrete(name = "HDBSCAN Cluster") +
   ggtitle("HDBSCAN Clustering") +
@@ -261,7 +277,7 @@ deg.cor <- deg.cor %>%
   mutate(in_LFY1_cluster = dbscan_cluster == 2) %>%
   select(geneID, in_LFY1_cluster, everything(), -starts_with("LFY2"))
 
-write_csv(deg.cor, "../output/LFY1_gam_sex_cluster_noSexSamples.csv")
+write_csv(deg.cor, "../output/LFY1_gam_sex_cluster_noSexSamples.csv.gz")
 ```
 
 

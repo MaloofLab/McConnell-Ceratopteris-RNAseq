@@ -1,0 +1,20 @@
+GO.ID,Term,Annotated,Significant,Expected,p.value
+GO:0007018,microtubule-based movement,79,21,2.68,5.9e-13
+GO:0007017,microtubule-based process,156,34,5.29,1.2e-5
+GO:0031122,cytoplasmic microtubule organization,19,6,0.64,2.7e-5
+GO:0007020,microtubule nucleation,20,6,0.68,3.7e-5
+GO:0015914,phospholipid transport,15,3,0.51,0.013
+GO:0006813,potassium ion transport,44,6,1.49,0.021
+GO:0015743,malate transport,7,2,0.24,0.022
+GO:0042545,cell wall modification,50,5,1.7,0.026
+GO:0006241,CTP biosynthetic process,8,2,0.27,0.028
+GO:0006183,GTP biosynthetic process,8,2,0.27,0.028
+GO:0006002,fructose 6-phosphate metabolic process,8,2,0.27,0.028
+GO:0006228,UTP biosynthetic process,8,2,0.27,0.028
+GO:0045765,regulation of angiogenesis,1,1,0.03,0.034
+GO:0001539,cilium or flagellum-dependent cell motil...,1,1,0.03,0.034
+GO:0071929,alpha-tubulin acetylation,1,1,0.03,0.034
+GO:0009190,cyclic nucleotide biosynthetic process,1,1,0.03,0.034
+GO:0003341,cilium movement,1,1,0.03,0.034
+GO:0007096,regulation of exit from mitosis,1,1,0.03,0.034
+GO:0070588,calcium ion transmembrane transport,10,2,0.34,0.043
