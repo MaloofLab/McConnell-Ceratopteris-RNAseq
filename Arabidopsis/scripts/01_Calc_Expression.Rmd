@@ -138,7 +138,7 @@ unique(samples$sample_name)
 ```
 
 ## Read in cel files and normalize with rma
-```{r readcel, echo=FALSE,results='hide',eval=FALSE}
+```{r readcel}
 raw1 <- ReadAffy(filenames = rownames(samples),
                 celfile.path = here("Arabidopsis", "input", "datasets", "ME00319_Schmid"),
                 phenoData = samples)
@@ -183,7 +183,7 @@ unique(samples.2$sample_name)
 ```
 
 cel files were read in and normalized with rma
-```{r readcel set2, echo=FALSE,results='hide', message=FALSE,eval=FALSE}
+```{r readcel set2}
 raw2 <- ReadAffy(filenames = rownames(samples.2),
                   celfile.path = here("Arabidopsis", "input", "datasets", "ME00319_Schmid"),
                   phenoData = samples.2)
@@ -199,7 +199,7 @@ annotation.eset2.small <- annotation2[featureNames(eset2.small),] #reorder to ma
 featureNames(eset2.small) <- make.names(annotation.eset2.small$TAIR,unique=T)
 
 save(eset2.small, annotation2, annotation.eset2.small, 
-     file = here("Arabidopsis", "output", "eset2.small.RData"))
+     file = here("Arabidopsis", "output", "eset2.RData"))
 ```
 
 
@@ -244,7 +244,7 @@ eset3.small <- eset0.small[,pData(eset0.small)$sample %in% c("Col-0_flow12_petal
 
 annotation.eset3.small <- annotation.eset0.small[featureNames(eset3.small),] #reorder to match eset order
 
-save(eset3.small, annotation.eset3.small, file=here("Arabidopsis", "output", "eset3_319.RData"))
+save(eset3.small, annotation.eset3.small, file=here("Arabidopsis", "output", "eset3.RData"))
 
 as.character(unique(pData(eset3.small)$sample))
 ```

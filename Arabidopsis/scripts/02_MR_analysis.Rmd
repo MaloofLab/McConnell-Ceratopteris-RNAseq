@@ -1,0 +1,367 @@
+---
+title: "02 - Mutual Rank Analysis"
+author: "Julin Maloof"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+# Introduction
+
+Want to generate mutual rank (MR) for the ME00319 and ME00317 datasets.
+
+## Required Libraries
+
+```{r libraries}
+library(tidyverse)
+library(igraph)
+library(snowfall)
+library(knitr)
+library(GOstats)
+library(org.At.tair.db)
+library(pheatmap)
+library(here)
+```
+
+## Set Constants
+
+```{r constants}
+LFY <- "AT5G61850"  # LEAFY gene ID
+```
+
+## Load Known LFY Targets
+
+We'll use the same set of known LFY targets from Winter et al. 
+
+```{r load_targets}
+load(here("Arabidopsis", "input", "LFY_targets.RData"))
+```
+
+
+
+# Mutual Rank Analysis
+
+## Helper Functions for MR Analysis
+
+```{r mr_functions}
+# Function to calculate mutual ranks
+calc_mr <- function(expression_data) {
+  # Calculate pairwise correlations
+  gene.cor <- cor(t(expression_data))
+  
+  # Initialize parallel processing if needed
+  sfInit(parallel = TRUE, cpus = min(4, parallel::detectCores() - 1))
+  
+  # Rank correlations for each gene
+  gene.rank <- sfApply(gene.cor, 2, function(x) rank(-abs(x)))
+  
+  # Calculate mutual rank as geometric mean of ranks
+  gene.mr <- sqrt(gene.rank * t(gene.rank))
+  
+  # Stop parallel processing
+  sfStop()
+  
+  return(list(cor = gene.cor, mr = gene.mr, rank=gene.rank))
+}
+
+# Function to extract subgraph at a specified MR cutoff
+get_mr_subgraph <- function(mr.cutoff, mr.matrix, annotation, neighborhood = LFY, order = 1) {
+  # Function to extract LFY graph at a specificed MR cutoff
+  gene.mr.tmp <- mr.matrix
+  gene.mr.tmp[abs(gene.mr.tmp) > mr.cutoff] <- 0
+  gene.mr.tmp[is.na(gene.mr.tmp)] <- 0 # important! otherwise vertices with NA edges are connected
+  
+  gene.graph <- graph.adjacency(adjmatrix = gene.mr.tmp,
+                                mode = "undirected",
+                                weighted = "mr",
+                                diag = FALSE)
+  
+  sub.graph <- graph.neighborhood(gene.graph, order = order, nodes = neighborhood)[[1]]
+  
+  V(sub.graph)$color <- "lightblue"
+  V(sub.graph)[neighborhood]$color <- "red"
+  V(sub.graph)$gene <- annotation$SYMBOL[match(V(sub.graph)$name, annotation$TAIR)]
+  
+  list(cutoff = mr.cutoff, graph = sub.graph)
+}
+
+# Function to evaluate overlap with known targets
+target_overlap <- function(lfy_graph, targets, inf_targets, seedling_targets) {
+  vnames <- V(lfy_graph$graph)$name
+  
+  # Some IDs may contain dots, so we split them
+  vnames <- unlist(strsplit(vnames, split = ".", fixed = TRUE))
+  
+  c(LFY_nodes = length(vnames) - 1,
+    Known_Inf_targets = length(inf_targets) - 1,
+    Known_Seedling_targets = length(seedling_targets),
+    Known_targets = length(targets) - 1,
+    Intersection = length(intersect(vnames, targets)) - 1,
+    PercentNetworkIsKnownInfTarget = 100 * ((length(intersect(vnames, inf_targets)) - 1) / (length(vnames) - 1)),
+    PercentNetworkIsKnownSeedlingTarget = 100 * ((length(intersect(vnames, seedling_targets)) - 1) / (length(vnames) - 1)),
+    PercentNetworkIsKnownAnyTarget = 100 * ((length(intersect(vnames, targets)) - 1) / (length(vnames) - 1)),
+    PercentKnownInfTargetsInNetwork = 100 * ((length(intersect(vnames, inf_targets)) - 1) / (length(inf_targets) - 1)),
+    PercentKnownSeedlingTargetsInNetwork = 100 * ((length(intersect(vnames, seedling_targets)) - 1) / (length(seedling_targets))))
+}
+
+# Function to perform GO enrichment analysis
+GO_enrichment <- function(lfy_graph, universe) {
+  # Extract gene names from graph
+  vnames <- V(lfy_graph$graph)$name
+  vnames <- unlist(strsplit(vnames, split = ".", fixed = TRUE))
+  
+  # Remove LFY itself
+  vnames <- setdiff(vnames, LFY)
+  
+  # Create GOHyperGParams object
+  params <- new("GOHyperGParams",
+                geneIds = vnames,
+                universeGeneIds = universe,
+                annotation = "org.At.tair.db",
+                ontology = "BP",
+                pvalueCutoff = 0.01,
+                conditional = FALSE,
+                testDirection = "over")
+  
+  # Perform hypergeometric test
+  hyper_test <- tryCatch({
+    hyperGTest(params)
+  }, error = function(e) {
+    message("GO enrichment failed: ", e$message)
+    return(NULL)
+  })
+  
+  # If successful, format the results
+  if (!is.null(hyper_test)) {
+    go_table <- summary(hyper_test)
+    go_table <- go_table[order(go_table$Pvalue), ]
+    return(go_table[1:min(10, nrow(go_table)), ])
+  } else {
+    return(NULL)
+  }
+}
+```
+
+## Analyze Data Subsets
+
+```{r analyze_function}
+# Create a consolidated function for analyzing any subset
+analyze_subset <- function(eset_data, subset_name) {
+  # retreive expression data
+  exp.norm <- exprs(eset_data)
+  
+  # Calculate mutual ranks
+  mr.results <- calc_mr(exp.norm)
+  gene.mr <- mr.results$mr
+  
+  # Get LFY networks at different MR thresholds
+  cutoffs <- c(10, 20, 30, 50, 80, 100, 130, 210)
+  lfy.mr.graphs <- lapply(cutoffs, get_mr_subgraph, mr.matrix = gene.mr, 
+                          annotation = annotation, neighborhood = LFY)
+  names(lfy.mr.graphs) <- sapply(lfy.mr.graphs, function(x) paste("lfy.mr.graph", x$cutoff, sep = "."))
+  
+  # Compare to known targets
+  overlap.summary <- lapply(lfy.mr.graphs, target_overlap, 
+                           targets = targets, inf.targets = inf_targets, 
+                           seedling.targets = seedling_targets)
+  overlap.summary <- do.call(cbind, overlap.summary)
+  colnames(overlap.summary) <- names(lfy.mr.graphs)
+  
+  # GO enrichment for each network
+  go.results <- list()
+  for (i in seq_along(lfy.mr.graphs)) {
+    # Create universe of gene IDs
+    universe <- rownames(exp.norm)
+    universe <- unique(unlist(strsplit(universe, ".", fixed = TRUE)))
+    
+    go.results[[names(lfy.mr.graphs)[i]]] <- GO_enrichment(lfy.mr.graphs[[i]], universe)
+  }
+  
+  # Display results
+  cat(paste0("\n## Results for ", subset_name, "\n"))
+  
+  # Display overlap summary
+  print(kable(t(overlap.summary), 
+        caption = paste0("Overlap of MR networks with known LFY targets (", subset_name, ")")))
+  
+  # Display GO enrichment for MR = 80
+  cat(paste0("\nGO Enrichment for MR = 80 (", subset_name, "):\n"))
+  
+  if (!is.null(go.results$lfy.mr.graph.80) && nrow(go.results$lfy.mr.graph.80) > 0) {
+    print(kable(go.results$lfy.mr.graph.80, 
+          caption = paste0("GO Enrichment for MR = 80 network (", subset_name, ")")))
+  } else {
+    cat("No significant GO enrichment found.\n")
+  }
+  
+  # Return results
+  return(list(graphs = lfy.mr.graphs, 
+              overlap = overlap.summary, 
+              go.enrichment = go.results,
+              cutoffs = cutoffs))
+}
+```
+
+## Load Data Subsets
+
+```{r load_subsets}
+load(here("Arabidopsis", "output", "eset0.Rdata"))
+
+load(here("Arabidopsis", "output", "eset1.RData"))
+
+load(here("Arabidopsis", "output", "eset2.RData"))
+
+load(here("Arabidopsis", "output", "eset3.RData"))
+
+load(here("Arabidopsis", "output", "esetf.RData"))
+```
+
+
+## Apply Analysis to Each Subset
+
+```{r analyze_subsets}
+
+results <- tibble(name=ls(".GlobalEnv", pattern = "^eset")) %>%
+  mutate(result = map(name, ~ {
+    eset_name <- get(.x)
+    analyze_subset(eset_name, .x)
+  }, .progress = TRUE)) 
+```
+
+# Visualize MR Networks
+
+We'll visualize the network with the best enrichment for each subset.
+
+```{r visualize_networks, fig.width=10, fig.height=8}
+# Function to visualize network
+visualize_mr_network <- function(lfy_graph, title) {
+  plot(lfy_graph$graph, 
+       layout = layout_with_fr(lfy_graph$graph),
+       vertex.size = 8,
+       vertex.label = V(lfy_graph$graph)$gene,
+       vertex.label.cex = 0.7,
+       edge.width = 1/E(lfy_graph$graph)$mr * 5,
+       main = paste0(title, ", MR cutoff = ", lfy_graph$cutoff))
+}
+
+# Determine how many subsets we have
+subset.names <- names(subset.results)
+num.subsets <- length(subset.names)
+
+if (num.subsets > 0) {
+  # Arrange the plot layout based on number of subsets
+  par(mfrow = c(1, min(3, num.subsets)))
+  
+  # Visualize each available network
+  for (i in seq_along(subset.names)) {
+    subset.name <- subset.names[i]
+    display.name <- gsub("subset", "Subset ", subset.name)
+    
+    # Check if this subset has results and the MR=80 network
+    if (length(subset.results[[subset.name]]) > 0 && 
+        "lfy.mr.graph.80" %in% names(subset.results[[subset.name]]$graphs)) {
+      visualize_mr_network(subset.results[[subset.name]]$graphs$lfy.mr.graph.80, display.name)
+    }
+  }
+}
+```
+
+# Compare Results Across Subsets
+
+```{r compare_results}
+# Function to extract comparison metrics
+extract_comparison_metrics <- function(results_list, cutoff = 80) {
+  if (length(results_list) == 0) {
+    return(NULL)
+  }
+  
+  graph.name <- paste0("lfy.mr.graph.", cutoff)
+  overlap <- results_list$overlap[, graph.name]
+  
+  go.enrichment <- results_list$go.enrichment[[graph.name]]
+  if (!is.null(go.enrichment) && nrow(go.enrichment) > 0) {
+    top.go <- go.enrichment$Term[1]
+    top.go.pvalue <- go.enrichment$Pvalue[1]
+  } else {
+    top.go <- "None"
+    top.go.pvalue <- NA
+  }
+  
+  c(LFY_Nodes = overlap["LFY_nodes"],
+    Percent_Known_Targets = overlap["PercentNetworkIsKnownAnyTarget"],
+    Top_GO_Term = top.go,
+    Top_GO_Pvalue = top.go.pvalue)
+}
+
+# Get list of subset names and create comparison table
+subset.names <- names(subset.results)
+display.names <- gsub("subset", "Subset ", subset.names)
+
+# Initialize comparison table with the right dimensions
+comparison.table <- data.frame(
+  Subset = display.names,
+  LFY_Nodes = NA,
+  Percent_Known_Targets = NA,
+  Top_GO_Term = NA,
+  Top_GO_Pvalue = NA,
+  stringsAsFactors = FALSE
+)
+
+# Fill in the comparison table
+for (i in seq_along(subset.names)) {
+  subset.name <- subset.names[i]
+  
+  # Extract metrics if results are available
+  if (length(subset.results[[subset.name]]) > 0) {
+    metrics <- extract_comparison_metrics(subset.results[[subset.name]])
+    if (!is.null(metrics)) {
+      comparison.table$LFY_Nodes[i] <- metrics["LFY_Nodes"]
+      comparison.table$Percent_Known_Targets[i] <- metrics["Percent_Known_Targets"]
+      comparison.table$Top_GO_Term[i] <- metrics["Top_GO_Term"]
+      comparison.table$Top_GO_Pvalue[i] <- metrics["Top_GO_Pvalue"]
+    }
+  }
+}
+
+# Display comparison table
+kable(comparison.table, 
+      caption = "Comparison of MR = 80 Networks Across Subsets",
+      row.names = FALSE)
+```
+
+# Save Results
+
+```{r save_results}
+# Save all results
+all.results <- list(
+  subset.results = subset.results,
+  comparison = comparison.table
+)
+
+save(all.results, file = here("Arabidopsis", "output", "MR_ME00319_results.RData"))
+
+# Save individual subset results for easier access
+for (subset.name in names(subset.results)) {
+  if (length(subset.results[[subset.name]]) > 0) {
+    subset.data <- subset.results[[subset.name]]
+    save.file <- here("Arabidopsis", "output", paste0("MR_ME00319_", subset.name, ".RData"))
+    save(subset.data, file = save.file)
+  }
+}
+```
+
+# Conclusions
+
+This analysis applies the Mutual Rank (MR) approach to the three subsets of the AtGenExpress developmental series dataset (ME00319) that were previously analyzed using WGCNA and correlation methods.
+
+The results allow us to:
+
+1. Compare the performance of MR across different data subsets
+2. Determine which subset provides the most informative LFY network
+3. Validate whether the MR approach consistently outperforms other methods regardless of the dataset used
+4. Identify the optimal MR cutoff for each dataset
+
+The comparative analysis with known targets and GO enrichment provides insights into which subset and cutoff are most effective for identifying biologically relevant LFY gene regulatory networks.
