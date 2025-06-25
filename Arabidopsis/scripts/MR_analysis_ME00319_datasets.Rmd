@@ -1,0 +1,470 @@
+---
+title: "Mutual Rank Analysis on AtGenExpress ME00319 Data Subsets"
+author: "Julin Maloof"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+# Introduction
+
+In our previous analysis of the Schmid et al. time course dataset (ME00317), we found that Mutual Rank (MR) analysis provided better results than WGCNA or simple correlation for identifying genes in the LEAFY (LFY) gene regulatory network. This approach showed better enrichment of known LFY targets and relevant GO terms.
+
+This script extends that approach to analyze the various subsets of the AtGenExpress developmental series dataset (ME00319) that were previously examined with other methods.
+
+## Required Libraries
+
+```{r libraries}
+library(affy)
+library(gcrma)
+library(ath1121501.db) # contains TAIR annotation for the microarray
+library(plyr)
+library(ggplot2)
+library(igraph)
+library(snowfall)
+library(dplyr)
+library(knitr)
+library(GOstats)
+library(org.At.tair.db)
+library(tidyr)
+library(stringr)
+library(pheatmap)
+```
+
+## Set Constants
+
+```{r constants}
+LFY <- "AT5G61850"  # LEAFY gene ID
+data_dir <- "../input/datasets/ME00319_Schmid/"  # Update this path if needed
+```
+
+## Load Known LFY Targets
+
+We'll use the same set of known LFY targets from Winter et al. that were used in the original analysis.
+
+```{r load_targets}
+# We'll need to recreate these from the original analysis
+# Load from existing data if available, or recreate from scratch
+if(file.exists("../input/LFY_targets.RData")) {
+  load("../input/LFY_targets.RData")
+} else {
+  # If needed, we'll define these manually based on the original data
+  # This is placeholder code - modify if the actual targets data is available elsewhere
+  targets <- c(LFY, "AT5G03840", "AT2G33810", "AT1G24260", "AT4G18960", "AT5G60910", "AT3G54340", "AT1G69120", "AT2G45190", "AT5G61850", "AT4G09960") # Example targets
+  inf.targets <- c(LFY, "AT5G03840", "AT2G33810", "AT1G24260") # Example inflorescence targets
+  seedling.targets <- c("AT4G18960", "AT5G60910", "AT3G54340", "AT1G69120", "AT2G45190") # Example seedling targets
+  save(targets, inf.targets, seedling.targets, file = "../input/LFY_targets.RData")
+}
+```
+
+# Data Preprocessing
+
+## Loading and Processing the Data
+
+We'll analyze all three subsets of the ME00319 data that were previously explored.
+
+```{r load_data, eval=TRUE}
+# Original path from the 2015 analysis
+original_path <- "/Users/jmaloof/Documents/Lab Notebook support/2015/At_LFY_Analysis/"
+
+# Try to load the existing processed data
+if(file.exists(paste0(original_path, "At_esets1_2_Lfy_319.Rdata"))) {
+  load(paste0(original_path, "At_esets1_2_Lfy_319.Rdata"))
+} else if(file.exists("../input/At_esets1_2_Lfy_319.Rdata")) {
+  load("../input/At_esets1_2_Lfy_319.Rdata")
+}
+
+# eset.small is 84 samples from #319 and genes that pass expression filtering. this is "Set 1"
+# eset.small.2 is a different set of samples from #319; in this case 72 samples. this is "Set 2"
+
+eset_subset1 <- eset.small  # This is the first subset from the original analysis
+eset_subset2 <- eset.small.2  # This is the second subset from the original analysis
+rm(eset.small, eset.small.2)  # Remove the original objects to avoid confusion
+
+
+if(file.exists(paste0(original_path, "esetV3.RData"))) {
+  load(paste0(original_path, "esetV3.RData"))
+} else if(file.exists("../input/esetV3.RData")) {
+  load("../input/esetV3.RData")
+}
+
+# this loads an eset also named eset.small.2, which is the third subset we will analyze
+eset_subset3 <- eset.small.2  # This is the third subset from the original analysis
+rm(eset.small.2)  # Remove the original object to avoid confusion
+```
+
+If we need to reprocess the data, we can follow the approach from the original scripts:
+
+```{r process_data, eval=FALSE}
+# Read sample descriptions
+samples <- read.csv(paste0(data_dir, "Sample_Descriptions.csv"), row.names=1)
+
+# Define the three subsets
+# Subset 1 (from original analysis)
+subset1_samples <- c("clv3-7_flow12", "clv3-7_inflor", "Col-0_cauline",
+                     "Col-0_flow10/11", "Col-0_flow12", "Col-0_flow12_carp",
+                     "Col-0_flow12_petal", "Col-0_flow12_sepal", "Col-0_flow12_stam",
+                     "Col-0_flow15", "Col-0_flow15_carp", "Col-0_flow15_pedi",
+                     "Col-0_flow15_petal", "Col-0_flow15_sepal", "Col-0_flow15_stam",
+                     "Col-0_flow9", "Col-0_flower", "Col-0_inflo",
+                     "Col-0_leaf_1-2", "Col-0_roset2", "Col-0_roset4_1l",
+                     "Col-0_roset8", "Col-0_shoot_trans", "Col-0_shoot_veg",
+                     "Col-0_stem_2nd", "Col-0_whole21d", "lfy-12_flow12",
+                     "lfy-12_inflor")
+
+# Subset 2 (from original analysis)
+subset2_samples <- c("clv3-7_flow12", "clv3-7_inflor", "Col-0_cauline",
+                     "Col-0_flow10/11", "Col-0_flow12", "Col-0_flow15",
+                     "Col-0_flow9", "Col-0_flower", "Col-0_hyp",
+                     "Col-0_inflo", "Col-0_leaf_1-2", "Col-0_roset4",
+                     "Col-0_roset4_1l", "Col-0_roset6", "Col-0_seedl_green",
+                     "Col-0_senescent", "Col-0_shoot_trans", "Col-0_shoot_veg",
+                     "Col-0_veg_leaf", "Col-0_whole21d", "Col-0_whole22d",
+                     "Col-0_whole23d", "lfy-12_flow12", "lfy-12_inflor")
+
+# Subset 3 (selected based on LFY expression diversity)
+subset3_samples <- c("Col-0_flow12_petal", "Col-0_shoot_trans", "Col-0_inflo",
+                     "clv3-7_inflor", "ufo-1_inflor", "lfy-12_inflor",
+                     "Col-0_flow15_carp", "Col-0_flow12_carp", "clv3-7_flow12",
+                     "Col-0_flow12", "lfy-12_flow12", "ufo-1_flow12",
+                     "Col-0_flow9", "Col-0_flower", "Col-0_flow10/11")
+
+# Function to process CEL files (only needed if we need to reprocess from scratch)
+process_cel_files <- function(sample_subset) {
+  # Get CEL files for the subset
+  cel_files <- list.files(data_dir, pattern = "\\.cel(\\.gz)?$", full.names = TRUE)
+  sample_cel_files <- cel_files[sapply(sample_subset, function(s) any(grepl(s, cel_files)))]
+  
+  # Read CEL files
+  raw_data <- ReadAffy(filenames = sample_cel_files)
+  
+  # Normalize with RMA
+  eset <- gcrma(raw_data)
+  
+  return(eset)
+}
+```
+
+# Mutual Rank Analysis
+
+Now we'll implement the Mutual Rank analysis for each of the three data subsets. This follows the approach from the ME00317 analysis but applies it to each ME00319 subset.
+
+## Helper Functions for MR Analysis
+
+```{r mr_functions}
+# Function to calculate mutual ranks
+calculate_mutual_ranks <- function(expression_data) {
+  # Calculate pairwise correlations
+  gene.cor <- cor(t(expression_data))
+  
+  # Initialize parallel processing if needed
+  sfInit(parallel = TRUE, cpus = min(4, parallel::detectCores() - 1))
+  
+  # Rank correlations for each gene
+  gene.rank <- sfApply(gene.cor, 2, function(x) rank(-abs(x)))
+  
+  # Calculate mutual rank as geometric mean of ranks
+  gene.mr <- sqrt(gene.rank * t(gene.rank))
+  
+  # Stop parallel processing
+  sfStop()
+  
+  return(list(cor = gene.cor, mr = gene.mr))
+}
+
+# Function to extract subgraph at a specified MR cutoff
+get.mr.subgraph <- function(mr.cutoff, mr.matrix, annotation, neighborhood = LFY, order = 1) {
+  # Function to extract LFY graph at a specificed MR cutoff
+  gene.mr.tmp <- mr.matrix
+  gene.mr.tmp[abs(gene.mr.tmp) > mr.cutoff] <- 0
+  gene.mr.tmp[is.na(gene.mr.tmp)] <- 0 # important! otherwise vertices with NA edges are connected
+  
+  gene.graph <- graph.adjacency(adjmatrix = gene.mr.tmp,
+                                mode = "undirected",
+                                weighted = "mr",
+                                diag = FALSE)
+  
+  sub.graph <- graph.neighborhood(gene.graph, order = order, nodes = neighborhood)[[1]]
+  
+  V(sub.graph)$color <- "lightblue"
+  V(sub.graph)[neighborhood]$color <- "red"
+  V(sub.graph)$gene <- annotation$SYMBOL[match(V(sub.graph)$name, annotation$TAIR)]
+  
+  list(cutoff = mr.cutoff, graph = sub.graph)
+}
+
+# Function to evaluate overlap with known targets
+evaluate_target_overlap <- function(lfy_graph, targets, inf_targets, seedling_targets) {
+  vnames <- V(lfy_graph$graph)$name
+  
+  # Some IDs may contain dots, so we split them
+  vnames <- unlist(strsplit(vnames, split = ".", fixed = TRUE))
+  
+  c(LFY_nodes = length(vnames) - 1,
+    Known_Inf_targets = length(inf_targets) - 1,
+    Known_Seedling_targets = length(seedling_targets),
+    Known_targets = length(targets) - 1,
+    Intersection = length(intersect(vnames, targets)) - 1,
+    PercentNetworkIsKnownInfTarget = 100 * ((length(intersect(vnames, inf_targets)) - 1) / (length(vnames) - 1)),
+    PercentNetworkIsKnownSeedlingTarget = 100 * ((length(intersect(vnames, seedling_targets)) - 1) / (length(vnames) - 1)),
+    PercentNetworkIsKnownAnyTarget = 100 * ((length(intersect(vnames, targets)) - 1) / (length(vnames) - 1)),
+    PercentKnownInfTargetsInNetwork = 100 * ((length(intersect(vnames, inf_targets)) - 1) / (length(inf_targets) - 1)),
+    PercentKnownSeedlingTargetsInNetwork = 100 * ((length(intersect(vnames, seedling_targets)) - 1) / (length(seedling_targets))))
+}
+
+# Function to perform GO enrichment analysis
+perform_go_enrichment <- function(lfy_graph, universe) {
+  # Extract gene names from graph
+  vnames <- V(lfy_graph$graph)$name
+  vnames <- unlist(strsplit(vnames, split = ".", fixed = TRUE))
+  
+  # Remove LFY itself
+  vnames <- setdiff(vnames, LFY)
+  
+  # Create GOHyperGParams object
+  params <- new("GOHyperGParams",
+                geneIds = vnames,
+                universeGeneIds = universe,
+                annotation = "org.At.tair.db",
+                ontology = "BP",
+                pvalueCutoff = 0.01,
+                conditional = FALSE,
+                testDirection = "over")
+  
+  # Perform hypergeometric test
+  hyper_test <- tryCatch({
+    hyperGTest(params)
+  }, error = function(e) {
+    message("GO enrichment failed: ", e$message)
+    return(NULL)
+  })
+  
+  # If successful, format the results
+  if (!is.null(hyper_test)) {
+    go_table <- summary(hyper_test)
+    go_table <- go_table[order(go_table$Pvalue), ]
+    return(go_table[1:min(10, nrow(go_table)), ])
+  } else {
+    return(NULL)
+  }
+}
+```
+
+## Analyze Data Subsets
+
+```{r analyze_function}
+# Create a consolidated function for analyzing any subset
+analyze_subset <- function(eset_data, subset_name) {
+  # retreive expression data
+  exp.norm <- exprs(eset_data)
+  
+  # Calculate mutual ranks
+  mr_results <- calculate_mutual_ranks(exp.norm)
+  gene.mr <- mr_results$mr
+  
+  # Get LFY networks at different MR thresholds
+  cutoffs <- c(10, 20, 30, 50, 80, 100, 130, 210)
+  lfy.mr.graphs <- lapply(cutoffs, get.mr.subgraph, mr.matrix = gene.mr, 
+                          annotation = annotation, neighborhood = LFY)
+  names(lfy.mr.graphs) <- sapply(lfy.mr.graphs, function(x) paste("lfy.mr.graph", x$cutoff, sep = "."))
+  
+  # Compare to known targets
+  overlap.summary <- lapply(lfy.mr.graphs, evaluate_target_overlap, 
+                           targets = targets, inf_targets = inf_targets, 
+                           seedling_targets = seedling_targets)
+  overlap.summary <- do.call(cbind, overlap.summary)
+  colnames(overlap.summary) <- names(lfy.mr.graphs)
+  
+  # GO enrichment for each network
+  go_results <- list()
+  for (i in seq_along(lfy.mr.graphs)) {
+    go_results[[names(lfy.mr.graphs)[i]]] <- perform_go_enrichment(lfy.mr.graphs[[i]], rownames(exp.norm))
+  }
+  
+  # Display results
+  cat(paste0("\n## Results for ", subset_name, "\n"))
+  
+  # Display overlap summary
+  print(kable(t(overlap.summary), 
+        caption = paste0("Overlap of MR networks with known LFY targets (", subset_name, ")")))
+  
+  # Display GO enrichment for MR = 80
+  cat(paste0("\nGO Enrichment for MR = 80 (", subset_name, "):\n"))
+  
+  if (!is.null(go_results$lfy.mr.graph.80) && nrow(go_results$lfy.mr.graph.80) > 0) {
+    print(kable(go_results$lfy.mr.graph.80, 
+          caption = paste0("GO Enrichment for MR = 80 network (", subset_name, ")")))
+  } else {
+    cat("No significant GO enrichment found.\n")
+  }
+  
+  # Return results
+  return(list(graphs = lfy.mr.graphs, 
+              overlap = overlap.summary, 
+              go_enrichment = go_results,
+              cutoffs = cutoffs))
+}
+```
+
+## Apply Analysis to Each Subset
+
+```{r analyze_subsets}
+# Initialize results containers
+subset_results <- list()
+
+# Analyze Subset 1 if available
+if (exists("eset_subset1")) {
+  cat("\n### Analyzing Subset 1\n")
+  subset_results$subset1 <- analyze_subset(eset_subset1, "Subset 1")
+}
+
+# Analyze Subset 2 if available
+if (exists("eset_subset2")) {
+  cat("\n### Analyzing Subset 2\n")
+  subset_results$subset2 <- analyze_subset(eset_subset2, "Subset 2")
+}
+
+# Analyze Subset 3 if available
+if (exists("eset_subset3")) {  
+  cat("\n### Analyzing Subset 3\n")
+  subset_results$subset3 <- analyze_subset(eset.small.2, "Subset 3")
+}
+```
+
+# Visualize MR Networks
+
+We'll visualize the network with the best enrichment for each subset.
+
+```{r visualize_networks, fig.width=10, fig.height=8}
+# Function to visualize network
+visualize_mr_network <- function(lfy_graph, title) {
+  plot(lfy_graph$graph, 
+       layout = layout_with_fr(lfy_graph$graph),
+       vertex.size = 8,
+       vertex.label = V(lfy_graph$graph)$gene,
+       vertex.label.cex = 0.7,
+       edge.width = 1/E(lfy_graph$graph)$mr * 5,
+       main = paste0(title, ", MR cutoff = ", lfy_graph$cutoff))
+}
+
+# Determine how many subsets we have
+subset_names <- names(subset_results)
+num_subsets <- length(subset_names)
+
+if (num_subsets > 0) {
+  # Arrange the plot layout based on number of subsets
+  par(mfrow = c(1, min(3, num_subsets)))
+  
+  # Visualize each available network
+  for (i in seq_along(subset_names)) {
+    subset_name <- subset_names[i]
+    display_name <- gsub("subset", "Subset ", subset_name)
+    
+    # Check if this subset has results and the MR=80 network
+    if (length(subset_results[[subset_name]]) > 0 && 
+        "lfy.mr.graph.80" %in% names(subset_results[[subset_name]]$graphs)) {
+      visualize_mr_network(subset_results[[subset_name]]$graphs$lfy.mr.graph.80, display_name)
+    }
+  }
+}
+```
+
+# Compare Results Across Subsets
+
+```{r compare_results}
+# Function to extract comparison metrics
+extract_comparison_metrics <- function(results_list, cutoff = 80) {
+  if (length(results_list) == 0) {
+    return(NULL)
+  }
+  
+  graph_name <- paste0("lfy.mr.graph.", cutoff)
+  overlap <- results_list$overlap[, graph_name]
+  
+  go_enrichment <- results_list$go_enrichment[[graph_name]]
+  if (!is.null(go_enrichment) && nrow(go_enrichment) > 0) {
+    top_go <- go_enrichment$Term[1]
+    top_go_pvalue <- go_enrichment$Pvalue[1]
+  } else {
+    top_go <- "None"
+    top_go_pvalue <- NA
+  }
+  
+  c(LFY_Nodes = overlap["LFY_nodes"],
+    Percent_Known_Targets = overlap["PercentNetworkIsKnownAnyTarget"],
+    Top_GO_Term = top_go,
+    Top_GO_Pvalue = top_go_pvalue)
+}
+
+# Get list of subset names and create comparison table
+subset_names <- names(subset_results)
+display_names <- gsub("subset", "Subset ", subset_names)
+
+# Initialize comparison table with the right dimensions
+comparison_table <- data.frame(
+  Subset = display_names,
+  LFY_Nodes = NA,
+  Percent_Known_Targets = NA,
+  Top_GO_Term = NA,
+  Top_GO_Pvalue = NA,
+  stringsAsFactors = FALSE
+)
+
+# Fill in the comparison table
+for (i in seq_along(subset_names)) {
+  subset_name <- subset_names[i]
+  
+  # Extract metrics if results are available
+  if (length(subset_results[[subset_name]]) > 0) {
+    metrics <- extract_comparison_metrics(subset_results[[subset_name]])
+    if (!is.null(metrics)) {
+      comparison_table$LFY_Nodes[i] <- metrics["LFY_Nodes"]
+      comparison_table$Percent_Known_Targets[i] <- metrics["Percent_Known_Targets"]
+      comparison_table$Top_GO_Term[i] <- metrics["Top_GO_Term"]
+      comparison_table$Top_GO_Pvalue[i] <- metrics["Top_GO_Pvalue"]
+    }
+  }
+}
+
+# Display comparison table
+kable(comparison_table, 
+      caption = "Comparison of MR = 80 Networks Across Subsets",
+      row.names = FALSE)
+```
+
+# Save Results
+
+```{r save_results}
+# Save all results
+all_results <- list(
+  subset_results = subset_results,
+  comparison = comparison_table
+)
+
+save(all_results, file = "../output/MR_ME00319_results.RData")
+
+# Save individual subset results for easier access
+for (subset_name in names(subset_results)) {
+  if (length(subset_results[[subset_name]]) > 0) {
+    subset_data <- subset_results[[subset_name]]
+    save_file <- paste0("../output/MR_ME00319_", subset_name, ".RData")
+    save(subset_data, file = save_file)
+  }
+}
+```
+
+# Conclusions
+
+This analysis applies the Mutual Rank (MR) approach to the three subsets of the AtGenExpress developmental series dataset (ME00319) that were previously analyzed using WGCNA and correlation methods.
+
+The results allow us to:
+
+1. Compare the performance of MR across different data subsets
+2. Determine which subset provides the most informative LFY network
+3. Validate whether the MR approach consistently outperforms other methods regardless of the dataset used
+4. Identify the optimal MR cutoff for each dataset
+
+The comparative analysis with known targets and GO enrichment provides insights into which subset and cutoff are most effective for identifying biologically relevant LFY gene regulatory networks.

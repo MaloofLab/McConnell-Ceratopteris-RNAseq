@@ -1,0 +1,353 @@
+# Calculate Gene expression
+
+This script is to generate expression data from the .cel files
+
+It will create several different expression datasets:
+
+### From Dataset 319 (Developmental Atlas):
+* 319 data sets
+  - All Samples
+  - Subset 1: 84 samples
+  - Subset 2: 72 samples
+  - Subset 3: 45 samples chosen to have a diversity of LFY expression levels
+
+I downloaded the Lohman, Schmidt, Weigel AtGenExpress developmenal microarray series described [here](https://www.arabidopsis.org/servlets/TairObject?type=hyb_descr_collection&id=1006710873).  Also see [the paper](http://www.nature.com/ng/journal/v37/n5/full/ng1543.html).  
+
+Samples were downloaded from the [TAIR ftp server](ftp://ftp.arabidopsis.org/home/tair/Microarrays/Datasets/ExpressionSet_ME00319/)
+
+### From Dataset 317 (Floral induction time series)
+
+In this data set, various genotypes are moved from SD to LD and samples are taken at 0, 3, 5, and 7 days after moving.  Essentially a time course of floral induction.
+
+I downloaded the Schmid et al microarray series described [here](https://www.arabidopsis.org/servlets/TairObject?type=expression_set&id=1006710827).  Also see [the paper](http://www.ncbi.nlm.nih.gov/pubmed/14573523?dopt=Abstract).  
+
+Samples were downloaded from the [TAIR ftp server](ftp://ftp.arabidopsis.org/home/tair/Microarrays/Datasets/ExpressionSet_ME00317/)
+
+```{r, echo=TRUE, message=FALSE}
+library(here)
+library(affy)
+#library(gcrma)
+library(ath1121501.db) #contains TAIR annotation for the microarray
+library(plyr)
+library(ggplot2)
+library(flashClust)
+LFY <- "AT5G61850"
+conflicted::conflicts_prefer(here::here)
+```
+
+# All samples from ME00319: (will refer to this as set 0)
+
+```{r sample_subset_full}
+samples <- read.csv(here("Arabidopsis", "input", "datasets", "ME00319_Schmid", "Sample_Descriptions.csv"), row.names=1)
+unique(samples$sample_name)
+```
+
+## read in cel files and normalized with rma
+```{r readcel_full}
+raw0 <- ReadAffy(filenames = paste0(rownames(samples),".gz"),
+                 celfile.path = here("Arabidopsis", "input", "datasets",
+                                     "ME00319_Schmid"),
+                phenoData = samples)
+raw0
+mas5.0 <- exprs(mas5calls(raw0))
+eset0 <- rma(raw0)
+eset0.small <- eset0[rowSums(mas5.0 == "P") > 15,] # require "detectable" expression in more than 15 samples
+dim(eset0.small)
+
+annotation0 <- select(ath1121501.db,keys = featureNames(eset0.small),columns = c("TAIR","SYMBOL","GENENAME"))
+
+summary(annotation0)
+head(annotation0)
+
+#need to deal with duplicates
+duplicated <- unique(annotation0$PROBEID[duplicated(annotation0$PROBEID)])
+
+reduced <- ldply(duplicated,function(x) {
+  tmp <- annotation0[annotation0$PROBEID==x,]
+  tmp[1,"TAIR"] <- paste(unique(na.omit(tmp$TAIR)),sep=".",collapse = ".")
+  tmp[1,"SYMBOL"] <- paste(unique(na.omit(tmp$SYMBOL)),sep=".",collapse = ".")
+  tmp[1,"GENENAME"] <- paste(unique(na.omit(tmp$GENENAME)),sep=".",collapse = ".")
+  tmp[1,]
+  })
+
+annotation0 <- annotation0[!annotation0$PROBEID %in% duplicated,]
+annotation0 <- rbind(annotation0,reduced)
+
+rownames(annotation0) <- annotation0$PROBEID
+
+annotation.eset0.small <- annotation0[featureNames(eset0.small),] #reoder to match eset order
+
+featureNames(eset0.small) <- make.names(annotation.eset0.small$TAIR,unique=T)
+```
+
+I have found that LFY is still expressed at pretty high levels in the _lfy-12_ mutant.  So I will manually adjust the lfy-12 expression level to be the minimum observed.
+
+```{r lfy_Adjust}
+
+gene.expression <- exprs(eset0.small)
+
+qplot(x=colnames(gene.expression),y=gene.expression[LFY,]) +
+  ggtitle("LFY expression") +
+  theme( axis.text.x  = element_text(angle=90, vjust=0.5, size=10)) +
+  xlab("sample") +
+  ylab("log2(LFY expression)")
+
+exprs(eset0.small)[LFY,grepl("lfy-12",samples[colnames(gene.expression),"genotype"])] <- min(exprs(eset0.small)[LFY,])
+
+gene.expression <- exprs(eset0.small)
+
+qplot(x=colnames(gene.expression),y=gene.expression[LFY,]) +
+  ggtitle("Modified LFY expression") +
+  theme( axis.text.x  = element_text(angle=90, vjust=0.5, size=10)) +
+  xlab("sample") +
+  ylab("log2(LFY expression)")
+```
+
+## check cluster sampling.  
+
+We use flashClust to do a quick clustering of samples and learn about the sample relationships.
+
+```{r clustersamples}
+exp.norm <- t(exprs(eset0.small))
+
+sampleTree <- flashClust(dist(exp.norm), method = "average");
+#pdf(file = "sampleClustering_mean_all.pdf", width = 20, height = 9);
+par(cex = 0.6);
+par(mar = c(0,4,2,0))
+plot(sampleTree, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5,cex.axis = 1.5, cex.main = 2)
+plot(sampleTree, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5,cex.axis = 1.5, cex.main = 2,labels=samples$sample_name)
+#dev.off()
+```
+
+## save the full set
+
+```{r save_full_set}
+save(eset0.small, annotation0, annotation.eset0.small, file=here("Arabidopsis", "output", "eset0.RData"))
+``` 
+
+# Subset 1: 84 samples
+
+
+## Choosing samples
+
+I subsetted the original data set to include 84 samples of `r 84/3` sample types.
+
+```{r sample_subset,comment=""}
+samples <- read.csv(here("Arabidopsis", "input", "datasets", "ME00319_Schmid", "Sample_Descriptions_Small.csv"), row.names=1)
+unique(samples$sample_name)
+```
+
+## Read in cel files and normalize with rma
+```{r readcel, echo=FALSE,results='hide',eval=FALSE}
+raw1 <- ReadAffy(filenames = rownames(samples),
+                celfile.path = here("Arabidopsis", "input", "datasets", "ME00319_Schmid"),
+                phenoData = samples)
+raw1
+mas5.1 <- exprs(mas5calls(raw1))
+eset1 <- rma(raw1)
+eset1.small <- eset1[rowSums(mas5.1 == "P") > 15,] # require "detectable" expression in more than 15 samples
+dim(eset1.small)
+
+
+annotation.1 <- select(ath1121501.db,keys = featureNames(eset1.small),columns = c("TAIR","SYMBOL","GENENAME"))
+
+#need to deal with duplicates
+duplicated <- unique(annotation.1$PROBEID[duplicated(annotation.1$PROBEID)])
+
+reduced <- ldply(duplicated,function(x) {
+  tmp <- annotation.1[annotation.1$PROBEID==x,]
+  tmp[1,"TAIR"] <- paste(unique(na.omit(tmp$TAIR)),sep=".",collapse = ".")
+  tmp[1,"SYMBOL"] <- paste(unique(na.omit(tmp$SYMBOL)),sep=".",collapse = ".")
+  tmp[1,"GENENAME"] <- paste(unique(na.omit(tmp$GENENAME)),sep=".",collapse = ".")
+  tmp[1,]
+  })
+
+annotation.1 <- annotation.1[!annotation.1$PROBEID %in% duplicated,]
+annotation.1 <- rbind(annotation.1,reduced)
+
+rownames(annotation.1) <- annotation.1$PROBEID
+
+annotation.eset1.small <- annotation.1[featureNames(eset1.small),] #reoder to match eset order
+
+featureNames(eset1.small) <- make.names(annotation.eset1.small$TAIR,unique=T)
+
+save(eset1.small, annotation.1, annotation.eset1.small, file=here("Arabidopsis", "output", "eset1.RData"))
+```
+
+# Subset 2: 72 samples
+
+Samples:
+```{r sample_subset set2}
+samples.2 <- read.csv(here("Arabidopsis", "input", "datasets", "ME00319_Schmid", "Sample_Descriptions_Small2.csv"), row.names=1)
+unique(samples.2$sample_name)
+```
+
+cel files were read in and normalized with rma
+```{r readcel set2, echo=FALSE,results='hide', message=FALSE,eval=FALSE}
+raw2 <- ReadAffy(filenames = rownames(samples.2),
+                  celfile.path = here("Arabidopsis", "input", "datasets", "ME00319_Schmid"),
+                  phenoData = samples.2)
+raw2
+mas5.2 <- exprs(mas5calls(raw2))
+eset2 <- rma(raw2)
+eset2.small <- eset2[rowSums(mas5.2 == "P") > 15,] # require "detectable" expression in more than 0 samples
+dim(eset2.small)
+
+annotation2 <- select(ath1121501.db,keys = featureNames(eset2.small),columns = c("TAIR","SYMBOL","GENENAME"))
+annotation.eset2.small <- annotation2[featureNames(eset2.small),] #reorder to match eset order
+
+featureNames(eset2.small) <- make.names(annotation.eset2.small$TAIR,unique=T)
+
+save(eset2.small, annotation2, annotation.eset2.small, 
+     file = here("Arabidopsis", "output", "eset2.small.RData"))
+```
+
+
+# Subset 3: LFY expression levels
+
+# Choosing samples
+
+Start with full sample set.  This requires running code in the first part of this script (eset0)
+
+Take a look at _LFY_ transcript levels across these samples.
+
+```{r plot_lfy}
+lfy.exp <- exp.norm[sampleTree$order,LFY]
+lfy.names <- factor(make.names(samples$sample_name[sampleTree$order],unique=TRUE),
+                    levels = make.names(samples$sample_name[sampleTree$order],unique=TRUE))
+qplot(lfy.names,y=lfy.exp) + theme(axis.text.x  = element_text(angle=90, vjust=0.5, size=6))
+ggsave(here("Arabidopsis", "output", "lfyexp.pdf"), width=14, height=8)
+
+lfy.names <- factor(samples$sample_name[sampleTree$order],
+                    levels = unique(samples$sample_name[sampleTree$order]))
+qplot(lfy.names,y=lfy.exp) + theme(axis.text.x  = element_text(angle=90, vjust=0.5, size=6))
+ggsave(here("Arabidopsis", "output", "lfyexpv2.pdf"), width=10.5, height=8)
+```
+
+Based on the plots above, select the following:
+```{r choose_samples}
+eset3.small <- eset0.small[,pData(eset0.small)$sample %in% c("Col-0_flow12_petal",
+                                         "Col-0_shoot_trans",
+                                         "Col-0_inflo",
+                                         "clv3-7_inflor",
+                                         "ufo-1_inflor",
+                                         "lfy-12_inflor",
+                                         "Col-0_flow15_carp",
+                                         "Col-0_flow12_carp",
+                                         "clv3-7_flow12",
+                                         "Col-0_flow12",
+                                         "lfy-12_flow12",
+                                         "ufo-1_flow12",
+                                         "Col-0_flow9",
+                                         "Col-0_flower",
+                                         "Col-0_flow10/11")]
+
+annotation.eset3.small <- annotation.eset0.small[featureNames(eset3.small),] #reorder to match eset order
+
+save(eset3.small, annotation.eset3.small, file=here("Arabidopsis", "output", "eset3_319.RData"))
+
+as.character(unique(pData(eset3.small)$sample))
+```
+
+# Dataset 317: Floral induction time series
+
+```{r generate_sample_description, eval=FALSE, echo=FALSE}
+#only needs to be done once
+sample_description <- data.frame(file_name=dir(here("Arabidopsis", "input", "datasets", "ME00317_Schmid"), pattern="cel"),stringsAsFactors = FALSE)
+sample_description <- within(sample_description,{
+  sample_name=sub("_[0-9].cel.gz","",file_name)
+  genotype=sub("_[0-9]","",sample_name)
+  day=sub(".+_","",sample_name)
+  })
+sample_description
+write.csv(sample_description, file=here("Arabidopsis", "input", "datasets", "ME00317_Schmid", "sample_description.csv"), row.names=FALSE)
+```
+
+
+## Choosing samples
+
+I am starting with all samples in the experiment.  These are
+
+```{r sample_subset,comment="",echo=FALSE}
+samples <- read.csv(here("Arabidopsis", "input", "datasets", "ME00317_Schmid", "sample_description.csv"), row.names=1)
+unique(samples$sample_name)
+```
+
+## read in cel files and normalize with rma
+
+```{r readcel}
+rawf <- ReadAffy(filenames = rownames(samples),
+        celfile.path = here("Arabidopsis", "input", "datasets", "ME00317_Schmid"),
+        phenoData = samples,
+        compress = TRUE)
+rawf
+mas5f <- exprs(mas5calls(rawf))
+esetf <- rma(rawf)
+esetf.small <- esetf[rowSums(mas5f == "P") > 10,] # require "detectable" expression in more than 10 samples
+dim(esetf.small)
+```
+
+
+
+In addition I used the affy mas5 "presence/absence" calls to discard genes that were only present in 10 or fewer samples.  This resulted in keeping about 16,282 genes.
+
+Gene IDs were added from the TAIR database
+```{r IDs}
+annotationf <- select(ath1121501.db,keys = featureNames(esetf.small),columns = c("TAIR","SYMBOL","GENENAME"))
+
+summary(annotationf)
+head(annotationf)
+
+#need to deal with duplicates
+duplicated <- unique(annotationf$PROBEID[duplicated(annotationf$PROBEID)])
+
+reduced <- ldply(duplicated,function(x) {
+  tmp <- annotationf[annotationf$PROBEID==x,]
+  tmp[1,"TAIR"] <- paste(unique(na.omit(tmp$TAIR)),sep=".",collapse = ".")
+  tmp[1,"SYMBOL"] <- paste(unique(na.omit(tmp$SYMBOL)),sep=".",collapse = ".")
+  tmp[1,"GENENAME"] <- paste(unique(na.omit(tmp$GENENAME)),sep=".",collapse = ".")
+  tmp[1,]
+  })
+
+annotationf <- annotationf[!annotationf$PROBEID %in% duplicated,]
+annotationf <- rbind(annotationf,reduced)
+
+rownames(annotationf) <- annotationf$PROBEID
+
+annotation.esetf.small <- annotationf[featureNames(esetf.small),] #reoder to match eset order
+
+featureNames(esetf.small) <- make.names(annotation.esetf.small$TAIR,unique=T)
+```
+
+
+## Adjust lfy-1
+
+I realized that _lfy-12_ does not cause a reduction in _LFY_ transcript level and this could mess up the correlations/networks, so I will reassign the _LFY_ transcript level in _lfy-12_ mutants to the lowest observed _LFY_ level in any sample
+
+```{r print_expression, echo=FALSE}
+
+gene.expression <- exprs(esetf.small)
+
+qplot(x=colnames(gene.expression),y=gene.expression[LFY,]) +
+  ggtitle("LFY expression") +
+  theme( axis.text.x  = element_text(angle=90, vjust=0.5, size=10)) +
+  xlab("sample") +
+  ylab("log2(LFY expression)")
+
+exprs(esetf.small)[LFY,grepl("LFY12",samples[colnames(gene.expression),"genotype"])] <- min(exprs(esetf.small)[LFY,])
+
+gene.expression <- exprs(esetf.small)
+
+qplot(x=colnames(gene.expression),y=gene.expression[LFY,]) +
+  ggtitle("Modified LFY expression") +
+  theme( axis.text.x  = element_text(angle=90, vjust=0.5, size=10)) +
+  xlab("sample") +
+  ylab("log2(LFY expression)")
+
+```
+
+## save the 317 set
+
+```{r save_317_set}
+save(esetf.small, annotationf, annotation.esetf.small, file=here("Arabidopsis", "output", "esetf.RData"))
+```
