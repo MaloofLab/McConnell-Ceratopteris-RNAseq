@@ -148,30 +148,11 @@ eset1 <- rma(raw1)
 eset1.small <- eset1[rowSums(mas5.1 == "P") > 15,] # require "detectable" expression in more than 15 samples
 dim(eset1.small)
 
-
-annotation.1 <- select(ath1121501.db,keys = featureNames(eset1.small),columns = c("TAIR","SYMBOL","GENENAME"))
-
-#need to deal with duplicates
-duplicated <- unique(annotation.1$PROBEID[duplicated(annotation.1$PROBEID)])
-
-reduced <- ldply(duplicated,function(x) {
-  tmp <- annotation.1[annotation.1$PROBEID==x,]
-  tmp[1,"TAIR"] <- paste(unique(na.omit(tmp$TAIR)),sep=".",collapse = ".")
-  tmp[1,"SYMBOL"] <- paste(unique(na.omit(tmp$SYMBOL)),sep=".",collapse = ".")
-  tmp[1,"GENENAME"] <- paste(unique(na.omit(tmp$GENENAME)),sep=".",collapse = ".")
-  tmp[1,]
-  })
-
-annotation.1 <- annotation.1[!annotation.1$PROBEID %in% duplicated,]
-annotation.1 <- rbind(annotation.1,reduced)
-
-rownames(annotation.1) <- annotation.1$PROBEID
-
-annotation.eset1.small <- annotation.1[featureNames(eset1.small),] #reoder to match eset order
+annotation.eset1.small <- annotation0[featureNames(eset1.small),] #reoder to match eset order
 
 featureNames(eset1.small) <- make.names(annotation.eset1.small$TAIR,unique=T)
 
-save(eset1.small, annotation.1, annotation.eset1.small, file=here("Arabidopsis", "output", "eset1.RData"))
+save(eset1.small, annotation.eset1.small, file=here("Arabidopsis", "output", "eset1.RData"))
 ```
 
 # Subset 2: 72 samples
@@ -193,12 +174,11 @@ eset2 <- rma(raw2)
 eset2.small <- eset2[rowSums(mas5.2 == "P") > 15,] # require "detectable" expression in more than 0 samples
 dim(eset2.small)
 
-annotation2 <- select(ath1121501.db,keys = featureNames(eset2.small),columns = c("TAIR","SYMBOL","GENENAME"))
-annotation.eset2.small <- annotation2[featureNames(eset2.small),] #reorder to match eset order
+annotation.eset2.small <- annotation0[featureNames(eset2.small),] #reoder to match eset order
 
 featureNames(eset2.small) <- make.names(annotation.eset2.small$TAIR,unique=T)
 
-save(eset2.small, annotation2, annotation.eset2.small, 
+save(eset2.small, annotation.eset2.small, 
      file = here("Arabidopsis", "output", "eset2.RData"))
 ```
 
