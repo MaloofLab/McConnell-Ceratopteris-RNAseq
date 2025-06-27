@@ -34,13 +34,23 @@ LFY <- "AT5G61850"  # LEAFY gene ID
 
 ## Load Known LFY Targets
 
-We'll use the same set of known LFY targets from Winter et al. 
-
+These are targets from Winters et al.
 ```{r load_targets}
 load(here("Arabidopsis", "input", "LFY_targets.RData"))
 ```
 
+Load _a priori_ targets from Hannah
 
+```{r load_hannah_targets}
+apriori.targets <- read_csv(here("Arabidopsis", "input", "LFY GRN candidates.csv"), name_repair = "universal") %>% 
+mutate(Gene.name = ifelse(Gene.name == "*", AGI, Gene.name),
+        AGI = toupper(AGI),
+        Cr.match = Cr.ID,
+        Cr.ID = str_extract(Cr.match, "Ceric\\.[0-9]{2}G[0-9]{6}\\.[0-9]")) %>% 
+        dplyr::select(everything(), Cr.match)
+
+apriori.targets %>% print(n=100)
+```
 
 # Mutual Rank Analysis
 
@@ -48,25 +58,133 @@ load(here("Arabidopsis", "input", "LFY_targets.RData"))
 
 ```{r mr_functions}
 # Function to calculate mutual ranks
-calc_mr <- function(expression_data) {
+calc_mr <- function(eset, outfile, LFYonly = TRUE) {
+  # There isn't enough memory on my laptop to return the full resutls on multiple sets,
+  # so we save the results to a file if outfile is provided and give an option to return
+  # only LFY-related results.
+
+  eset <- exprs(eset)  # Extract expression data
+
+ # eset <- eset[c(match(c(LFY, apriori.targets$AGI), rownames(eset)),  1:100),] # For testing, use only LFY, a priori candidates, and first 100 genes
+
   # Calculate pairwise correlations
-  gene.cor <- cor(t(expression_data))
-  
-  # Initialize parallel processing if needed
-  sfInit(parallel = TRUE, cpus = min(4, parallel::detectCores() - 1))
+  gene.cor <- cor(t(eset))
+
+  diag(gene.cor) <- 0
   
   # Rank correlations for each gene
-  gene.rank <- sfApply(gene.cor, 2, function(x) rank(-abs(x)))
+  gene.rank <- apply(gene.cor, 2, function(x) rank(-abs(x)))
   
   # Calculate mutual rank as geometric mean of ranks
   gene.mr <- sqrt(gene.rank * t(gene.rank))
-  
-  # Stop parallel processing
-  sfStop()
-  
-  return(list(cor = gene.cor, mr = gene.mr, rank=gene.rank))
-}
 
+  if(!is.null(outfile)) {
+    saveRDS(list(cor = gene.cor, mr = gene.mr, rank = gene.rank), file = outfile)
+  }
+
+  if(LFYonly) {
+    # extract LFY columns
+    lfy.cor <- gene.cor[, LFY]
+    lfy.rank <- gene.rank[, LFY]
+    lfy.mr <- gene.mr[, LFY]
+    return(tibble(AGI=names(lfy.cor), lfy.cor, lfy.rank, lfy.mr))
+  } else {
+    return(list(cor = gene.cor, rank = gene.rank, mr = gene.mr))
+  }
+}
+```
+
+
+
+## Load Data Subsets
+
+```{r load_subsets}
+load(here("Arabidopsis", "output", "eset0.Rdata"))
+
+load(here("Arabidopsis", "output", "eset1.RData"))
+
+load(here("Arabidopsis", "output", "eset2.RData"))
+
+load(here("Arabidopsis", "output", "eset3.RData"))
+
+load(here("Arabidopsis", "output", "esetf.RData"))
+```
+
+
+## Get MR for each subset
+
+```{r analyze_subsets}
+
+Vsize <- mem.maxVSize()
+
+mem.maxVSize(max(Vsize, 32000)) 
+
+results <- tibble(name=ls(".GlobalEnv", pattern = "^eset.\\.")) %>%
+  mutate(MR = map(name, ~ {
+    calc_mr(get(.x),
+    outfile = here("Arabidopsis", "output", paste0(tools::file_path_sans_ext(.x), "_MR.RData")))
+  }, 
+  .progress = TRUE)) 
+
+saveRDS(results, file = here("Arabidopsis", "output", "MR_LFY_results.Rds"))
+
+mem.maxVSize(Vsize) # return to original memory size
+```
+
+```{r calculate_distance}
+results <- results %>% 
+  mutate(target.distance = map(MR, inner_join, apriori.targets), 
+         set.size = nrow(MR))
+
+saveRDS(results, file = here("Arabidopsis", "output", "MR_LFY_results.Rds"))
+
+results %>% unnest(target.distance)
+```
+
+
+```{r summarize_distance}
+results %>% 
+  unnest(target.distance) %>% 
+  group_by(name) %>%
+  summarize(across(starts_with("lfy"),
+    .fns = list(
+      mean = \(x) mean(abs(x), na.rm=TRUE),
+      median = \(x) median(abs(x), na.na.rm = TRUE)
+      )))
+
+```
+
+```{r plot_distance}
+results %>% unnest(target.distance) %>% 
+  pivot_longer(starts_with("lfy"), values_to = "score", names_to = "metric") %>% 
+  ggplot(aes(x=Gene.name, y = score, fill = name)) +
+  geom_col(position = "dodge") +
+  facet_wrap(~metric, ncol=1, scales = "free_y") +
+  scale_fill_brewer(type="qual", palette = 3)
+```
+
+
+focus on the 3 best ones
+```{r plot_distance}
+results %>% 
+  filter(str_detect(name, "2|3|f")) %>%
+  unnest(target.distance) %>% 
+  pivot_longer(starts_with("lfy"), values_to = "score", names_to = "metric") %>% 
+  ggplot(aes(x=Gene.name, y = score, fill = name)) +
+  geom_col(position = "dodge") +
+  facet_wrap(~metric, ncol=1, scales = "free_y") +
+  scale_fill_brewer(type="qual", palette = 3)
+```
+
+
+NOTE: MAYBE I SHOULD REDO THIS WITHOUT THE LFY-12 MUTANT?
+
+I AM HERE
+
+
+# Unused Functions
+
+```{r}
 # Function to extract subgraph at a specified MR cutoff
 get_mr_subgraph <- function(mr.cutoff, mr.matrix, annotation, neighborhood = LFY, order = 1) {
   # Function to extract LFY graph at a specificed MR cutoff
@@ -145,9 +263,10 @@ GO_enrichment <- function(lfy_graph, universe) {
 }
 ```
 
-## Analyze Data Subsets
+# Analyze Data Subsets
 
-```{r analyze_function}
+DON'T USE THIS
+```{r analyze_function, eval=FALSE}
 # Create a consolidated function for analyzing any subset
 analyze_subset <- function(eset_data, subset_name) {
   # retreive expression data
@@ -205,37 +324,11 @@ analyze_subset <- function(eset_data, subset_name) {
 }
 ```
 
-## Load Data Subsets
-
-```{r load_subsets}
-load(here("Arabidopsis", "output", "eset0.Rdata"))
-
-load(here("Arabidopsis", "output", "eset1.RData"))
-
-load(here("Arabidopsis", "output", "eset2.RData"))
-
-load(here("Arabidopsis", "output", "eset3.RData"))
-
-load(here("Arabidopsis", "output", "esetf.RData"))
-```
-
-
-## Apply Analysis to Each Subset
-
-```{r analyze_subsets}
-
-results <- tibble(name=ls(".GlobalEnv", pattern = "^eset")) %>%
-  mutate(result = map(name, ~ {
-    eset_name <- get(.x)
-    analyze_subset(eset_name, .x)
-  }, .progress = TRUE)) 
-```
-
 # Visualize MR Networks
 
 We'll visualize the network with the best enrichment for each subset.
 
-```{r visualize_networks, fig.width=10, fig.height=8}
+```{r visualize_networks, fig.width=10, fig.height=8, eval = FALSE}
 # Function to visualize network
 visualize_mr_network <- function(lfy_graph, title) {
   plot(lfy_graph$graph, 
@@ -271,7 +364,7 @@ if (num.subsets > 0) {
 
 # Compare Results Across Subsets
 
-```{r compare_results}
+```{r compare_results, eval = FALSE}
 # Function to extract comparison metrics
 extract_comparison_metrics <- function(results_list, cutoff = 80) {
   if (length(results_list) == 0) {
@@ -334,7 +427,7 @@ kable(comparison.table,
 
 # Save Results
 
-```{r save_results}
+```{r save_results, eval = FALSE}
 # Save all results
 all.results <- list(
   subset.results = subset.results,
@@ -352,16 +445,3 @@ for (subset.name in names(subset.results)) {
   }
 }
 ```
-
-# Conclusions
-
-This analysis applies the Mutual Rank (MR) approach to the three subsets of the AtGenExpress developmental series dataset (ME00319) that were previously analyzed using WGCNA and correlation methods.
-
-The results allow us to:
-
-1. Compare the performance of MR across different data subsets
-2. Determine which subset provides the most informative LFY network
-3. Validate whether the MR approach consistently outperforms other methods regardless of the dataset used
-4. Identify the optimal MR cutoff for each dataset
-
-The comparative analysis with known targets and GO enrichment provides insights into which subset and cutoff are most effective for identifying biologically relevant LFY gene regulatory networks.

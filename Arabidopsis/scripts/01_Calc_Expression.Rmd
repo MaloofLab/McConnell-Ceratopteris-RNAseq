@@ -38,16 +38,17 @@ conflicted::conflicts_prefer(here::here)
 # All samples from ME00319: (will refer to this as set 0)
 
 ```{r sample_subset_full}
-samples <- read.csv(here("Arabidopsis", "input", "datasets", "ME00319_Schmid", "Sample_Descriptions.csv"), row.names=1)
-unique(samples$sample_name)
+samples.all <- read.csv(here("Arabidopsis", "input", "datasets", "ME00319_Schmid", "Sample_Descriptions.csv"), row.names=1)
+rownames(samples.all) <-  paste0(rownames(samples.all),".gz")
+unique(samples.all$sample_name)
 ```
 
 ## read in cel files and normalized with rma
 ```{r readcel_full}
-raw0 <- ReadAffy(filenames = paste0(rownames(samples),".gz"),
+raw0 <- ReadAffy(filenames = rownames(samples.all),
                  celfile.path = here("Arabidopsis", "input", "datasets",
                                      "ME00319_Schmid"),
-                phenoData = samples)
+                phenoData = samples.all)
 raw0
 mas5.0 <- exprs(mas5calls(raw0))
 eset0 <- rma(raw0)
@@ -82,7 +83,7 @@ featureNames(eset0.small) <- make.names(annotation.eset0.small$TAIR,unique=T)
 
 I have found that LFY is still expressed at pretty high levels in the _lfy-12_ mutant.  So I will manually adjust the lfy-12 expression level to be the minimum observed.
 
-```{r lfy_Adjust}
+```{r lfy_Adjust0}
 
 gene.expression <- exprs(eset0.small)
 
@@ -92,7 +93,7 @@ qplot(x=colnames(gene.expression),y=gene.expression[LFY,]) +
   xlab("sample") +
   ylab("log2(LFY expression)")
 
-exprs(eset0.small)[LFY,grepl("lfy-12",samples[colnames(gene.expression),"genotype"])] <- min(exprs(eset0.small)[LFY,])
+exprs(eset0.small)[LFY,grepl("lfy-12",samples.all[colnames(gene.expression),"genotype"])] <- min(exprs(eset0.small)[LFY,])
 
 gene.expression <- exprs(eset0.small)
 
@@ -115,7 +116,7 @@ sampleTree <- flashClust(dist(exp.norm), method = "average");
 par(cex = 0.6);
 par(mar = c(0,4,2,0))
 plot(sampleTree, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5,cex.axis = 1.5, cex.main = 2)
-plot(sampleTree, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5,cex.axis = 1.5, cex.main = 2,labels=samples$sample_name)
+plot(sampleTree, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5,cex.axis = 1.5, cex.main = 2,labels=samples.all$sample_name)
 #dev.off()
 ```
 
@@ -151,7 +152,30 @@ dim(eset1.small)
 annotation.eset1.small <- annotation0[featureNames(eset1.small),] #reoder to match eset order
 
 featureNames(eset1.small) <- make.names(annotation.eset1.small$TAIR,unique=T)
+```
 
+```{r lfy_Adjust1}
+
+gene.expression <- exprs(eset1.small)
+
+qplot(x=colnames(gene.expression),y=gene.expression[LFY,]) +
+  ggtitle("LFY expression") +
+  theme( axis.text.x  = element_text(angle=90, vjust=0.5, size=10)) +
+  xlab("sample") +
+  ylab("log2(LFY expression)")
+
+exprs(eset1.small)[LFY,grepl("lfy-12",samples[colnames(gene.expression),"genotype"])] <- min(exprs(eset1.small)[LFY,])
+
+gene.expression <- exprs(eset1.small)
+
+qplot(x=colnames(gene.expression),y=gene.expression[LFY,]) +
+  ggtitle("Modified LFY expression") +
+  theme( axis.text.x  = element_text(angle=90, vjust=0.5, size=10)) +
+  xlab("sample") +
+  ylab("log2(LFY expression)")
+```
+
+```{r save_set1}
 save(eset1.small, annotation.eset1.small, file=here("Arabidopsis", "output", "eset1.RData"))
 ```
 
@@ -177,7 +201,30 @@ dim(eset2.small)
 annotation.eset2.small <- annotation0[featureNames(eset2.small),] #reoder to match eset order
 
 featureNames(eset2.small) <- make.names(annotation.eset2.small$TAIR,unique=T)
+```
 
+```{r lfy_Adjust2}
+
+gene.expression <- exprs(eset2.small)
+
+qplot(x=colnames(gene.expression),y=gene.expression[LFY,]) +
+  ggtitle("LFY expression") +
+  theme( axis.text.x  = element_text(angle=90, vjust=0.5, size=10)) +
+  xlab("sample") +
+  ylab("log2(LFY expression)")
+
+exprs(eset2.small)[LFY,grepl("lfy-12",samples[colnames(gene.expression),"genotype"])] <- min(exprs(eset2.small)[LFY,])
+
+gene.expression <- exprs(eset2.small)
+
+qplot(x=colnames(gene.expression),y=gene.expression[LFY,]) +
+  ggtitle("Modified LFY expression") +
+  theme( axis.text.x  = element_text(angle=90, vjust=0.5, size=10)) +
+  xlab("sample") +
+  ylab("log2(LFY expression)")
+```
+
+```{r save set2}
 save(eset2.small, annotation.eset2.small, 
      file = here("Arabidopsis", "output", "eset2.RData"))
 ```
@@ -193,13 +240,13 @@ Take a look at _LFY_ transcript levels across these samples.
 
 ```{r plot_lfy}
 lfy.exp <- exp.norm[sampleTree$order,LFY]
-lfy.names <- factor(make.names(samples$sample_name[sampleTree$order],unique=TRUE),
-                    levels = make.names(samples$sample_name[sampleTree$order],unique=TRUE))
+lfy.names <- factor(make.names(samples.all$sample_name[sampleTree$order],unique=TRUE),
+                    levels = make.names(samples.all$sample_name[sampleTree$order],unique=TRUE))
 qplot(lfy.names,y=lfy.exp) + theme(axis.text.x  = element_text(angle=90, vjust=0.5, size=6))
 ggsave(here("Arabidopsis", "output", "lfyexp.pdf"), width=14, height=8)
 
-lfy.names <- factor(samples$sample_name[sampleTree$order],
-                    levels = unique(samples$sample_name[sampleTree$order]))
+lfy.names <- factor(samples.all$sample_name[sampleTree$order],
+                    levels = unique(samples.all$sample_name[sampleTree$order]))
 qplot(lfy.names,y=lfy.exp) + theme(axis.text.x  = element_text(angle=90, vjust=0.5, size=6))
 ggsave(here("Arabidopsis", "output", "lfyexpv2.pdf"), width=10.5, height=8)
 ```
