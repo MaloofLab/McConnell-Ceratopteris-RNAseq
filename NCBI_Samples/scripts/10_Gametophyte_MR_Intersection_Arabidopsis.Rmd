@@ -1,0 +1,63 @@
+---
+title: "10_MR_Intersections_with_Arabidopsis"
+author: "Julin Maloof"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+## load datasets
+
+Fern
+```{r}
+fern.mr <- read_csv("../../McConnell_Samples/output/DEG_ALL_WT_male_v_herm_LFY_CORRELATIONS_v2_noSexMR.csv.gz") %>%
+  mutate(geneID = str_remove(geneID, "\\.[0-9]$"))
+```
+
+Arabidopsis
+```{r}
+at.mr <- readRDS("../../Arabidopsis/output/MR_LFY_results.Rds")
+at.mr <- at.mr %>%
+  select(-MR) %>%
+  unnest(target.distance) %>%
+  mutate(Cr.ID = str_remove(Cr.ID, "\\.[0-9]$"))
+```
+
+## combine the data sets
+
+```{r}
+combined.mr <- at.mr %>% left_join(fern.mr, by = c("Cr.ID" = "geneID")) %>%
+  select(At.eset = name, Gene.name, Cr.ID, lfy.cor, LFY1.cor,  lfy.rank, LFY1.rank, lfy.mr, LFY1.MR)
+combined.mr
+```
+
+```{r}
+combined.mr %>% group_by(At.eset) %>%
+  summarize(cor.mr=cor(abs(lfy.mr), abs(LFY1.MR), use = "pairwise.complete.obs"))
+```
+
+
+```{r}
+combined.mr %>% group_by(At.eset) %>%
+  summarize(cor=cor(abs(lfy.cor), abs(LFY1.cor), use = "pairwise.complete.obs"))
+```
+```{r}
+combined.mr %>%
+  filter(At.eset == "esetf.small") %>%
+  arrange((lfy.mr + LFY1.MR)) %>%
+  select(At.eset, Gene.name, Cr.ID, lfy.mr, LFY1.MR, lfy.cor, LFY1.cor, lfy.rank, LFY1.rank)
+```
+
+```{r}
+combined.mr %>%
+  filter(At.eset == "eset3.small") %>%
+  arrange((lfy.mr + LFY1.MR)) %>%
+  select(At.eset, Gene.name, Cr.ID, lfy.mr, LFY1.MR, lfy.cor, LFY1.cor, lfy.rank, LFY1.rank)
+```
