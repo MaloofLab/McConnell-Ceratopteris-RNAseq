@@ -1,0 +1,46 @@
+---
+title: "Get LFY Promoters"
+output: html_notebook
+---
+
+Quick script to pull out upstream region from LFY promoters.
+```{r, message=FALSE}
+library(Biostrings)
+library(tidyverse)
+```
+
+```{r}
+LFY1 <- "Ceric.33G031700.v2.1"
+LFY2 <- "Ceric.18G076300.v2.1"  
+```
+
+
+load genome
+```{r}
+genome <- readDNAStringSet("~/Sequences/ref_genomes/C_richardii_v2.1/assembly/Crichardii_676_v2.0.fa.gz")
+genome <- genome[nchar(genome) >= 100000] # only keep reasonably size scaffolds
+```
+
+load gff
+```{r}
+gff <- rtracklayer::import.gff("~/Sequences/ref_genomes/C_richardii_v2.1/annotation/Crichardii_676_v2.1.gene.gff3.gz") 
+gff <- gff[gff$type=="mRNA" & gff$longest==1]
+lfy.gff <- gff[unlist(gff$Parent) %in% c(LFY1, LFY2)]
+lfy.gff
+```
+
+```{r}
+promoters <- flank(lfy.gff, 5000)
+```
+```{r}
+# Use the upstream region in promoters to pull out the sequences from the genome
+promoter.seqs <- genome[seqnames(promoters)] %>%
+  subseq(start=start(promoters), end = end(promoters)) %>%
+  reverseComplement() # because both genes are on the "-" strand
+```
+
+```{r}
+# Save the sequences to a fasta file
+writeXStringSet(promoter.seqs, "../output/LFY_promoters.fa")
+```
+
