@@ -30,6 +30,18 @@ sample.description <- sample.description %>%
   filter(!str_detect(group, "WT-male_gam|WT-mature_herm"))
 ```
 
+write the table back out for paper
+
+```{r}
+sample.description %>%
+  mutate(rep = str_sub(label.unique, nchar(label.unique)),
+         group = ifelse(str_detect(group, "^PRJ"), str_remove(group, "(-.*){1}$"), group)) %>%
+  select(-label.unique) %>%
+  rename(description=label) %>%
+  rename_with(str_to_title) %>%
+write_csv( "../output/sample.description.final.gametophyte.network.for.paper.csv")
+```
+
 
 load reads
 
