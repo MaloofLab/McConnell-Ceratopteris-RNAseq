@@ -147,7 +147,8 @@ head(genes.all)
 
 ## Heat maps
 
-```{r}
+Not mean centered
+```{r, fig.height = 6}
 genes.heatmap <- bind_rows( {
   genes.all %>% 
     filter(logFC > 0) %>% 
@@ -165,7 +166,9 @@ hm <- cpm(dge.data, log = TRUE) %>%
   column_to_rownames("geneID") %>%
   rename_with(\(x) str_remove(x, "WT-")) %>%
   as.matrix() %>%
-  heatmap.2(trace="none",col="bluered", Colv = FALSE, dendrogram = "row", mar=c(10,8))
+  heatmap.2(trace="none",
+            col=colorpanel(15, low="black", mid="#666610", high="#FFFF33"), 
+            Colv = FALSE, dendrogram = "row", mar=c(10,8))
   
 #dev.copy(png, filename = "../output/male_v_herm_heatmap.png", width=1200, height = 900)
 
@@ -176,6 +179,28 @@ genes.heatmap.reorder <- genes.heatmap[rev(match(colnames(hm$carpet),genes.heatm
 write_csv(genes.heatmap.reorder, "../output/male_v_herm_heatmap_genes_ordered.csv")
 ```
 
+Mean centered (but not scaled)
+
+```{r}
+
+
+hm.centered <- cpm(dge.data, log = TRUE) %>%
+  as_tibble(rownames = "geneID") %>%
+  semi_join(genes.heatmap) %>%
+  column_to_rownames("geneID") %>%
+  rename_with(\(x) str_remove(x, "WT-")) %>%
+  as.matrix() %>%
+  t() %>% scale(scale=FALSE) %>% t() %>% # mean-center each gene
+  heatmap.2(trace="none",col="bluered", Colv = FALSE, dendrogram = "row", mar=c(10,8))
+  
+#dev.copy(png, filename = "../output/male_v_herm_heatmap.png", width=1200, height = 900)
+
+dev.copy(png, filename = "../output/male_v_herm_heatmap_tall_centered.png", width=1200, height = 1800)
+
+genes.heatmap.reorder.centered <- genes.heatmap[rev(match(colnames(hm.centered$carpet),genes.heatmap$geneID)),]
+
+write_csv(genes.heatmap.reorder.centered, "../output/male_v_herm_heatmap_genes_ordered_centered.csv")
+```
 
 Add annotation
 
