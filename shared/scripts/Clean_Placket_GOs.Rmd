@@ -1,0 +1,111 @@
+---
+title: "Clean Placket GO terms"
+author: "Julin Maloof"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+Cr_GO <- readxl::read_excel("../input/Ceratopteris_ortholog_data_JM 1.xlsx", 
+                                   sheet = "Ceratopteris_inherited_GOterms",
+                                   .name_repair = "universal",
+                                   skip = 1)
+
+head(Cr_GO)
+
+Cr_GO_orig <- Cr_GO
+```
+get rid of extra spaces
+```{r}
+Cr_GO %>% filter(str_detect(All_GO, "  "))
+
+Cr_GO <- Cr_GO %>% 
+  mutate(All_GO = str_squish(All_GO))
+
+Cr_GO %>% filter(str_detect(All_GO, "  "))
+
+Cr_GO
+```
+
+
+remove leading and trailing ","
+```{r}
+Cr_GO %>% filter(str_detect(All_GO, "(^ ?,)|(, ?$)"))
+
+Cr_GO <- Cr_GO %>%
+  mutate(All_GO = str_remove(All_GO, "^(, ?)+"),
+         All_GO = str_remove(All_GO, "(, ?)+$"))
+
+Cr_GO %>% filter(str_detect(All_GO, "(^ ?,)|(, ?$)"))
+
+Cr_GO
+```
+
+Add missing commas
+```{r}
+Cr_GO %>% filter(str_detect(All_GO, "([0-9]) G"))
+
+Cr_GO <- Cr_GO %>%
+  mutate(All_GO = str_replace_all(All_GO, "([0-9]) G",  "\\1, G"))
+
+Cr_GO %>% filter(str_detect(All_GO, "([0-9]) G"))
+
+Cr_GO
+
+Cr_GO %>% filter(Cr_peptideName=="Ceric.01G020800.1.p")
+```
+
+remove duplicates
+
+```{r}
+dedup_row <- function(s,
+                      sep = ",",
+                      case_insensitive = TRUE,
+                      empty_to_na = TRUE) {
+  if (is.na(s) || str_trim(s) == "") {
+    return(if (empty_to_na) NA_character_ else "")
+  }
+
+  # split on comma (or other separator); allow optional whitespace around sep
+  parts <- str_split(s, pattern = paste0("\\s*", sep, "\\s*"))[[1]]
+  parts <- str_trim(parts)
+  parts <- parts[parts != ""]    # drop empty tokens
+
+  seen <- character()
+  out <- character()
+  for (p in parts) {
+    key <- if (case_insensitive) tolower(p) else p
+    if (!key %in% seen) {
+      seen <- c(seen, key)
+      out <- c(out, p)
+    }
+  }
+
+  paste(out, collapse = ", ")
+}
+```
+
+```{r}
+
+Cr_GO <- Cr_GO %>%
+  mutate(All_GO = map_chr(All_GO, ~ dedup_row(.x, sep = ",", case_insensitive = TRUE)))
+```
+
+merge them to compare
+```{r}
+Cr_combined <- full_join(Cr_GO_orig, Cr_GO, by = "Cr_peptideName", suffix = c(".orig", ".new"))
+Cr_combined %>% filter(All_GO.orig != All_GO.new)
+```
+```{r}
+write_csv(Cr_GO, "../input/Cr_GO_Plackett_clean.csv")
+```
+

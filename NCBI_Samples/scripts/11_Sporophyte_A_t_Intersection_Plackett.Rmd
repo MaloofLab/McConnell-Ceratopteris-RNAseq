@@ -15,9 +15,11 @@ library(tidyverse)
 
 # Using Andy Plackett's ortholog and developmental pathway info.
 
+[Plackett and Catoni](https://www.biorxiv.org/content/10.1101/2025.03.18.643782v1)
+
 ## There are at least three things to do with this:
 
-1) Look for enrichment of reproductive genes (sheet 1 for catgory and sheet 3 for Cr to At info)
+1) Look for enrichment of reproductive genes (sheet 1 for category and sheet 3 for Cr to At info)
 
 2) Update previous GO analysis with Andy's GO set
 

@@ -6,21 +6,30 @@ output: html_notebook
 ```{r}
 library(tidyverse)
 library(topGO)
-conflicted::conflicts_prefer(dplyr::select())
+conflicted::conflicts_prefer(dplyr::select(), dplyr::filter())
 #library(clusterProfiler)
 ```
 
-## for WGCNA with ALL samples
+Load GOs
 ```{r}
-load("../output/WGCNA_allSamples.Rdata")
-```
+GOs <- read_delim("../../shared/input/Crichardii_676_v2.1.annotation_info.txt")
 
-
-```{r}
-GOs <- read_delim("../input/Crichardii_676_v2.1.annotation_info.txt")
 head(GOs)
 tail(GOs)
 ```
+
+Plackett GOs
+```{r}
+# replace with cleaned Plackett GOs
+```
+
+
+Compare Placket and genome GO
+
+```{r}
+GOs %>% select(Cr_peptideName = peptideName, GO_genome=GO) %>% full_join(dplyr::rename(Cr_GO, GO_Plackett = All_GO))
+```
+
 
 how  do the gene IDs match up?
 ```{r}
@@ -64,17 +73,6 @@ getGO <- function(moduleID, module.assignment, ontology = "BP")  {
 ```
 
 
-```{r, message=FALSE}
-GOresults <- tibble(module=sort(unique(module.assignment$module))) %>%
-  mutate(GOtable = map(module, getGO, module.assignment)) %>%
-  unnest(cols=GOtable)
-
-write_csv(GOresults, file = "../output/WGCNA_allSamples_GO.csv")
-
-GOresults %>% group_by(module) %>% slice_min(p.value, n=3) %>% write_csv(file = "../output/WGCNA_allSamples_GO_top3.csv")
-
-GOresults
-```
 
 
 ## for WGCNA with SPOROPHYTE samples
@@ -156,6 +154,24 @@ GOresults <- tibble(module=sort(unique(module.assignment$module))) %>%
 write_csv(GOresults, file = "../output/WGCNA_gametophyteSamples_GO.csv")
 
 GOresults %>% group_by(module) %>% slice_min(p.value, n=3) %>% write_csv(file = "../output/WGCNA_gametophyteSamples_GO_top3.csv")
+
+GOresults
+```
+
+## for WGCNA with ALL samples
+```{r, eval=FALSE}
+load("../output/WGCNA_allSamples.Rdata")
+```
+
+
+```{r, eval=FALSE, message=FALSE}
+GOresults <- tibble(module=sort(unique(module.assignment$module))) %>%
+  mutate(GOtable = map(module, getGO, module.assignment)) %>%
+  unnest(cols=GOtable)
+
+write_csv(GOresults, file = "../output/WGCNA_allSamples_GO.csv")
+
+GOresults %>% group_by(module) %>% slice_min(p.value, n=3) %>% write_csv(file = "../output/WGCNA_allSamples_GO_top3.csv")
 
 GOresults
 ```

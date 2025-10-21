@@ -53,7 +53,7 @@ dim(lcpm)
 ```
 Get the GO info and convert to a list.
 ```{r}
-GOs <- read_delim("../input/Crichardii_676_v2.1.annotation_info.txt")
+GOs <- read_delim("../../shared/input/Crichardii_676_v2.1.annotation_info.txt")
 GOs <- GOs[match(rownames(lcpm), GOs$transcriptName),] %>% drop_na(transcriptName)
 gene2GO.list <- GOs %>% 
   select(transcriptName, GO) %>%

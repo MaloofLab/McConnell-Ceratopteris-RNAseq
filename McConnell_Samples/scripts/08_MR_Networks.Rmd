@@ -15,7 +15,7 @@ CrLFY2 <- "Ceric.18G076300.1"
 ```
 
 ```{r}
-annotation <- read_delim("../input/Crichardii_676_v2.1.annotation_info.txt")
+annotation <- read_delim("../../shared/input/Crichardii_676_v2.1.annotation_info.txt")
 ```
 
 
