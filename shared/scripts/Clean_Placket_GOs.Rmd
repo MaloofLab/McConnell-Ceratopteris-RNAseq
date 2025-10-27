@@ -107,5 +107,6 @@ Cr_combined %>% filter(All_GO.orig != All_GO.new)
 ```
 ```{r}
 write_csv(Cr_GO, "../input/Cr_GO_Plackett_clean.csv")
+write_tsv(Cr_GO, "../input/Cr_GO_Plackett_clean.tsv")
 ```
 
