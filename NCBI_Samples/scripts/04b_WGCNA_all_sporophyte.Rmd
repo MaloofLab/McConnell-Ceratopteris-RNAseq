@@ -242,12 +242,15 @@ sample.eigen.mean$label %>% sort
 ```
 
 ```{r, fig.height=7}
-MEs.m <- sample.eigen.mean %>% mutate(label=make.names(label, unique = TRUE)) %>% column_to_rownames("label") %>% select(starts_with("ME")) %>% as.matrix()
+MEs.m <- sample.eigen.mean %>% 
+  mutate(label=make.names(label, unique = TRUE)) %>% 
+  column_to_rownames("label") %>% 
+  select(starts_with("ME")) %>% as.matrix()
 heatmap.2(MEs.m, trace="none", cexRow= 0.6, col="bluered")
 ```
 
 
 ```{r}
-save(module.assignment, MEs, lcpm.filter, CrLFY1, CrLFY2, file="../output/WGCNA_sporophyte_all.Rdata")
+save(module.assignment, MEs, lcpm.filter, CrLFY1, CrLFY2, sample.eigen.mean, MEs.m, file="../output/WGCNA_sporophyte_all.Rdata")
 ```
 
