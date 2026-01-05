@@ -307,7 +307,7 @@ deg.cor %>%
   guides(color = guide_legend(override.aes = list(alpha = 1)))
 ```
 
-## GO enrichment
+## GO enrichment for LFY1 cluster
 
 ```{r}
 gene2GO.list <- deg.cor %>% 
@@ -336,7 +336,7 @@ GO.results
 write_csv(GO.results, file = "../output/LFY1_Sex_Cluster_GO_noSexSamples.csv")
 ```
 
-## Look for overlap with A.t. repro  genes
+## Look for overlap with A.t. repro  genes in all male vs hermaphrodite DEG
 
 load gene info
 
@@ -345,7 +345,7 @@ Cr_gene_info <- read_csv("../../shared/output/Cr_At_repro_Placket.csv")
 ```
 
 
-## Enrichment
+### Enrichment
 
 For each gene set (up or down), retain genes that are orthologs of A.t. vegetative or one of the reproductive sets and then do Fisher's exact.
 
@@ -384,6 +384,52 @@ fisher.results <- expand_grid(gene.category = colnames(Cr_gene_info)[-1:-2],
 
 ```{r}
 fisher.results %>%
+  # group_by(module) %>%
+  ungroup() %>%
+  filter(fisher.fdr < 0.05) %>%
+  arrange(module, fisher.fdr) %>%
+  select(module, gene.category, estimate, fisher.fdr, everything())
+```
+
+
+## Look for overlap with A.t. repro  genes in male vs hermaphrodite DEG LFY1 cluster
+
+### Enrichment
+
+For each gene set (up or down), retain genes that are orthologs of A.t. vegetative or one of the reproductive sets and then do Fisher's exact.
+
+```{r}
+Cr_gene_info_LFY1Cluster <- deg.cor %>% 
+  select(geneID, in_LFY1_cluster) %>%
+  inner_join(Cr_gene_info, by=c("geneID"="Crichardii")) %>%
+  select(-Athaliana)
+
+Cr_gene_info_LFY1Cluster
+
+
+```
+
+Is it ratio of each reproductive category to all others, or to vegetative specific?
+
+
+```{r}
+get.fisher <- function(category, module, t = Cr_gene_info_LFY1Cluster) {
+  fisher.test(get(category, t), get(module, t), alternative = "greater")
+}
+
+fisher.results.LFY1.cluster <- expand_grid(gene.category = colnames(Cr_gene_info)[-1:-2],
+                              module = "in_LFY1_cluster") %>%
+  mutate(fisher = map2(gene.category, module, get.fisher, Cr_gene_info_LFY1Cluster),
+         fisher.tidy = map(fisher, tidy)) %>%
+  unnest(fisher.tidy) %>%
+  rename(fisher.p.value = p.value) %>%
+    mutate(fisher.fdr = p.adjust(fisher.p.value, method = "fdr")) %>%
+  arrange(fisher.p.value)
+
+```
+
+```{r}
+fisher.results.LFY1.cluster %>%
   # group_by(module) %>%
   ungroup() %>%
   filter(fisher.fdr < 0.05) %>%
