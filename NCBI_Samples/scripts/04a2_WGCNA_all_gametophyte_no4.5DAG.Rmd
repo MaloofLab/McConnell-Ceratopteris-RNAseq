@@ -249,6 +249,6 @@ heatmap.2(MEs.m, trace="none", cexRow= 0.6, col="bluered")
 
 
 ```{r}
-save(module.assignment, MEs, lcpm.filter, CrLFY1, CrLFY2, file="../output/WGCNA_gametophyte_all_no4.5DAG.Rdata")
+save(module.assignment, MEs, lcpm.filter, CrLFY1, CrLFY2, sample.eigen.mean, MEs.m, file="../output/WGCNA_gametophyte_all_no4.5DAG.Rdata")
 ```
 

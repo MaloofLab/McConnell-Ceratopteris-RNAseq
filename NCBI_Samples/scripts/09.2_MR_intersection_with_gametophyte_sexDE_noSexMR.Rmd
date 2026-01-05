@@ -10,6 +10,7 @@ library(tidyverse)
 library(dbscan)    # Contains both DBSCAN and HDBSCAN implementations
 library(patchwork)   # For arranging multiple plots
 library(topGO)
+library(broom)
 conflicted::conflicts_prefer(dplyr::rename, dplyr::filter, dplyr::select)
 ```
 
@@ -184,9 +185,6 @@ pl.df %>%
   ggplot(aes(x = LFY1.MR, y = logFC)) +
   geom_point(color = pl.df$module, alpha = 0.3) + theme_minimal()
 ```
-```{r}
-newdata <- read_csv("")
-```
 
 ## Try to ID clusters
 
@@ -338,3 +336,57 @@ GO.results
 write_csv(GO.results, file = "../output/LFY1_Sex_Cluster_GO_noSexSamples.csv")
 ```
 
+## Look for overlap with A.t. repro  genes
+
+load gene info
+
+```{r}
+Cr_gene_info <- read_csv("../../shared/output/Cr_At_repro_Placket.csv")
+```
+
+
+## Enrichment
+
+For each gene set (up or down), retain genes that are orthologs of A.t. vegetative or one of the reproductive sets and then do Fisher's exact.
+
+```{r}
+Cr_gene_info_deg <- deg %>% 
+  select(geneID, logFC, FDR) %>%
+  inner_join(Cr_gene_info, by=c("geneID"="Crichardii")) %>%
+  select(-Athaliana) %>%
+  mutate(upHermaphrodite = FDR < 0.01 & logFC > 0,
+         upMale = FDR < 0.05 & logFC < 0) %>%
+  select(geneID, starts_with("up"), everything(), -FDR, -logFC)
+
+Cr_gene_info_deg
+
+
+```
+
+Is it ratio of each reproductive category to all others, or to vegetative specific?
+
+
+```{r}
+get.fisher <- function(category, module, t = Cr_gene_info_deg) {
+  fisher.test(get(category, t), get(module, t), alternative = "greater")
+}
+
+fisher.results <- expand_grid(gene.category = colnames(Cr_gene_info)[-1:-2],
+                              module = c("upMale", "upHermaphrodite")) %>%
+  mutate(fisher = map2(gene.category, module, get.fisher, Cr_gene_info_deg),
+         fisher.tidy = map(fisher, tidy)) %>%
+  unnest(fisher.tidy) %>%
+  rename(fisher.p.value = p.value) %>%
+    mutate(fisher.fdr = p.adjust(fisher.p.value, method = "fdr")) %>%
+  arrange(fisher.p.value)
+
+```
+
+```{r}
+fisher.results %>%
+  # group_by(module) %>%
+  ungroup() %>%
+  filter(fisher.fdr < 0.05) %>%
+  arrange(module, fisher.fdr) %>%
+  select(module, gene.category, estimate, fisher.fdr, everything())
+```

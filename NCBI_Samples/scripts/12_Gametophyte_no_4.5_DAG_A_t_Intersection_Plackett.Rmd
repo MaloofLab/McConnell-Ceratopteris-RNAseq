@@ -1,5 +1,5 @@
 ---
-title: "11_Sporophyte_A_t_Intersection_Plackett"
+title: "12_Sporophyte_A_t_Intersection_Plackett"
 author: "Julin Maloof"
 date: "`r Sys.Date()`"
 output: html_document
@@ -111,16 +111,12 @@ Cr_gene_info <- inner_join(At_gene_info, Cr_At_orthologs) %>%
 Cr_gene_info
 ```
 
-```{r}
-write_csv(Cr_gene_info, "../../shared/output/Cr_At_repro_Placket.csv")
-```
-
 
 
 ### Load WGCNA network
 
 ```{r}
-load("../output/WGCNA_sporophyte_all.Rdata")
+load("../output/WGCNA_gametophyte_all_no4.5DAG.Rdata")
 
 module.assignment <- module.assignment %>%
   mutate(Crichardii = str_remove(geneID, "\\.v2"))
@@ -239,7 +235,7 @@ fisher.pl <- fisher.results.plot %>%
   scale_y_discrete(limits = repro.order) +
   scale_fill_gradient2(low="blue", high = "red", mid = "white") +
   theme(axis.text.x = element_text(angle=90, hjust=1, vjust=0.5)) +
-  ggtitle("CrLFY1 & 2: Blue")
+  ggtitle("CrLFY1: Brown    CrLFY2: Black")
 
 fisher.pl
 ```

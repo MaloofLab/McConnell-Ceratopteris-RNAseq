@@ -1,0 +1,51 @@
+---
+title: "Compare Packett GOs"
+author: "Julin Maloof"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Goal: compare Packett GO annotation to original
+
+```{r}
+library(tidyverse)
+```
+
+Load GOs
+```{r}
+genome_GOs <- read_delim("../../shared/input/Crichardii_676_v2.1.annotation_info.txt") %>%
+  select(peptideName, GO_genome = GO)
+
+head(genome_GOs)
+tail(genome_GOs)
+dim(genome_GOs)
+```
+
+```{r}
+Plackett_GOs <- read_tsv("../../shared/input/Cr_GO_Plackett_clean.tsv") %>%
+  rename(peptideName = Cr_peptideName, GO_Plackett = All_GO)
+head(Plackett_GOs)
+dim(Plackett_GOs)
+```
+
+merge them
+```{r}
+GOs <- genome_GOs %>% full_join(Plackett_GOs)
+GOs
+```
+
+```{r}
+GOs %>%
+  summarize(across(starts_with("GO"), \(x) sum(is.na(x))))
+```
+
+```{r}
+GOs %>%
+  summarize(across(starts_with("GO"), \(x) mean(str_count(x,"GO"), na.rm=TRUE), .names = "{.col}_count"))
+```
+So these are not wildly different
+

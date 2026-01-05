@@ -1,0 +1,136 @@
+---
+title: "13_MR_GSEA_with_Plackett"
+output: html_notebook
+---
+
+Create a mutual rank network and intersect that with Andy's reproductive gene set
+
+```{r, message=FALSE}
+library(tidyverse)
+library(patchwork)   # For arranging multiple plots
+library(topGO)
+library(reticulate)
+py_require("scipy")
+library(fgsea)
+conflicted::conflicts_prefer(dplyr::rename, dplyr::filter, dplyr::select)
+```
+
+```{r}
+CrLFY1 <- "Ceric.33G031700.1" 
+
+CrLFY2 <- "Ceric.18G076300.1"
+```
+
+# Gametophyte
+load sample info
+```{r}
+sample.description <- read.csv("../output/sample.description.gametophyte.no4.5DAG.csv")
+```
+
+load reads
+
+```{r}
+lcpm <- read.csv("../output/gam_combined_log2cpm_no4.5DAG.csv.gz", row.names = 1, check.names = FALSE)
+
+lcpm <- lcpm[,sample.description$sample]
+rownames(lcpm) <- str_remove(rownames(lcpm), fixed(".v2"))
+head(lcpm)
+dim(lcpm)
+lcpmM <- as.matrix(lcpm)
+r_to_py(lcpmM)
+```
+
+
+```{python}
+import numpy as np
+from scipy.stats import rankdata
+
+C = np.absolute(np.corrcoef(r.lcpmM, rowvar=True))        # shape (n_genes, n_genes)
+np.fill_diagonal(C, 0.0)
+
+
+# 2. rank correlations for each gene (higher corr = smaller rank)
+#    here we rank by decreasing correlation, ignoring self-corr
+
+n = C.shape[0]
+ranks = np.zeros_like(C, dtype=float)
+
+
+for i in range(n):
+    # descending rank: biggest correlation -> rank 1
+    rank = rankdata(-C[:, i], method='average')
+    ranks[:, i] = rank
+    
+# 3. mutual rank: geometric mean of the two directional ranks
+#    MR_ij = sqrt(rank_i(j) * rank_j(i))
+MR = np.sqrt(ranks * ranks.T)
+```
+
+```{r}
+# Bring results back into R
+m.cor    <- py$C
+MR   <- py$MR
+
+dimnames(m.cor)  <- list(rownames(lcpm), rownames(lcpm))
+dimnames(MR) <- list(rownames(lcpm), rownames(lcpm))
+
+m.cor[1:10,1:10]
+MR[1:10,1:10]
+
+```
+
+
+Create LFY specific subsets of these tables
+```{r}
+cor.lfy <- m.cor[,c(CrLFY1, CrLFY2)] %>%
+  round(3) %>%
+  as_tibble(rownames = "geneID") %>%
+  rename(LFY1.cor = contains(CrLFY1), LFY2.cor = contains(CrLFY2))
+
+MR.lfy <- MR[,c(CrLFY1, CrLFY2)] %>%
+  as_tibble(rownames = "geneID") %>%
+  rename(LFY1.MR = contains(CrLFY1), LFY2.MR = contains(CrLFY2))
+```
+
+# GSEA
+
+## load Plackett data and arrange as needed for fgsea (A list with membership)
+
+```{r}
+Cr_gene_info <- read_csv("../../shared/output/Cr_At_repro_Placket.csv") %>%
+  select(-Athaliana, geneID=Crichardii, everything())
+Cr_gene_info
+```
+```{r}
+Cr_gene_info.list <-  lapply(names(Cr_gene_info)[-1], 
+                             function(nm) {
+                               Cr_gene_info$geneID[Cr_gene_info[[nm]]]
+                             })
+names(Cr_gene_info.list) <- names(Cr_gene_info)[-1]
+```
+
+
+## LFY1
+
+### MR
+
+get ordered list for lfy1 and lfy2
+```{r}
+MR.lfy1 <- MR.lfy %>% arrange(LFY1.MR) %>% pull(LFY1.MR, name = geneID)
+MR.lfy2 <- MR.lfy %>% arrange(LFY2.MR) %>% pull(LFY2.MR, name = geneID)
+```
+
+```{r}
+lfy1.gsea.res <- fgsea(Cr_gene_info.list, MR.lfy1, scoreType = "pos")
+lfy2.gsea.res <- fgsea(Cr_gene_info.list, MR.lfy2, scoreType = "pos")
+```
+```{r}
+lfy1.gsea.res %>% arrange(pval)
+```
+
+```{r}
+lfy2.gsea.res %>% arrange(pval)
+```
+
+
+
