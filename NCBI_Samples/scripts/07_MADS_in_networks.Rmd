@@ -11,6 +11,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(tidyverse)
+library(topGO)
+library(reticulate)
+py_require("scipy")
+library(fgsea)
+conflicted::conflicts_prefer(dplyr::rename, dplyr::filter, dplyr::select)
 ```
 
 
@@ -26,11 +31,31 @@ CrLFY2 <- "Ceric.18G076300"
 ```{r}
 MADS <- read_csv("../input/CrMADS_Carr.csv") # These are from Carr thesis
 ```
+
+```{r}
+MADS_new <- readxl::read_excel("../../shared/input/CrMADS_homologs_Crgenome-v2.1.xlsx") %>%
+  mutate(geneID = str_remove(Locus, "\\.1$")) %>%
+  select(geneID, everything())
+```
+
+```{r}
+MADS$geneID %in% MADS_new$geneID
+```
+
+All of the previous MADS are in this list
+
+Work with new list:
+
+```{r}
+MADS <- MADS_new %>% select(geneID, Result)
+```
+
+
 ## WGCNA
 
 ### gametophyte samples
 ```{r}
-load("../output/WGCNA_gametophyte_all.Rdata")
+load("../output/WGCNA_gametophyte_all_no4.5DAG.Rdata")
 gmodule.assignment <- module.assignment %>%
   mutate(geneID = str_remove(geneID, "\\.v2.*"))
 ```
@@ -41,7 +66,7 @@ table(gmodule.assignment$module)
 
 
 ```{r}
-MADS.gmodules <- gmodule.assignment %>% semi_join(MADS)
+MADS.gmodules <- gmodule.assignment %>% right_join(MADS)
 ```
 
 ```{r}
@@ -51,13 +76,16 @@ table(MADS.gmodules$module)
 ```{r}
 gmodule.assignment %>% filter(str_detect(geneID, CrLFY1))
 ```
+```{r}
+table(MADS.gmodules$module, MADS.gmodules$Result)
+```
 
 ```{r}
 gmodule.assignment %>% filter(str_detect(geneID, CrLFY2))
 ```
 
 ```{r}
-MADS.gmodules %>% filter(str_detect(module, "pink|turquoise"))
+MADS.gmodules %>% filter(str_detect(module, "black|brown"))
 ```
 
 Test for sig. enrichment
@@ -96,13 +124,15 @@ table(smodule.assignment$module)
 
 
 ```{r}
-MADS.smodules <- smodule.assignment %>% semi_join(MADS)
+MADS.smodules <- smodule.assignment %>% right_join(MADS)
 ```
 ```{r}
 table(MADS.smodules$module)
 ```
 
-
+```{r}
+table(MADS.smodules$module, MADS.smodules$Result)
+```
 
 ```{r}
 smodule.assignment %>% filter(str_detect(geneID, CrLFY1))
@@ -111,16 +141,27 @@ smodule.assignment %>% filter(str_detect(geneID, CrLFY1))
 smodule.assignment %>% filter(str_detect(geneID, CrLFY2))
 ```
 ```{r}
-MADS.smodules %>% filter(str_detect(module, "blue"))
+MADS.smodules %>% filter(str_detect(module, "^blue$"))
+```
+
+```{r}
+sfisherinput <- gmodule.assignment %>%
+  mutate(lfy1.module = str_detect(module, lfy1.gmodule),
+         lfy2.module = str_detect(module, lfy2.gmodule),
+         mads.gene=geneID %in% MADS$geneID,
+         mutate(across(-geneID, factor)))
 ```
 
 
+```{r}
+fisher.test(sfisherinput$lfy1.module, sfisherinput$mads.gene)
+```
 ## TGCN Gametophyte
 
 ### LFY1 Cutoff 6
 
 ```{r}
-read_csv("../output/TGCN_LFY1_gam/results/LFY1_gam_c6_TGCN.csv") %>% 
+read_csv("../output/TGCN_LFY1_gam_no4.5DAG/results/LFY1_gam_c6_TGCN.csv") %>% 
   mutate(geneID = str_remove(genes, "\\.[0-9]$")) %>%
   semi_join(MADS)
 ```
@@ -149,4 +190,543 @@ read_csv("../output/TGCN_LFY1_sp/results/LFY1_sp_c6_TGCN.csv") %>%
 read_csv("../output/TGCN_LFY2_sp/results/LFY2_sp_c5_TGCN.csv") %>%
   mutate(geneID = str_remove(genes, "\\.[0-9]$")) %>%
   semi_join(MADS)
+```
+
+## Mutual Rank Networks
+
+Create a mutual rank network and check for GSEA relative to MADS box
+
+### Gametophyte
+load sample info
+```{r}
+sample.description <- read.csv("../output/sample.description.gametophyte.no4.5DAG.csv")
+```
+
+load read counts
+
+```{r}
+lcpm <- read.csv("../output/gam_combined_log2cpm_no4.5DAG.csv.gz", row.names = 1, check.names = FALSE)
+
+lcpm <- lcpm[,sample.description$sample]
+rownames(lcpm) <- str_remove(rownames(lcpm), "\\.v2\\..")
+head(lcpm)
+dim(lcpm)
+lcpmM <- as.matrix(lcpm)
+
+lfy_idx <- c(which(rownames(lcpm) == CrLFY1), which(rownames(lcpm) == CrLFY2)) 
+
+r_to_py(lcpmM)
+r_to_py(lfy_idx)
+```
+
+
+```{python}
+import numpy as np
+from scipy.stats import rankdata
+
+lfy_idx = np.array(r.lfy_idx, dtype=int) - 1
+
+C = np.absolute(np.corrcoef(r.lcpmM, rowvar=True))        # shape (n_genes, n_genes)
+np.fill_diagonal(C, 0.0)
+
+
+# 2. rank correlations for each gene (higher corr = smaller rank)
+#    here we rank by decreasing correlation, ignoring self-corr
+
+n = C.shape[0]
+ranks = np.zeros_like(C, dtype=float)
+
+
+for i in range(n):
+    # descending rank: biggest correlation -> rank 1
+    rank = rankdata(-C[:, i], method='average')
+    ranks[:, i] = rank
+    
+# 3. mutual rank: geometric mean of the two directional ranks
+#    MR_ij = sqrt(rank_i(j) * rank_j(i))
+MR = np.sqrt(ranks * ranks.T)
+
+Clfy = C[:, lfy_idx]
+
+MRlfy = MR[:, lfy_idx]
+
+del C
+del MR
+
+```
+
+```{r}
+# Bring results back into R
+cor.lfy.gam    <- py$Clfy
+MR.lfy.gam   <- py$MRlfy
+
+dimnames(cor.lfy.gam)  <- list(rownames(lcpm), c("CrLFY1", "CrLFY2"))
+dimnames(MR.lfy.gam) <- list(rownames(lcpm), c("CrLFY1", "CrLFY2"))
+
+cor.lfy.gam <- cor.lfy.gam %>% as_tibble(rownames = "geneID")
+MR.lfy.gam <- MR.lfy.gam %>% as_tibble(rownames = "geneID")
+
+head(cor.lfy.gam)
+head(MR.lfy.gam)
+
+
+```
+
+#### GSEA
+
+Create list for GSEA input
+```{r}
+MADS.list <- as.list(MADS) %>% set_names("MADS")
+```
+
+### MR
+
+get ordered list for lfy1 and lfy2
+```{r}
+MR.lfy1.gam <-  MR.lfy.gam %>% arrange(CrLFY1) %>% pull(CrLFY1, name = geneID)
+MR.lfy2.gam <- MR.lfy.gam %>% arrange(CrLFY2) %>% pull(CrLFY2, name = geneID)
+```
+
+```{r}
+MR.lfy1.gsea.res.gam <- fgsea(MADS.list, MR.lfy1.gam, scoreType = "pos")
+MR.lfy2.gsea.res.gam <- fgsea(MADS.list, MR.lfy2.gam, scoreType = "pos")
+```
+
+```{r}
+MR.lfy1.gsea.res.gam
+```
+
+```{r}
+MR.lfy2.gsea.res.gam
+```
+
+### correlation
+
+get ordered list for lfy1 and lfy2
+```{r}
+cor.lfy1.gam <-  cor.lfy.gam %>% arrange(CrLFY1) %>% pull(CrLFY1, name = geneID)
+cor.lfy2.gam <- cor.lfy.gam %>% arrange(CrLFY2) %>% pull(CrLFY2, name = geneID)
+```
+
+```{r}
+cor.lfy1.gsea.res.gam <- fgsea(MADS.list, cor.lfy1.gam, scoreType = "pos")
+cor.lfy2.gsea.res.gam <- fgsea(MADS.list, cor.lfy2.gam, scoreType = "pos")
+```
+
+```{r}
+cor.lfy1.gsea.res.gam
+```
+
+```{r}
+cor.lfy2.gsea.res.gam
+```
+
+### Sporophyte
+load sample info
+```{r}
+sample.description <- read.csv("../output/sample.description.sporophyte.all.csv")
+```
+
+load read counts
+
+```{r}
+lcpm <- read.csv("../output/sporophyte_combined_log2cpm.csv.gz", row.names = 1, check.names = FALSE)
+
+lcpm <- lcpm[,sample.description$sample]
+rownames(lcpm) <- str_remove(rownames(lcpm), "\\.v2\\..")
+head(lcpm)
+dim(lcpm)
+lcpmM <- as.matrix(lcpm)
+
+lfy_idx <- c(which(rownames(lcpm) == CrLFY1), which(rownames(lcpm) == CrLFY2)) 
+
+r_to_py(lcpmM)
+r_to_py(lfy_idx)
+```
+
+
+```{python}
+import numpy as np
+from scipy.stats import rankdata
+
+lfy_idx = np.array(r.lfy_idx, dtype=int) - 1
+
+C = np.absolute(np.corrcoef(r.lcpmM, rowvar=True))        # shape (n_genes, n_genes)
+np.fill_diagonal(C, 0.0)
+
+
+# 2. rank correlations for each gene (higher corr = smaller rank)
+#    here we rank by decreasing correlation, ignoring self-corr
+
+n = C.shape[0]
+ranks = np.zeros_like(C, dtype=float)
+
+
+for i in range(n):
+    # descending rank: biggest correlation -> rank 1
+    rank = rankdata(-C[:, i], method='average')
+    ranks[:, i] = rank
+    
+# 3. mutual rank: geometric mean of the two directional ranks
+#    MR_ij = sqrt(rank_i(j) * rank_j(i))
+MR = np.sqrt(ranks * ranks.T)
+
+Clfy = C[:, lfy_idx]
+
+MRlfy = MR[:, lfy_idx]
+
+del C
+del MR
+
+```
+
+```{r}
+# Bring results back into R
+cor.lfy.spor    <- py$Clfy
+MR.lfy.spor   <- py$MRlfy
+
+dimnames(cor.lfy.spor)  <- list(rownames(lcpm), c("CrLFY1", "CrLFY2"))
+dimnames(MR.lfy.spor) <- list(rownames(lcpm), c("CrLFY1", "CrLFY2"))
+
+cor.lfy.spor <- cor.lfy.spor %>% as_tibble(rownames = "geneID")
+MR.lfy.spor <- MR.lfy.spor %>% as_tibble(rownames = "geneID")
+
+head(cor.lfy.spor)
+head(MR.lfy.spor)
+
+
+```
+
+#### GSEA
+
+
+### MR
+
+get ordered list for lfy1 and lfy2
+```{r}
+MR.lfy1.spor <-  MR.lfy.spor %>% arrange(CrLFY1) %>% pull(CrLFY1, name = geneID)
+MR.lfy2.spor <- MR.lfy.spor %>% arrange(CrLFY2) %>% pull(CrLFY2, name = geneID)
+```
+
+```{r}
+MR.lfy1.gsea.res.spor <- fgsea(MADS.list, MR.lfy1.spor, scoreType = "pos")
+MR.lfy2.gsea.res.spor <- fgsea(MADS.list, MR.lfy2.spor, scoreType = "pos")
+```
+
+```{r}
+MR.lfy1.gsea.res.spor
+```
+
+```{r}
+MR.lfy2.gsea.res.spor
+```
+
+### correlation
+
+get ordered list for lfy1 and lfy2
+```{r}
+cor.lfy1.spor <-  cor.lfy.spor %>% arrange(CrLFY1) %>% pull(CrLFY1, name = geneID)
+cor.lfy2.spor <- cor.lfy.spor %>% arrange(CrLFY2) %>% pull(CrLFY2, name = geneID)
+```
+
+```{r}
+cor.lfy1.gsea.res.spor <- fgsea(MADS.list, cor.lfy1.spor, scoreType = "pos")
+cor.lfy2.gsea.res.spor <- fgsea(MADS.list, cor.lfy2.spor, scoreType = "pos")
+```
+
+```{r}
+cor.lfy1.gsea.res.spor
+```
+
+```{r}
+cor.lfy2.gsea.res.spor
+```
+
+# Mutual Rank Networks without ABS value
+
+Create a mutual rank network and check for GSEA relative to MADS box
+
+### Gametophyte
+load sample info
+```{r}
+sample.description <- read.csv("../output/sample.description.gametophyte.no4.5DAG.csv")
+```
+
+load read counts
+
+```{r}
+lcpm <- read.csv("../output/gam_combined_log2cpm_no4.5DAG.csv.gz", row.names = 1, check.names = FALSE)
+
+lcpm <- lcpm[,sample.description$sample]
+rownames(lcpm) <- str_remove(rownames(lcpm), "\\.v2\\..")
+head(lcpm)
+dim(lcpm)
+lcpmM <- as.matrix(lcpm)
+
+lfy_idx <- c(which(rownames(lcpm) == CrLFY1), which(rownames(lcpm) == CrLFY2)) 
+
+r_to_py(lcpmM)
+r_to_py(lfy_idx)
+```
+
+
+```{python}
+import numpy as np
+from scipy.stats import rankdata
+
+lfy_idx = np.array(r.lfy_idx, dtype=int) - 1
+
+C = np.corrcoef(r.lcpmM, rowvar=True)        # shape (n_genes, n_genes)
+np.fill_diagonal(C, 0.0)
+
+
+# 2. rank correlations for each gene (higher corr = smaller rank)
+#    here we rank by decreasing correlation, ignoring self-corr
+
+n = C.shape[0]
+ranks = np.zeros_like(C, dtype=float)
+
+
+for i in range(n):
+    # descending rank: biggest correlation -> rank 1
+    rank = rankdata(-C[:, i], method='average')
+    ranks[:, i] = rank
+    
+# 3. mutual rank: geometric mean of the two directional ranks
+#    MR_ij = sqrt(rank_i(j) * rank_j(i))
+MR = np.sqrt(ranks * ranks.T)
+
+Clfy = C[:, lfy_idx]
+
+MRlfy = MR[:, lfy_idx]
+
+del C
+del MR
+
+```
+
+```{r}
+# Bring results back into R
+cor.lfy.gam    <- py$Clfy
+MR.lfy.gam   <- py$MRlfy
+
+dimnames(cor.lfy.gam)  <- list(rownames(lcpm), c("CrLFY1", "CrLFY2"))
+dimnames(MR.lfy.gam) <- list(rownames(lcpm), c("CrLFY1", "CrLFY2"))
+
+cor.lfy.gam <- cor.lfy.gam %>% as_tibble(rownames = "geneID")
+MR.lfy.gam <- MR.lfy.gam %>% as_tibble(rownames = "geneID")
+
+head(cor.lfy.gam)
+head(MR.lfy.gam)
+
+
+```
+
+#### GSEA
+
+Create list for GSEA input
+```{r}
+MADS.list <- as.list(MADS) %>% set_names("MADS")
+```
+
+### MR
+
+get ordered list for lfy1 and lfy2
+```{r}
+MR.lfy1.gam <-  MR.lfy.gam %>% arrange(CrLFY1) %>% pull(CrLFY1, name = geneID)
+MR.lfy2.gam <- MR.lfy.gam %>% arrange(CrLFY2) %>% pull(CrLFY2, name = geneID)
+```
+
+```{r}
+MR.lfy1.gsea.res.gam.pos <- fgsea(MADS.list, MR.lfy1.gam, scoreType = "pos")
+MR.lfy2.gsea.res.gam.pos <- fgsea(MADS.list, MR.lfy2.gam, scoreType = "pos")
+MR.lfy1.gsea.res.gam.neg <- fgsea(MADS.list, MR.lfy1.gam, scoreType = "neg")
+MR.lfy2.gsea.res.gam.neg <- fgsea(MADS.list, MR.lfy2.gam, scoreType = "neg")
+```
+
+```{r}
+MR.lfy1.gsea.res.gam.pos
+```
+
+```{r}
+MR.lfy2.gsea.res.gam.pos
+```
+```{r}
+MR.lfy1.gsea.res.gam.neg
+```
+
+```{r}
+MR.lfy2.gsea.res.gam.neg
+```
+### correlation
+
+get ordered list for lfy1 and lfy2
+```{r}
+cor.lfy1.gam <-  cor.lfy.gam %>% arrange(CrLFY1) %>% pull(CrLFY1, name = geneID)
+cor.lfy2.gam <- cor.lfy.gam %>% arrange(CrLFY2) %>% pull(CrLFY2, name = geneID)
+```
+
+```{r}
+cor.lfy1.gsea.res.gam.pos <- fgsea(MADS.list, cor.lfy1.gam, scoreType = "pos")
+cor.lfy2.gsea.res.gam.pos <- fgsea(MADS.list, cor.lfy2.gam, scoreType = "pos")
+cor.lfy1.gsea.res.gam.neg <- fgsea(MADS.list, cor.lfy1.gam, scoreType = "neg")
+cor.lfy2.gsea.res.gam.neg <- fgsea(MADS.list, cor.lfy2.gam, scoreType = "neg")
+```
+
+```{r}
+cor.lfy1.gsea.res.gam.pos
+```
+
+```{r}
+cor.lfy2.gsea.res.gam.pos
+```
+
+```{r}
+cor.lfy1.gsea.res.gam.neg
+```
+
+```{r}
+cor.lfy2.gsea.res.gam.neg
+```
+
+### Sporophyte
+load sample info
+```{r}
+sample.description <- read.csv("../output/sample.description.sporophyte.all.csv")
+```
+
+load read counts
+
+```{r}
+lcpm <- read.csv("../output/sporophyte_combined_log2cpm.csv.gz", row.names = 1, check.names = FALSE)
+
+lcpm <- lcpm[,sample.description$sample]
+rownames(lcpm) <- str_remove(rownames(lcpm), "\\.v2\\..")
+head(lcpm)
+dim(lcpm)
+lcpmM <- as.matrix(lcpm)
+
+lfy_idx <- c(which(rownames(lcpm) == CrLFY1), which(rownames(lcpm) == CrLFY2)) 
+
+r_to_py(lcpmM)
+r_to_py(lfy_idx)
+```
+
+
+```{python}
+import numpy as np
+from scipy.stats import rankdata
+
+lfy_idx = np.array(r.lfy_idx, dtype=int) - 1
+
+C = np.corrcoef(r.lcpmM, rowvar=True)        # shape (n_genes, n_genes)
+np.fill_diagonal(C, 0.0)
+
+
+# 2. rank correlations for each gene (higher corr = smaller rank)
+#    here we rank by decreasing correlation, ignoring self-corr
+
+n = C.shape[0]
+ranks = np.zeros_like(C, dtype=float)
+
+
+for i in range(n):
+    # descending rank: biggest correlation -> rank 1
+    rank = rankdata(-C[:, i], method='average')
+    ranks[:, i] = rank
+    
+# 3. mutual rank: geometric mean of the two directional ranks
+#    MR_ij = sqrt(rank_i(j) * rank_j(i))
+MR = np.sqrt(ranks * ranks.T)
+
+Clfy = C[:, lfy_idx]
+
+MRlfy = MR[:, lfy_idx]
+
+del C
+del MR
+
+```
+
+```{r}
+# Bring results back into R
+cor.lfy.spor    <- py$Clfy
+MR.lfy.spor   <- py$MRlfy
+
+dimnames(cor.lfy.spor)  <- list(rownames(lcpm), c("CrLFY1", "CrLFY2"))
+dimnames(MR.lfy.spor) <- list(rownames(lcpm), c("CrLFY1", "CrLFY2"))
+
+cor.lfy.spor <- cor.lfy.spor %>% as_tibble(rownames = "geneID")
+MR.lfy.spor <- MR.lfy.spor %>% as_tibble(rownames = "geneID")
+
+head(cor.lfy.spor)
+head(MR.lfy.spor)
+
+
+```
+
+#### GSEA
+
+
+### MR
+
+get ordered list for lfy1 and lfy2
+```{r}
+MR.lfy1.spor <-  MR.lfy.spor %>% arrange(CrLFY1) %>% pull(CrLFY1, name = geneID)
+MR.lfy2.spor <- MR.lfy.spor %>% arrange(CrLFY2) %>% pull(CrLFY2, name = geneID)
+```
+
+```{r}
+MR.lfy1.gsea.res.spor.pos <- fgsea(MADS.list, MR.lfy1.spor, scoreType = "pos")
+MR.lfy2.gsea.res.spor.pos <- fgsea(MADS.list, MR.lfy2.spor, scoreType = "pos")
+MR.lfy1.gsea.res.spor.neg <- fgsea(MADS.list, MR.lfy1.spor, scoreType = "neg")
+MR.lfy2.gsea.res.spor.neg <- fgsea(MADS.list, MR.lfy2.spor, scoreType = "neg")
+```
+
+```{r}
+MR.lfy1.gsea.res.spor.pos
+```
+
+```{r}
+MR.lfy2.gsea.res.spor.pos
+```
+
+```{r}
+MR.lfy1.gsea.res.spor.neg
+```
+
+```{r}
+MR.lfy2.gsea.res.spor.neg
+```
+
+### correlation
+
+get ordered list for lfy1 and lfy2
+```{r}
+cor.lfy1.spor <-  cor.lfy.spor %>% arrange(CrLFY1) %>% pull(CrLFY1, name = geneID)
+cor.lfy2.spor <- cor.lfy.spor %>% arrange(CrLFY2) %>% pull(CrLFY2, name = geneID)
+```
+
+```{r}
+cor.lfy1.gsea.res.spor.pos <- fgsea(MADS.list, cor.lfy1.spor, scoreType = "pos")
+cor.lfy2.gsea.res.spor.pos <- fgsea(MADS.list, cor.lfy2.spor, scoreType = "pos")
+cor.lfy1.gsea.res.spor.neg <- fgsea(MADS.list, cor.lfy1.spor, scoreType = "neg")
+cor.lfy2.gsea.res.spor.neg <- fgsea(MADS.list, cor.lfy2.spor, scoreType = "neg")
+```
+
+```{r}
+cor.lfy1.gsea.res.spor.pos
+```
+
+```{r}
+cor.lfy2.gsea.res.spor.pos
+```
+
+
+```{r}
+cor.lfy1.gsea.res.spor.neg
+```
+
+```{r}
+cor.lfy2.gsea.res.spor.neg
 ```

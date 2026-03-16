@@ -177,13 +177,13 @@ dev.copy(png, filename = "../output/male_v_herm_heatmap_tall.png", width=1200, h
 genes.heatmap.reorder <- genes.heatmap[rev(match(colnames(hm$carpet),genes.heatmap$geneID)),]
 
 write_csv(genes.heatmap.reorder, "../output/male_v_herm_heatmap_genes_ordered.csv")
+
+dev.off()
 ```
 
 Mean centered (but not scaled)
 
 ```{r}
-
-
 hm.centered <- cpm(dge.data, log = TRUE) %>%
   as_tibble(rownames = "geneID") %>%
   semi_join(genes.heatmap) %>%
@@ -200,6 +200,8 @@ dev.copy(png, filename = "../output/male_v_herm_heatmap_tall_centered.png", widt
 genes.heatmap.reorder.centered <- genes.heatmap[rev(match(colnames(hm.centered$carpet),genes.heatmap$geneID)),]
 
 write_csv(genes.heatmap.reorder.centered, "../output/male_v_herm_heatmap_genes_ordered_centered.csv")
+
+dev.off()
 ```
 
 Add annotation
@@ -252,7 +254,7 @@ seqs <- readDNAStringSet("~/Sequences/ref_genomes/C_richardii_v2.1/annotation/Cr
 
 gene.lengths <- nchar(seqs) %>% set_names(str_remove(names(seqs), " .*"))
 
-gene.lengths
+head(gene.lengths)
 
 saveRDS(gene.lengths, "../input/genelengths.Rds")
 ```
@@ -271,6 +273,20 @@ vectors of upregulated and downregulated genes
 genes.up <- genes.all %>% mutate(up = (FDR <= 0.01 & logFC > 0) * 1 ) %>% pull(up, name = geneID)
 genes.down <- genes.all %>% mutate(up = (FDR <= 0.01 & logFC < 0) * 1 ) %>% pull(up, name = geneID)
 ```
+
+checking number of gene with/without GO terms
+```{r}
+nrow(genes.all) %>% str_c("Total expressed genes: ", .)
+
+genes.all %>% filter(is.na(GO)) %>% nrow() %>% str_c("Genes without GO: ", .)
+
+genes.all %>% filter(!is.na(GO)) %>% nrow() %>% str_c("Genes with GO: ", .)
+
+genes.all %>% filter(!is.na(GO)) %>% nrow() %>% magrittr::divide_by(nrow(genes.all)/100) %>% round(2) %>% str_c("% with GO: ", .)
+
+
+```
+
 
 ```{r}
 #determines if there is bias due to gene length.  The plot shows the relationship.

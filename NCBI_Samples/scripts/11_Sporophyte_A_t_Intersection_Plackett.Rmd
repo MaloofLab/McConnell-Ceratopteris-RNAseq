@@ -43,6 +43,8 @@ Ceratopteris annotation: all the annotation data I was able to glean. Some of th
 
 Ceratopteris inherited GOterms: to make GOterm enrichment easier, a datet restricted to the GO terms for each Ceratopteris gene extracted from the annotation sheet, including GO terms taken from the orthologous genes from model species.  It covers the whole genome, including Cr genes that had no GO terms inherited.
 
+__NOTE__ There is now some updated data from Andy
+
 ## Import data
 First look at sheet names
 ```{r}
@@ -79,15 +81,23 @@ At_gene_info <- At_gene_info %>%
 At_gene_info
 ```
 
-
-```{r}
-Cr_At_orthologs <- readxl::read_excel("../../shared/input/Ceratopteris_ortholog_data_JM 1.xlsx", 
+OLD
+```{r, eval=FALSE}
+Cr_At_orthologs <- readxl::read_excel("../../shared/input/Ceratopteris_ortholog_data_JM 1.xlsx",
                                       sheet = "Orthofinder_orthologs_Cr_v_At",
                                       .name_repair = "universal") %>%
-  set_names(\(x) str_remove(x, "_.*")) 
+  set_names(\(x) str_remove(x, "_.*"))
 
 Cr_At_orthologs
 ```
+NEW
+```{r}
+Cr_At_orthologs <- read_tsv("../../shared/input/Crichardii_676_v2.1.protein_primaryTranscriptOnly.cleaned__v__Athaliana_167_TAIR10.protein_primaryTranscriptOnly.cleaned.tsv") %>%
+  set_names(\(x) str_remove(x, "_.*"))
+
+Cr_At_orthologs
+```
+
 
 ### Table of Cr orthlog membership in reproductive groups
 

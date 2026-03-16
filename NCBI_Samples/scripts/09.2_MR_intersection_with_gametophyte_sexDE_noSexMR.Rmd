@@ -202,7 +202,7 @@ kNNdistplot(scaled_data[, c("logFC", "LFY1.rank")], k = 499)
 abline(h = 0.2, col = "red") # Adjust this line to find the "elbow"
 
 dbscan_result <- dbscan(scaled_data[, c("logFC", "LFY1.rank")], eps = 0.25, minPts = 500, borderPoints = TRUE)
-deg.cor$dbscan_cluster <- as.factor(dbscan_result$cluster)
+deg.cor$dbscan_cluster <- generics::as.factor(dbscan_result$cluster)
 
 # Create plots to compare the results
 plot1 <- ggplot(deg.cor, aes(x = LFY1.rank, y = logFC,  color = dbscan_cluster)) +
@@ -214,7 +214,7 @@ plot1 <- ggplot(deg.cor, aes(x = LFY1.rank, y = logFC,  color = dbscan_cluster))
 print(plot1)
 
 hdbscan_result <- hdbscan(scaled_data[, c("logFC", "LFY1.rank")], minPts = 500)
-deg.cor$hdbscan_cluster <- as.factor(hdbscan_result$cluster)
+deg.cor$hdbscan_cluster <- generics::as.factor(hdbscan_result$cluster)
 
 plot2 <- ggplot(deg.cor, aes(x = LFY1.rank, y = logFC, color = hdbscan_cluster)) +
   geom_point(alpha = 0.1) +
@@ -240,7 +240,7 @@ kNNdistplot(scaled_data[, c("logFC", "LFY1.MR")], k = 499)
 abline(h = 0.2, col = "red") # Adjust this line to find the "elbow"
 
 dbscan_result <- dbscan(scaled_data[, c("logFC", "LFY1.MR")], eps = 0.25, minPts = 500, borderPoints = TRUE)
-deg.cor$dbscan_cluster <- as.factor(dbscan_result$cluster)
+deg.cor$dbscan_cluster <- generics::as.factor(dbscan_result$cluster)
 
 # Create plots to compare the results
 plot1 <- deg.cor %>% 
@@ -266,7 +266,7 @@ plot1.alt <- deg.cor %>%
 print(plot1.alt)
 
 hdbscan_result <- hdbscan(scaled_data[, c("logFC", "LFY1.MR")], minPts = 500)
-deg.cor$hdbscan_cluster <- as.factor(hdbscan_result$cluster)
+deg.cor$hdbscan_cluster <- generics::as.factor(hdbscan_result$cluster)
 
 plot2 <- deg.cor %>% ggplot(aes(x = LFY1.MR, y = logFC, color = hdbscan_cluster)) +
   geom_point(alpha = 0.2) +
@@ -319,7 +319,7 @@ gene2GO.list <- deg.cor %>%
 
 cluster.genes <- deg.cor %>%
   mutate(cluster.genes = as.numeric(in_LFY1_cluster)) %>% 
-  pull(cluster.genes, name = geneID) %>% as.factor()
+  pull(cluster.genes, name = geneID) %>% generics::as.factor()
 
 go.data.cluster <- new("topGOdata", ontology = "BP", description = "In LFY1 Cluster", allGenes = cluster.genes, annot = annFUN.gene2GO, gene2GO = gene2GO.list)
 
@@ -383,12 +383,16 @@ fisher.results <- expand_grid(gene.category = colnames(Cr_gene_info)[-1:-2],
 ```
 
 ```{r}
-fisher.results %>%
+fisher.results.filter <- fisher.results %>%
   # group_by(module) %>%
   ungroup() %>%
   filter(fisher.fdr < 0.05) %>%
   arrange(module, fisher.fdr) %>%
-  select(module, gene.category, estimate, fisher.fdr, everything())
+  select(module, gene.category, estimate, fisher.fdr, everything(), -fisher, -method, -alternative)
+
+write_csv(fisher.results.filter, "../output/male_hermaphrodite_DEG_At_repro_fisher.csv")
+
+fisher.results.filter 
 ```
 
 
@@ -429,10 +433,14 @@ fisher.results.LFY1.cluster <- expand_grid(gene.category = colnames(Cr_gene_info
 ```
 
 ```{r}
-fisher.results.LFY1.cluster %>%
+fisher.results.LFY1.cluster.filter <- fisher.results.LFY1.cluster %>%
   # group_by(module) %>%
   ungroup() %>%
   filter(fisher.fdr < 0.05) %>%
   arrange(module, fisher.fdr) %>%
-  select(module, gene.category, estimate, fisher.fdr, everything())
+  select(module, gene.category, estimate, fisher.fdr, everything(), -fisher, -method, -alternative)
+
+write_csv(fisher.results.LFY1.cluster.filter, "../output/male_hermaphrodite_DEG_LFY1_Cluster_At_repro_fisher.csv")
+
+fisher.results.LFY1.cluster.filter
 ```

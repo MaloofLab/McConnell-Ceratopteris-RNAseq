@@ -26,34 +26,10 @@ Plackett GOs
 
 Compare Placket and genome GO
 
-```{r}
+```{r, eval=FALSE}
 GOs %>% select(Cr_peptideName = peptideName, GO_genome=GO) %>% full_join(dplyr::rename(Cr_GO, GO_Plackett = All_GO))
 ```
 
-
-how  do the gene IDs match up?
-```{r}
-moduleGOs <- module.assignment %>%
-  mutate(geneID2 = str_remove(geneID, fixed(".v2"))) %>%
-  inner_join(GOs, by = c("geneID2" = "transcriptName")) %>%
-  select(geneID, module, GO)
-
-dim(module.assignment)
-dim(moduleGOs)
-head(moduleGOs)
-```
-Great.  All genes in module.assignments are retained after the join
-
-Create a gene2GO list needed by topGO:
-
-```{r}
-gene2GO.list <- moduleGOs %>% 
-  rowwise() %>%
-  mutate(GOlist = str_split(GO, pattern = " ")) %>%
-  ungroup() %>%
-  mutate(GOlist = set_names(GOlist, geneID)) %>%
-  pull(GOlist)
-```
 
 Create a function to return a go table
 ```{r}
@@ -77,7 +53,7 @@ getGO <- function(moduleID, module.assignment, ontology = "BP")  {
 
 ## for WGCNA with SPOROPHYTE samples
 ```{r}
-load("../output/WGCNA_sporophyteSamples.Rdata")
+load("../output/WGCNA_sporophyte_all.Rdata")
 ```
 
 how will the gene IDs match up?
@@ -119,7 +95,7 @@ GOresults
 
 ## for WGCNA with GAMETOPHYTE samples
 ```{r}
-load("../output/WGCNA_gametophyteSamples.Rdata")
+load("../output/WGCNA_gametophyte_all_no4.5DAG.Rdata")
 ```
 
 how will the gene IDs match up?
@@ -154,24 +130,6 @@ GOresults <- tibble(module=sort(unique(module.assignment$module))) %>%
 write_csv(GOresults, file = "../output/WGCNA_gametophyteSamples_GO.csv")
 
 GOresults %>% group_by(module) %>% slice_min(p.value, n=3) %>% write_csv(file = "../output/WGCNA_gametophyteSamples_GO_top3.csv")
-
-GOresults
-```
-
-## for WGCNA with ALL samples
-```{r, eval=FALSE}
-load("../output/WGCNA_allSamples.Rdata")
-```
-
-
-```{r, eval=FALSE, message=FALSE}
-GOresults <- tibble(module=sort(unique(module.assignment$module))) %>%
-  mutate(GOtable = map(module, getGO, module.assignment)) %>%
-  unnest(cols=GOtable)
-
-write_csv(GOresults, file = "../output/WGCNA_allSamples_GO.csv")
-
-GOresults %>% group_by(module) %>% slice_min(p.value, n=3) %>% write_csv(file = "../output/WGCNA_allSamples_GO_top3.csv")
 
 GOresults
 ```

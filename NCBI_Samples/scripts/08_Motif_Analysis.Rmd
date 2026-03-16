@@ -61,7 +61,7 @@ overlaps
 ## LFY1 gametophyte sex cluster
 
 ```{r}
-lfy1.gam.sex.cluster <- read_csv("../output/LFY1_gam_sex_cluster_noSexSamples.csv")
+lfy1.gam.sex.cluster <- read_csv("../output/LFY1_gam_sex_cluster_noSexSamples.csv.gz")
 ```
 
 ```{r}
@@ -77,7 +77,7 @@ No evidence for enrichment.  Mild evidence for anti-enrichment.
 
 ### gametophyte samples
 ```{r}
-load("../output/WGCNA_gametophyte_all.Rdata")
+load("../output/WGCNA_gametophyte_all_no4.5DAG.Rdata")
 gmodule.assignment <- module.assignment
 ```
 

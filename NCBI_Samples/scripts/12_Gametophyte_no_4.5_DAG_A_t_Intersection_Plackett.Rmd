@@ -79,12 +79,19 @@ At_gene_info <- At_gene_info %>%
 At_gene_info
 ```
 
-
-```{r}
+OLD
+```{r, eval=FALSE}
 Cr_At_orthologs <- readxl::read_excel("../../shared/input/Ceratopteris_ortholog_data_JM 1.xlsx", 
                                       sheet = "Orthofinder_orthologs_Cr_v_At",
                                       .name_repair = "universal") %>%
   set_names(\(x) str_remove(x, "_.*")) 
+
+Cr_At_orthologs
+```
+NEW
+```{r}
+Cr_At_orthologs <- read_tsv("../../shared/input/Crichardii_676_v2.1.protein_primaryTranscriptOnly.cleaned__v__Athaliana_167_TAIR10.protein_primaryTranscriptOnly.cleaned.tsv") %>%
+  set_names(\(x) str_remove(x, "_.*"))
 
 Cr_At_orthologs
 ```

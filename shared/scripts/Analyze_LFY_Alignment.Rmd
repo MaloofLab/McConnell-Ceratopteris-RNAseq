@@ -1,0 +1,40 @@
+---
+title: "Analyze_LFY_Alignment"
+output: html_document
+---
+
+```{r}
+library(Biostrings)
+library(pwalign)
+```
+
+```{r}
+lfys <- readDNAMultipleAlignment("../input/CrLFY_CDS_Aligned.fa")
+```
+
+```{r}
+lfys
+```
+
+```{r}
+cmat <- as.matrix(lfys)              # characters, 2 rows × N columns
+matches <- cmat[1, ] == cmat[2, ]   # TRUE/FALSE per column
+nongap <- cmat[1, ] != "-" | cmat[2, ] != "-"
+100 * sum(matches & nongap) / sum(nongap)
+
+```
+
+
+Or
+
+```{r}
+dna <- DNAStringSet(unmasked(lfys))  
+s1 <- dna[[1]]
+s2 <- dna[[2]]
+
+pal <- pairwiseAlignment(pattern = s1, subject = s2,
+                         type = "global", scoreOnly = FALSE)
+
+pid(pal, type = "PID2")
+```
+

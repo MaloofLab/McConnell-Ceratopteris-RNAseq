@@ -1,0 +1,70 @@
+---
+title: "03.5_LFY_Exp_Comparisons"
+output: html_document
+---
+
+Is LFY DE in OE or RNA lines compared to WT?
+
+```{r}
+library(tidyverse)
+```
+```{r}
+sample.description <- read_csv("../input/sample.description.csv")
+sample.description
+```
+
+
+
+```{r}
+log2cpm <- read_csv("../output/log2cpm.csv.gz") %>%
+  rename(gene_ID = `...1`)
+head(log2cpm)
+```
+
+```{r}
+CrLFY1 <- "Ceric.33G031700.v2.1" 
+
+CrLFY2 <- "Ceric.18G076300.v2.1"
+```
+
+```{r}
+lfy1cpm <- log2cpm %>%
+  filter(gene_ID == CrLFY1) %>%
+  pivot_longer(-gene_ID, , names_to = "sample", values_to = "log2cpm") %>%
+  left_join(sample.description, by = "sample") %>% 
+  select(sample, log2cpm, base_gt, tissue) %>% 
+  group_by(tissue, base_gt) %>%
+  nest()
+
+lfy1cpm.wt <- lfy1cpm %>% filter(base_gt == "WT")
+
+lfy1cpm %>% left_join(lfy1cpm.wt, by = "tissue", suffix = c("", "_WT")) %>%
+  na.omit() %>%
+  mutate(t.test = map2(data, data_WT, \(x,y) t.test(x$log2cpm, y$log2cpm)),
+         glance = map(t.test, broom::glance)) %>%
+           unnest(glance) %>%
+  arrange(p.value) %>%
+  ungroup() %>%
+  mutate(FDR = p.adjust(p.value, method = "fdr")) %>%
+  select(base_gt, tissue, p.value, FDR, starts_with("estimate"))
+```
+
+```{r}
+lfy2cpm <- log2cpm %>%
+  filter(gene_ID == CrLFY2) %>%
+  pivot_longer(-gene_ID, , names_to = "sample", values_to = "log2cpm") %>%
+  left_join(sample.description, by = "sample") %>% 
+  select(sample, log2cpm, base_gt, tissue) %>% 
+  group_by(tissue, base_gt) %>%
+  nest()
+
+lfy2cpm.wt <- lfy2cpm %>% filter(base_gt == "WT")
+
+lfy2cpm %>% left_join(lfy2cpm.wt, by = "tissue", suffix = c("", "_WT")) %>%
+  na.omit() %>%
+  mutate(t.test = map2(data, data_WT, \(x,y) t.test(x$log2cpm, y$log2cpm)),
+         glance = map(t.test, broom::glance)) %>%
+           unnest(glance) %>%
+  arrange(p.value) %>%
+  select(base_gt, tissue, p.value, starts_with("estimate"))
+```
