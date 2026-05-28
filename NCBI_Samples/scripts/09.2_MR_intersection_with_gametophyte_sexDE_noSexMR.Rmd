@@ -284,10 +284,11 @@ Mutual Rank DBSCAN is the best...
 Create a column for being in cluster 2 and save output
 ```{r}
 deg.cor <- deg.cor %>%
-  mutate(in_LFY1_cluster = dbscan_cluster == 2) %>%
-  select(geneID, in_LFY1_cluster, everything(), -starts_with("LFY2"))
+  mutate(in_LFY1_cluster = dbscan_cluster == 2)
 
-write_csv(deg.cor, "../output/LFY1_gam_sex_cluster_noSexSamples.csv.gz")
+deg.cor %>%
+  select(geneID, in_LFY1_cluster, everything(), -starts_with("LFY2")) %>%
+  write_csv("../output/LFY1_gam_sex_cluster_noSexSamples.csv.gz")
 ```
 
 
@@ -306,6 +307,39 @@ deg.cor %>%
   scale_color_brewer(name = "Cl", type = "qual") +
   guides(color = guide_legend(override.aes = list(alpha = 1)))
 ```
+
+
+## Compare LFY1 and LFY2 MR in cluster
+
+```{r}
+deg.cor %>%
+  mutate(upMale = logFC < -1 & FDR < 0.01) %>%
+  t.test(LFY1.MR ~ upMale, data = .)
+
+deg.cor %>%
+  mutate(upMale = logFC < -1 & FDR < 0.01) %>%
+  t.test(LFY2.MR ~ upMale, data = .)
+```
+```{r}
+deg.cor %>%
+  t.test(LFY1.MR ~ in_LFY1_cluster, data = .)
+
+deg.cor %>%
+  t.test(LFY2.MR ~ in_LFY1_cluster, data = .)
+```
+
+```{r}
+lfy.network.threshold <- deg.cor %>% filter(in_LFY1_cluster) %>% pull(LFY1.MR) %>% max()
+
+fisher.tmp <- deg.cor %>% mutate(LFY1.network = LFY1.MR <= lfy.network.threshold,
+                   LFY2.network = LFY2.MR <= lfy.network.threshold,
+                   upMale = logFC < 0 & FDR < 0.01) 
+
+fisher.test(fisher.tmp$upMale, fisher.tmp$LFY1.network, alternative = "greater")
+fisher.test(fisher.tmp$upMale, fisher.tmp$LFY2.network, alternative = "greater")
+
+```
+
 
 ## GO enrichment for LFY1 cluster
 
