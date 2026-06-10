@@ -1,14 +1,85 @@
-module,gene.category,estimate,fisher.fdr,fisher.p.value,conf.low,conf.high
-upHermaphrodite,Carpel.expressed.3,2.0227097655500894,1.4504999904803878e-4,2.1101353560433264e-6,1.5677264695319095,Inf
-upHermaphrodite,Vegetative.specific..seedling.leaf.root.stem.,1.5771067059611885,1.4504999904803878e-4,3.4535714059056855e-6,1.3341162217289666,Inf
-upHermaphrodite,Megaspore.Mother.Cell,1.1534195328085315,5.556462619374567e-4,1.9844509354909167e-5,1.089176682308822,Inf
-upHermaphrodite,Micropylar.Endosperm..MCE.,1.3175222614461908,0.0086436085423814,6.174006101701e-4,1.1443534033785452,Inf
-upHermaphrodite,Central.Cell,1.151561847856593,0.010251504975378165,8.542920812815138e-4,1.0691869294675094,Inf
-upHermaphrodite,Mature.green.stage.seed,1.4285540411607938,0.026773711739632416,0.0031873466356705255,1.150607137070245,Inf
-upHermaphrodite,Seed.Coat..SC.,1.299066605214021,0.02723710518779651,0.0036143212255146267,1.1060005827238186,Inf
-upHermaphrodite,Chalazal.Seed.Coat..CZSC.,1.2948151912982235,0.02723710518779651,0.0038910150268280726,1.1029823715910878,Inf
-upMale,Stamen.expressed.7,1.279374608921698,0.0013255155589178163,6.311978851989601e-5,1.150893568084771,Inf
-upMale,Post.pollination.stage.pollen,1.4514819691996794,0.0015098443911053202,8.987168994674525e-5,1.2320222482545848,Inf
-upMale,Stamen.all.tissues,1.2388344411161147,0.010917164740547387,0.0010397299752902274,1.1046441801447044,Inf
-upMale,Early.ovule..whole.,1.1145649951980166,0.015277011936947964,0.0016368227075301389,1.0487873717581826,Inf
-upMale,Early.stage.pollen,1.5754398344473202,0.02791465465940257,0.004320125125859922,1.1829416194672517,Inf
+gene.category,module,fisher,estimate,fisher.p.value,conf.low,conf.high,method,alternative,fisher.fdr
+Carpel.expressed.3,upHermaphrodite,,2.0227097655500894,2.1101353560433264e-6,1.5677264695319095,Inf,Fisher's Exact Test for Count Data,greater,1.4504999904803878e-4
+Vegetative.specific..seedling.leaf.root.stem.,upHermaphrodite,,1.5771067059611885,3.4535714059056855e-6,1.3341162217289666,Inf,Fisher's Exact Test for Count Data,greater,1.4504999904803878e-4
+Megaspore.Mother.Cell,upHermaphrodite,,1.1534195328085315,1.9844509354909167e-5,1.089176682308822,Inf,Fisher's Exact Test for Count Data,greater,5.556462619374567e-4
+Stamen.expressed.7,upMale,,1.279374608921698,6.311978851989601e-5,1.150893568084771,Inf,Fisher's Exact Test for Count Data,greater,0.0013255155589178163
+Post.pollination.stage.pollen,upMale,,1.4514819691996794,8.987168994674525e-5,1.2320222482545848,Inf,Fisher's Exact Test for Count Data,greater,0.0015098443911053202
+Micropylar.Endosperm..MCE.,upHermaphrodite,,1.3175222614461908,6.174006101701e-4,1.1443534033785452,Inf,Fisher's Exact Test for Count Data,greater,0.0086436085423814
+Central.Cell,upHermaphrodite,,1.151561847856593,8.542920812815138e-4,1.0691869294675094,Inf,Fisher's Exact Test for Count Data,greater,0.010251504975378165
+Stamen.all.tissues,upMale,,1.2388344411161147,0.0010397299752902274,1.1046441801447044,Inf,Fisher's Exact Test for Count Data,greater,0.010917164740547387
+Early.ovule..whole.,upMale,,1.1145649951980166,0.0016368227075301389,1.0487873717581826,Inf,Fisher's Exact Test for Count Data,greater,0.015277011936947964
+Mature.green.stage.seed,upHermaphrodite,,1.4285540411607938,0.0031873466356705255,1.150607137070245,Inf,Fisher's Exact Test for Count Data,greater,0.026773711739632416
+Seed.Coat..SC.,upHermaphrodite,,1.299066605214021,0.0036143212255146267,1.1060005827238186,Inf,Fisher's Exact Test for Count Data,greater,0.02723710518779651
+Chalazal.Seed.Coat..CZSC.,upHermaphrodite,,1.2948151912982235,0.0038910150268280726,1.1029823715910878,Inf,Fisher's Exact Test for Count Data,greater,0.02723710518779651
+Early.stage.pollen,upMale,,1.5754398344473202,0.004320125125859922,1.1829416194672517,Inf,Fisher's Exact Test for Count Data,greater,0.02791465465940257
+Embryo.sac,upHermaphrodite,,1.2002715450762504,0.010959741889397986,1.0524888670263188,Inf,Fisher's Exact Test for Count Data,greater,0.06170572432803579
+Carpel.specific,upMale,,1.5323172944831787,0.011018879344292106,1.1256718776505952,Inf,Fisher's Exact Test for Count Data,greater,0.06170572432803579
+Integuments,upHermaphrodite,,1.547646538595485,0.013526535176252796,1.1156808085595167,Inf,Fisher's Exact Test for Count Data,greater,0.07101430967532718
+Stamen.spl.nzz.downregulated,upMale,,1.1833451205704164,0.017918080865829657,1.0368342412930092,Inf,Fisher's Exact Test for Count Data,greater,0.08853639957233478
+Maturation.stage.pollen,upMale,,1.37482273195647,0.020782665290560363,1.0623931465571632,Inf,Fisher's Exact Test for Count Data,greater,0.09698577135594837
+Stamen.sporophyte.specific,upMale,,1.2489424147468038,0.02874537887026879,1.0298776920796169,Inf,Fisher's Exact Test for Count Data,greater,0.12708483290013572
+Embryo.proper..EP.,upHermaphrodite,,1.1724918202494177,0.03587183054222088,1.0137022246548997,Inf,Fisher's Exact Test for Count Data,greater,0.14835417087593272
+Embryo.specific,upMale,,1.065767298841973,0.03708854271898318,1.004967455856694,Inf,Fisher's Exact Test for Count Data,greater,0.14835417087593272
+Carpel.expressed.4,upMale,,1.33896433930263,0.04710023211794403,1.0049205267544934,Inf,Fisher's Exact Test for Count Data,greater,0.1798372499048772
+Stamen.ms1.downregulated,upHermaphrodite,,1.1950678708559053,0.05483323868046579,0.9950710261834609,Inf,Fisher's Exact Test for Count Data,greater,0.20026052387648374
+Intermediate.stamen..whole.,upMale,,1.2744392075189417,0.05900125719953103,0.9876979978278586,Inf,Fisher's Exact Test for Count Data,greater,0.2065044001983586
+Heart.stage.seed,upHermaphrodite,,1.2074006144581129,0.08467425372365332,0.9645064195340995,Inf,Fisher's Exact Test for Count Data,greater,0.28450549251147517
+Mature.pollen,upMale,,1.1504775919784629,0.09921981021382481,0.9624548129301307,Inf,Fisher's Exact Test for Count Data,greater,0.30921170883199944
+Peripheral.Endosperm..PEN.,upHermaphrodite,,1.119110648108473,0.1017216316844419,0.9681437866673671,Inf,Fisher's Exact Test for Count Data,greater,0.30921170883199944
+Preglobular.stage.seed,upHermaphrodite,,1.1881256330744978,0.10307056961066648,0.9508783375055511,Inf,Fisher's Exact Test for Count Data,greater,0.30921170883199944
+Egg.cell,upMale,,1.0562666697914251,0.12393557621923319,0.9773817001929848,Inf,Fisher's Exact Test for Count Data,greater,0.3589858069798479
+Linear.cotyledon.stage.seed,upHermaphrodite,,1.16967072927078,0.13749231977176588,0.9263972172965312,Inf,Fisher's Exact Test for Count Data,greater,0.3849784953609444
+Early.stamen..whole.,upHermaphrodite,,1.6429943329587453,0.1566839354902179,0.7591484410591902,Inf,Fisher's Exact Test for Count Data,greater,0.4245629219734936
+Late.ovule..whole.,upMale,,1.0366160233915085,0.1700001710375473,0.9746722843285226,Inf,Fisher's Exact Test for Count Data,greater,0.4462504489735617
+Early.stamen..whole.,upMale,,1.5991023816119108,0.17995163500365993,0.7208897150268412,Inf,Fisher's Exact Test for Count Data,greater,0.4489628796191139
+Globular.stage.seed,upHermaphrodite,,1.1197565244858851,0.18172307032202228,0.9158885680129512,Inf,Fisher's Exact Test for Count Data,greater,0.4489628796191139
+Mature.ovule..whole.,upMale,,1.1141830996963333,0.20827995243815287,0.8997250839596365,Inf,Fisher's Exact Test for Count Data,greater,0.49750250434366844
+Late.stamen..whole.,upHermaphrodite,,1.1423851822949076,0.2132153590044293,0.875111085884413,Inf,Fisher's Exact Test for Count Data,greater,0.49750250434366844
+Preglobular.stage.seed,upMale,,1.115243824240437,0.22746983432599205,0.8835653361442595,Inf,Fisher's Exact Test for Count Data,greater,0.5116077888989602
+Unicellular.stage.pollen,upMale,,1.2256907254255838,0.23144161878762484,0.7958212607468296,Inf,Fisher's Exact Test for Count Data,greater,0.5116077888989602
+Gynoeicium.specific,upMale,,1.2838226410559543,0.2664446879908603,0.7052755047063258,Inf,Fisher's Exact Test for Count Data,greater,0.5738808664418529
+Synergid,upHermaphrodite,,1.0308340782840053,0.28296576527492934,0.9466633297613029,Inf,Fisher's Exact Test for Count Data,greater,0.5942281070773516
+Stamen.expressed.8,upMale,,1.0938748721901572,0.2929853438141291,0.8472791222555595,Inf,Fisher's Exact Test for Count Data,greater,0.6002626556191913
+Globular.stage.seed,upMale,,1.060845629831007,0.33336541261638614,0.8598565038172316,Inf,Fisher's Exact Test for Count Data,greater,0.6667308252327723
+Chalazal.Endosperm..CZE.,upHermaphrodite,,1.0284364465587523,0.38138705733106754,0.8936338161012527,Inf,Fisher's Exact Test for Count Data,greater,0.7325734166043903
+Late.stamen..whole.,upMale,,1.058671307627826,0.3872699533966567,0.7998530526641796,Inf,Fisher's Exact Test for Count Data,greater,0.7325734166043903
+Stamen.specific,upMale,,1.0659474737650303,0.39245004460949484,0.7736142946880571,Inf,Fisher's Exact Test for Count Data,greater,0.7325734166043903
+Stamen.ms1.downregulated,upMale,,1.0338193084416867,0.40354107005688805,0.8506784784830499,Inf,Fisher's Exact Test for Count Data,greater,0.7369010844517085
+Stamen.expressed.8,upHermaphrodite,,1.0303137283805366,0.44259766770644365,0.8020841532422832,Inf,Fisher's Exact Test for Count Data,greater,0.7756380788859154
+Heart.stage.seed,upMale,,1.0283343705735466,0.44322175936338026,0.8087239408823418,Inf,Fisher's Exact Test for Count Data,greater,0.7756380788859154
+Embryo.specific,upHermaphrodite,,1.0030843951072863,0.4707005275935427,0.947324810517252,Inf,Fisher's Exact Test for Count Data,greater,0.8069151901603588
+Stamen.specific,upHermaphrodite,,0.9850777847641318,0.5639583492975938,0.7186923632577502,Inf,Fisher's Exact Test for Count Data,greater,0.9474500268199576
+Synergid,upMale,,0.9872378974287681,0.6048225844745757,0.9033670797335779,Inf,Fisher's Exact Test for Count Data,greater,0.9961783744287129
+Embryo.sac,upMale,,0.9770223624448225,0.6235332212657376,0.8481012707887647,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Seed.Coat..SC.,upMale,,0.963629600043469,0.6567505668234499,0.8076705614211732,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Late.ovule..whole.,upHermaphrodite,,0.9769691763108231,0.7463408367094261,0.919971928598483,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Embryo.proper..EP.,upMale,,0.9374156871096778,0.7705967714495163,0.8005656290391369,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Gynoeicium.specific,upHermaphrodite,,0.796498077416863,0.7920063237970539,0.412383281966795,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Egg.cell,upHermaphrodite,,0.9634122036539515,0.7992209761301536,0.8926422110382326,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Central.Cell,upMale,,0.9618955455582512,0.8013731855798917,0.8889166943442829,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Stamen.spl.nzz.downregulated,upHermaphrodite,,0.9175114039256702,0.8690012697556027,0.8016359310555766,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Chalazal.Endosperm..CZE.,upMale,,0.9044769518375346,0.8823194679317692,0.7786020810914993,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Intermediate.stamen..whole.,upHermaphrodite,,0.8395573396857144,0.8860626537473114,0.639658359224787,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Mature.ovule..whole.,upHermaphrodite,,0.8631998950951741,0.8897846938728131,0.6930912514735266,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Peripheral.Endosperm..PEN.,upMale,,0.8969224367903496,0.8900473961505027,0.7661821358216707,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Linear.cotyledon.stage.seed,upMale,,0.8347583772920617,0.900361099209738,0.6420308102398382,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Post.pollination.stage.pollen,upHermaphrodite,,0.8789677274753973,0.9047334624997221,0.7369622841959205,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Maturation.stage.pollen,upHermaphrodite,,0.8141970616359508,0.9143350544245794,0.6142934116282942,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Chalazal.Seed.Coat..CZSC.,upMale,,0.864590871703788,0.9250834145264841,0.7215003087789943,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Mature.green.stage.seed,upMale,,0.8211424721488556,0.9253342297738187,0.6375627975921473,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Integuments,upMale,,0.7310643644776794,0.9365585173316093,0.48699058448613636,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Mature.pollen,upHermaphrodite,,0.8395349902618316,0.9539509992410222,0.6972893134978152,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Carpel.expressed.3,upMale,,0.7469170751465662,0.9584711011801177,0.5422691042181748,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Carpel.expressed.4,upHermaphrodite,,0.7204771288948949,0.9726744757719319,0.5212394938214736,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Ovule.Nucellus,upMale,,0.9377841207257906,0.9804953475961433,0.8902006790533997,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Ovule.Nucellus,upHermaphrodite,,0.9360473196746926,0.9857911799387846,0.8900376286626979,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Early.ovule..whole.,upHermaphrodite,,0.9245395589161953,0.9858461660215052,0.8705119089366969,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Stamen.all.tissues,upHermaphrodite,,0.8582311075103273,0.9865385938406253,0.7614170212674418,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Early.stage.pollen,upHermaphrodite,,0.6715756661131229,0.9872855817955697,0.4777853397669474,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Stamen.sporophyte.specific,upHermaphrodite,,0.7694550225457715,0.9881313831099583,0.6242872591158024,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Micropylar.Endosperm..MCE.,upMale,,0.8074260047824788,0.9902452960549846,0.6866185445826605,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Stamen.expressed.7,upHermaphrodite,,0.8429700871807149,0.9959410052495803,0.754122824630446,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Carpel.specific,upHermaphrodite,,0.5713960680162252,0.9977826722285821,0.3885084077378901,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Unicellular.stage.pollen,upHermaphrodite,,0.37519177692833783,0.9997792657447048,0.20222314240395656,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Vegetative.specific..seedling.leaf.root.stem.,upMale,,0.6443127853373685,0.9999244508041203,0.521014663786535,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
+Megaspore.Mother.Cell,upMale,,0.8091549060950207,0.9999999963264421,0.7606360972278386,Inf,Fisher's Exact Test for Count Data,greater,0.9999999963264421
