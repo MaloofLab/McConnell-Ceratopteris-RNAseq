@@ -389,7 +389,7 @@ Cr_gene_info_deg <- deg %>%
   inner_join(Cr_gene_info, by=c("geneID"="Crichardii")) %>%
   select(-Athaliana) %>%
   mutate(upHermaphrodite = FDR < 0.01 & logFC > 0,
-         upMale = FDR < 0.05 & logFC < 0) %>%
+         upMale = FDR < 0.01 & logFC < 0) %>%
   select(geneID, starts_with("up"), everything(), -FDR, -logFC)
 
 Cr_gene_info_deg
@@ -424,7 +424,12 @@ fisher.results.filter <- fisher.results %>%
   arrange(module, fisher.fdr) %>%
   select(module, gene.category, estimate, fisher.fdr, everything(), -fisher, -method, -alternative)
 
-write_csv(fisher.results.filter, "../output/male_hermaphrodite_DEG_At_repro_fisher.csv")
+#Table 1
+write_csv(fisher.results.filter, "../output/male_hermaphrodite_DEG_At_repro_fisher_fdr_0.05.csv")
+
+# Supplemental Table 1
+write_csv(fisher.results.filter, "../output/male_hermaphrodite_DEG_At_repro_fisher_all.csv")
+
 
 fisher.results.filter 
 ```
