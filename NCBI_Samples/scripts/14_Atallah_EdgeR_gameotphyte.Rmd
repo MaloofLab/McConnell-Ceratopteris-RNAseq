@@ -1,0 +1,322 @@
+---
+title: "14 Attallah EdgeR "
+author: "Julin Maloof"
+date: "2026-06-10"
+output: html_document
+---
+
+Goal: Do a differential expression analysis on the Atallah Gametophyte samples
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(edgeR)
+library(tidyverse)
+library(goseq)
+library(GO.db)
+library(Biostrings)
+library(gplots)
+library(ggrepel)
+conflicted::conflicts_prefer(dplyr::select, dplyr::filter())
+```
+
+```{r}
+annotation <- read_delim("../../shared/input/Crichardii_676_v2.1.annotation_info.txt") %>% 
+  select(-contains("pacid"), -locusName, -peptideName, geneID = transcriptName)
+```
+
+
+## NCBI counts
+
+### Read the counts and create sample description
+```{r}
+counts.data.ncbi <- read_delim("../output/ht-seq-counts_ncbi.csv.gz")
+head(counts.data.ncbi)
+```
+
+```{r}
+counts.data.ncbi %>% filter(str_detect(gene_ID, "__"))
+```
+
+```{r}
+counts.data.ncbi <- counts.data.ncbi %>% filter(str_detect(gene_ID, "__", negate = TRUE))
+```
+
+
+```{r}
+sample.description.ncbi <- read_csv("../input/all_srr_info_short.csv")
+sample.description.ncbi
+```
+
+what is missing?
+
+```{r}
+mapped.samples.ncbi <- tibble(Run=colnames(counts.data.ncbi)[-1])
+sample.description.ncbi %>% anti_join(mapped.samples.ncbi)
+```
+callus.  not sure why this got dropped but probably okay.
+
+```{r}
+sample.description.ncbi <- sample.description.ncbi %>% semi_join(mapped.samples.ncbi)
+```
+
+
+### Filter for Atallah samples
+
+```{r}
+sample.description <- sample.description.ncbi %>% 
+  filter(str_detect(description, fixed("4.5 DAG"))) %>%
+  mutate(trt = ifelse(str_detect(description, "antheridogen"), "ctrl", "antheridogen")) %>%
+  select(sample=Run, trt, description)
+
+counts.data <- counts.data.ncbi[,c("gene_ID", sample.description$sample)]
+
+colnames(counts.data)[-1] == sample.description$sample
+```
+
+### more data wrangling
+
+remove low read genes:
+
+```{r}
+counts.data <- counts.data[rowSums(counts.data[,-1] > 5) >= 3,]
+```
+
+```{r}
+counts.matrix <- counts.data %>% select(-gene_ID) %>% as.matrix()
+rownames(counts.matrix) <- counts.data$gene_ID
+
+dge.data <- DGEList(counts=counts.matrix, 
+                    group=sample.description$trt)
+dim(dge.data) 
+dge.data <- calcNormFactors(dge.data, method = "TMM")
+dge.data$samples # look at the normalization factors
+```
+
+
+## MAKE AN MDS
+
+```{r}
+mdsvals <- plotMDS(dge.data, plot = FALSE) # get the MDS values for plotting
+```
+
+
+```{r}
+mdsvals2 <- tibble(x=mdsvals$x, y=mdsvals$y, sample=rownames(dge.data$samples)) %>%
+  inner_join(sample.description)
+
+
+mdsvals2 %>% 
+  ggplot(aes(x=x, y=y)) +
+  theme_bw() +
+  geom_point(size=3) +
+  geom_text_repel(aes(label=trt), size=2)
+```
+
+## Calculate dispersion
+
+```{r}
+design <- model.matrix(~trt,data = sample.description) 
+colnames(design) <- colnames(design) %>% str_remove("trt")
+rownames(design) <- sample.description$sample
+
+design
+```
+
+```{r}
+#First the overall dispersion
+dge.data <- estimateGLMCommonDisp(dge.data,design,verbose = TRUE)
+
+#Then a trended dispersion based on count level
+dge.data <- estimateGLMTrendedDisp(dge.data,design)
+
+#And lastly we calculate the gene-wise dispersion, using the prior estimates to "squeeze" the dispersion towards the common dispersion.
+dge.data <- estimateGLMTagwiseDisp(dge.data,design)
+
+#We can examine this with a plot
+plotBCV(dge.data)
+```
+## Find DEG
+
+Note: up = plus antheridogen
+
+```{r}
+fit <- glmQLFit(dge.data, design)
+lrt <- glmQLFTest(fit,coef = "ctrl")
+summary(decideTests.DGELRT(lrt,p.value=0.01)) 
+```
+
+```{r}
+#Extract get DE info for all genes
+genes.all <- topTags(lrt, n = Inf, p.value = 1)$table %>%
+  rownames_to_column("geneID") %>%
+  mutate()
+head(genes.all)
+```
+
+## Heat maps
+
+Not mean centered
+```{r, fig.height = 6}
+genes.heatmap <- bind_rows( {
+  genes.all %>% 
+    filter(logFC > 0) %>% 
+    slice_min(PValue, n = 50)
+},
+{ genes.all %>%
+    filter(logFC < 0) %>%
+    slice_min(PValue, n = 50)}
+  
+)
+
+hm <- cpm(dge.data, log = TRUE) %>%
+  as_tibble(rownames = "geneID") %>%
+    set_names(c("geneID",make.names(as.character(dge.data$samples$group), unique = TRUE))) %>%
+  semi_join(genes.heatmap) %>%
+  column_to_rownames("geneID") %>%
+  as.matrix() %>%
+  heatmap.2(trace="none",
+            col=colorpanel(15, low="black", mid="#666610", high="#FFFF33"), 
+            Colv = FALSE, dendrogram = "row", mar=c(10,8))
+  
+dev.copy(png, filename = "../output/Atallah_heatmap_tall.png", width=1200, height = 1800)
+
+genes.heatmap.reorder <- genes.heatmap[rev(match(colnames(hm$carpet),genes.heatmap$geneID)),]
+
+write_csv(genes.heatmap.reorder, "../output/Atallah_heatmap_genes_ordered.csv")
+
+dev.off()
+```
+
+Mean centered (but not scaled)
+
+```{r}
+hm.centered <- cpm(dge.data, log = TRUE) %>%
+  as_tibble(rownames = "geneID") %>%
+    set_names(c("geneID",make.names(as.character(dge.data$samples$group), unique = TRUE))) %>%
+  semi_join(genes.heatmap) %>%
+  column_to_rownames("geneID") %>%
+  as.matrix() %>%
+  t() %>% scale(scale=FALSE) %>% t() %>% # mean-center each gene
+  heatmap.2(trace="none",col="bluered", Colv = FALSE, dendrogram = "row", mar=c(10,8))
+
+dev.copy(png, filename = "../output/Atallah_heatmap_tall_centered.png", width=1200, height = 1800)
+
+genes.heatmap.reorder.centered <- genes.heatmap[rev(match(colnames(hm.centered$carpet),genes.heatmap$geneID)),]
+
+write_csv(genes.heatmap.reorder.centered, "../output/Atallah_heatmap_genes_ordered_centered.csv")
+
+dev.off()
+```
+
+Add annotation
+
+```{r}
+genes.all <- genes.all %>%
+  mutate(geneID = str_remove(geneID, "v[1-9]\\.")) %>% left_join(annotation)
+```
+Add GO term names
+
+```{r, eval=FALSE}
+get_GO_definition <- function(go_id) {
+  require(GO.db)
+  if(is.na(go_id)) return("")
+  go_id <- str_split_1(go_id, pattern = " ")
+  sapply(go_id, \ (x) {
+    term_info <- GOTERM[[x]]
+    if (is.null(term_info)) {
+      return("")
+    }
+    Term(term_info)
+  }) |>
+    str_c(collapse = "; ")
+}
+
+genes.all <- genes.all %>% rowwise() %>% mutate(GOterms = get_GO_definition(GO)) %>%
+  dplyr::select(geneID:FDR, GO, GOterms, starts_with("Best"), everything())
+
+head(genes.all)
+
+#save to a file
+write_csv(genes.all,"../output/DEG_ALL_Atallah.csv.gz")
+```
+
+```{r}
+genes.all <- read_csv("../output/DEG_ALL_Atallah.csv.gz")
+```
+
+
+## GO term enrichment:
+
+format go list
+```{r}
+go.list <- genes.all %>% pull(GO) %>% strsplit(" ") %>% set_names(genes.all$geneID)
+head(go.list)
+```
+
+Get gene lengths
+```{r}
+gene.lengths <- readRDS("../../shared/input/genelengths.Rds")
+
+gene.lengths <- gene.lengths[genes.all$geneID]
+```
+
+vectors of upregulated and downregulated genes
+
+```{r}
+genes.up <- genes.all %>% mutate(up = (FDR <= 0.01 & logFC > 0) * 1 ) %>% pull(up, name = geneID)
+genes.down <- genes.all %>% mutate(up = (FDR <= 0.01 & logFC < 0) * 1 ) %>% pull(up, name = geneID)
+```
+
+checking number of gene with/without GO terms
+```{r}
+nrow(genes.all) %>% str_c("Total expressed genes: ", .)
+
+genes.all %>% filter(is.na(GO)) %>% nrow() %>% str_c("Genes without GO: ", .)
+
+genes.all %>% filter(!is.na(GO)) %>% nrow() %>% str_c("Genes with GO: ", .)
+
+genes.all %>% filter(!is.na(GO)) %>% nrow() %>% magrittr::divide_by(nrow(genes.all)/100) %>% round(2) %>% str_c("% with GO: ", .)
+
+
+```
+
+
+```{r}
+#determines if there is bias due to gene length.  The plot shows the relationship.
+nullp.result.up <- nullp(DEgenes = genes.up, bias.data = gene.lengths)
+
+#calculate p-values for each GO term
+rownames(nullp.result.up) <- names(gene.lengths) #because of a bug in nullp()
+
+GO.out.up <- goseq(pwf = nullp.result.up, gene2cat = go.list, use_genes_without_cat=TRUE) %>%
+  filter(ontology == "BP") %>%
+  mutate(FDR = p.adjust(over_represented_pvalue, method = "fdr")) %>%
+  filter(FDR < 0.05) %>%
+  select(category, term, FDR, everything(), -under_represented_pvalue)
+ 
+GO.out.up
+
+write.csv(GO.out.up, "../output/GO_up_antheridogen_Atallah.csv")
+```
+
+```{r}
+#determines if there is bias due to gene length.  The plot shows the relationship.
+nullp.result.down <- nullp(DEgenes = genes.down, bias.data = gene.lengths)
+
+#calculate p-values for each GO term
+rownames(nullp.result.down) <- names(gene.lengths) #because of a bug in nullp()
+
+GO.out.down <- goseq(pwf = nullp.result.down, gene2cat = go.list, use_genes_without_cat=TRUE) %>%
+  filter(ontology == "BP") %>%
+  mutate(FDR = p.adjust(over_represented_pvalue, method = "fdr")) %>%
+  filter(FDR < 0.05) %>%
+  select(category, term, FDR, everything(), -under_represented_pvalue)
+ 
+GO.out.down
+
+write.csv(GO.out.down, "../output/GO_down_antheridogen_Atallah.csv")
+
+```

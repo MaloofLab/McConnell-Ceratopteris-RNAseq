@@ -428,7 +428,7 @@ fisher.results.filter <- fisher.results %>%
 write_csv(fisher.results.filter, "../output/male_hermaphrodite_DEG_At_repro_fisher_fdr_0.05.csv")
 
 # Supplemental Table 1
-write_csv(fisher.results.filter, "../output/male_hermaphrodite_DEG_At_repro_fisher_all.csv")
+write_csv(fisher.results, "../output/male_hermaphrodite_DEG_At_repro_fisher_all.csv")
 
 
 fisher.results.filter 

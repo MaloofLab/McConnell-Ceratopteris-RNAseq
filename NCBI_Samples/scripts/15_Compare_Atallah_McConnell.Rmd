@@ -1,0 +1,99 @@
+---
+title: "15_Compare_Atallah_McConnell"
+author: "Julin Maloof"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Compare GO and DEG in the Attalah (immature) and McConnell (mature) gametophyte samples
+
+```{r}
+library(tidyverse)
+library(ggVennDiagram)
+```
+
+## DEGs
+
+```{r}
+atallah_deg <- read_csv("../output/DEG_ALL_Atallah.csv.gz")
+# note "up" is plus antheridogen
+
+mcconnell_deg <- read_csv("../../McConnell_Samples/output/DEG_ALL_WT_male_v_herm.csv.gz")
+# note "up" is hermaphrodites
+```
+
+Venn Diagram
+```{r}
+venn_list <- list(
+  McConnell_hermaphrodite = mcconnell_deg %>% filter(FDR < 0.01, logFC > 0) %>% pull(geneID),
+  Atallah_ctrl = atallah_deg %>% filter(FDR < 0.01, logFC < 0) %>% pull(geneID),
+  Atallah_antheridogen = atallah_deg %>% filter(FDR < 0.01, logFC > 0) %>% pull(geneID),
+  McConnell_male = mcconnell_deg %>% filter(FDR < 0.01, logFC < 0) %>% pull(geneID)
+  )
+
+v_data <- process_data(Venn(venn_list))
+
+
+category_names = c("McConnell\nhermaphrodite", "Atallah\ncontrol", "Atallah\nantheridogen", "McConnell\nmale")
+
+ggplot() +
+  # 1. region count layer
+  geom_polygon(aes(X, Y, fill = count, group = id), 
+          data = venn_regionedge(v_data)) +
+  # 2. set edge layer
+  geom_path(aes(X, Y, color = id, group = id), 
+          data = venn_setedge(v_data), 
+          show.legend = FALSE) +
+  # 3. set label layer
+  geom_text(aes(X, Y*1.02, label = category_names), 
+               data = venn_setlabel(v_data)) +
+  # 4. region label layer
+  geom_label(aes(X, Y, label = count), 
+             fill = "grey90",
+                data = venn_regionlabel(v_data)) +
+  coord_equal() +
+  theme_void() +
+    scale_x_continuous(expand = expansion(mult = .2)) 
+
+ggsave("../Atallah_McConnell_Venn.pdf")
+ggsave("../Atallah_McConnell_Venn.png")
+```
+
+## GOs
+
+```{r}
+atallah_go_antheridogen <- read_csv("../output/GO_up_antheridogen_Atallah.csv") #empty
+atallah_go_control <- read_csv("../output/GO_down_antheridogen_Atallah.csv")
+mcconnell_go_male <- read_csv("../../McConnell_Samples/output/GO_down_WT_male_v_herm.csv") # 1 row
+mcconnell_go_hermaphrodites <- read_csv("../../McConnell_Samples/output/GO_up_WT_male_v_herm.csv")
+```
+
+```{r}
+atallah_go_control <- atallah_go_control %>%
+  mutate(enrichment=numDEInCat/numInCat) %>%
+  select(term, enrichment, FDR)
+
+mcconnell_go_hermaphrodites <- mcconnell_go_hermaphrodites %>%
+  mutate(enrichment=numDEInCat/numInCat) %>%
+  select(term, enrichment, FDR)
+
+ctrl_herm_combined <- bind_rows(Atallah = atallah_go_control, McConnell = mcconnell_go_hermaphrodites,.id="data_set")
+```
+
+```{r}
+ctrl_herm_combined %>%
+  group_by(term) %>%
+  mutate(enrich_max = max(enrichment, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(term=fct_reorder(term, enrich_max, .desc = FALSE)) %>%
+  ggplot(aes(x=data_set, y = term, size = enrichment, color = -log10(FDR))) +
+  geom_point()
+
+ggsave("../output/Atallah_McConnell_GO_herm_ctrl.pdf")
+ggsave("../output/Atallah_McConnell_GO_herm_ctrl.png")
+```
+

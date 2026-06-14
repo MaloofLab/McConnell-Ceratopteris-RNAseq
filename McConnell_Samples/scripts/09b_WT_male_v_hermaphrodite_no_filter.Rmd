@@ -256,11 +256,11 @@ gene.lengths <- nchar(seqs) %>% set_names(str_remove(names(seqs), " .*"))
 
 gene.lengths
 
-saveRDS(gene.lengths, "../input/genelengths.Rds")
+saveRDS(gene.lengths, "../../shared/input/genelengths.Rds")
 ```
 
 ```{r}
-gene.lengths <- readRDS("../input/genelengths.Rds")
+gene.lengths <- readRDS("../../shared/input/genelengths.Rds")
 ```
 
 ```{r}
