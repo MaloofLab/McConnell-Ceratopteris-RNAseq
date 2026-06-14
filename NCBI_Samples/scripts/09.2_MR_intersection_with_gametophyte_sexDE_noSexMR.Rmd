@@ -469,6 +469,8 @@ fisher.results.LFY1.cluster <- expand_grid(gene.category = colnames(Cr_gene_info
     mutate(fisher.fdr = p.adjust(fisher.p.value, method = "fdr")) %>%
   arrange(fisher.p.value)
 
+write_csv(fisher.results.LFY1.cluster, "../output/male_hermaphrodite_DEG_LFY1_Cluster_At_repro_fisher_all.csv")
+
 ```
 
 ```{r}
@@ -479,7 +481,7 @@ fisher.results.LFY1.cluster.filter <- fisher.results.LFY1.cluster %>%
   arrange(module, fisher.fdr) %>%
   select(module, gene.category, estimate, fisher.fdr, everything(), -fisher, -method, -alternative)
 
-write_csv(fisher.results.LFY1.cluster.filter, "../output/male_hermaphrodite_DEG_LFY1_Cluster_At_repro_fisher.csv")
+write_csv(fisher.results.LFY1.cluster.filter, "../output/male_hermaphrodite_DEG_LFY1_Cluster_At_repro_fisher_fdr_0.05.csv")
 
 fisher.results.LFY1.cluster.filter
 ```
