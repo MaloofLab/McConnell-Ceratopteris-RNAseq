@@ -5,12 +5,11 @@ For McConnell 2026 Paper on Male vs Hermaphrodite Gametophytes:
 
 ## Figure 2 scripts:
 
-```
-McConnell-Ceratopteris-RNAseq/McConnell_Samples/scripts/00_Download_and_QC.Rmd
-McConnell-Ceratopteris-RNAseq/McConnell_Samples/scripts/01_Trim_Reads.Rmd
-McConnell-Ceratopteris-RNAseq/McConnell_Samples/scripts/02_Map_Reads.Rmd
-McConnell-Ceratopteris-RNAseq/McConnell_Samples/scripts/09_WT_male_v_hermaphrodite.Rmd
-```
+`McConnell-Ceratopteris-RNAseq/McConnell_Samples/scripts/00_Download_and_QC.Rmd`
+`McConnell-Ceratopteris-RNAseq/McConnell_Samples/scripts/01_Trim_Reads.Rmd`
+`McConnell-Ceratopteris-RNAseq/McConnell_Samples/scripts/02_Map_Reads.Rmd`
+`McConnell-Ceratopteris-RNAseq/McConnell_Samples/scripts/09_WT_male_v_hermaphrodite.Rmd`
+
 The actual figure was made external to R, so no scripts for that.
 
 ## Table 1 and Supplemental Table X script:
@@ -27,13 +26,11 @@ The actual figure was made external to R, so no scripts for that.
 
 ## Downloading and processing of NCBI samples in prep for MR networks and Atallah analysis:
 
-```
-McConnell-Ceratopteris-RNAseq/NCBI_Samples/scripts/01_Download_NCBI_Reads.sh
-McConnell-Ceratopteris-RNAseq/NCBI_Samples/scripts/02_Map_Reads.Rmd
-McConnell-Ceratopteris-RNAseq/NCBI_Samples/scripts/3a2_EdgeR_gameotphyte_remove_4.5DAG.Rmd
-```
+`McConnell-Ceratopteris-RNAseq/NCBI_Samples/scripts/01_Download_NCBI_Reads.sh`
+`McConnell-Ceratopteris-RNAseq/NCBI_Samples/scripts/02_Map_Reads.Rmd`
+`McConnell-Ceratopteris-RNAseq/NCBI_Samples/scripts/3a2_EdgeR_gameotphyte_remove_4.5DAG.Rmd`
 
-lemental Table Z script:
+## Table 4 and Supplemental Table Z script:
 `McConnell-Ceratopteris-RNAseq/NCBI_Samples/scripts/09.2_MR_intersection_with_gametophyte_sexDE_noSexMR.Rmd`
 
 ## Figure 6 script:
@@ -48,6 +45,5 @@ lemental Table Z script:
 
 `McConnell-Ceratopteris-RNAseq/NCBI_Samples/scripts/14_Atallah_EdgeR_gameotphyte.Rmd`
 `McConnell-Ceratopteris-RNAseq/NCBI_Samples/scripts/15_Compare_Atallah_McConnell.Rmd`
-/Users/jmaloof/git/McConnell-Ceratopteris-RNAseq/NCBI_Samples/scripts/15_Compare_Atallah_McConnell.Rmd
 
 
