@@ -71,11 +71,17 @@ counts.data %>% filter(str_detect(gene_ID, "__")) %>% magrittr::extract(-1) %>% 
 counts.data <- counts.data %>% filter(str_detect(gene_ID, "__", negate = TRUE))
 ```
 
+```{r}
+write_csv(counts.data, "../output/counts_unfiltered_male_herm.csv.gz")
+```
+
 
 remove low read genes:
 
 ```{r}
+nrow(counts.data)
 counts.data <- counts.data[rowSums(counts.data[,-1] > 5) >= 3,]
+nrow(counts.data)
 ```
 
 ```{r}

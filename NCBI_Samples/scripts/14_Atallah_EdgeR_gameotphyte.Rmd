@@ -76,6 +76,10 @@ counts.data <- counts.data.ncbi[,c("gene_ID", sample.description$sample)]
 colnames(counts.data)[-1] == sample.description$sample
 ```
 
+```{r}
+write_csv(counts.data, "../output/counts_unfiltered_Atallah.csv.gz")
+```
+
 ### more data wrangling
 
 remove low read genes:
