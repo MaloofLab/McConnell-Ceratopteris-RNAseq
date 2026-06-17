@@ -50,15 +50,10 @@ sample.description.ncbi <- read_csv("../input/all_srr_info_short.csv")
 sample.description.ncbi
 ```
 
-what is missing?
 
 ```{r}
 mapped.samples.ncbi <- tibble(Run=colnames(counts.data.ncbi)[-1])
-sample.description.ncbi %>% anti_join(mapped.samples.ncbi)
-```
-callus.  not sure why this got dropped but probably okay.
 
-```{r}
 sample.description.ncbi <- sample.description.ncbi %>% semi_join(mapped.samples.ncbi)
 ```
 
@@ -68,7 +63,7 @@ sample.description.ncbi <- sample.description.ncbi %>% semi_join(mapped.samples.
 ```{r}
 sample.description <- sample.description.ncbi %>% 
   filter(str_detect(description, fixed("4.5 DAG"))) %>%
-  mutate(trt = ifelse(str_detect(description, "antheridogen"), "ctrl", "antheridogen")) %>%
+  mutate(trt = ifelse(str_detect(description, "antheridogen"), "antheridogen", "ctrl")) %>%
   select(sample=Run, trt, description)
 
 counts.data <- counts.data.ncbi[,c("gene_ID", sample.description$sample)]
@@ -144,7 +139,7 @@ plotBCV(dge.data)
 ```
 ## Find DEG
 
-Note: up = plus antheridogen
+Note: up = ctrl, down = with antheridogen.  This might seem backwards but it matches the direction of the way I did Hannah's
 
 ```{r}
 fit <- glmQLFit(dge.data, design)
@@ -270,8 +265,8 @@ gene.lengths <- gene.lengths[genes.all$geneID]
 vectors of upregulated and downregulated genes
 
 ```{r}
-genes.up <- genes.all %>% mutate(up = (FDR <= 0.01 & logFC > 0) * 1 ) %>% pull(up, name = geneID)
-genes.down <- genes.all %>% mutate(up = (FDR <= 0.01 & logFC < 0) * 1 ) %>% pull(up, name = geneID)
+genes.up.antheridogen <- genes.all %>% mutate(up = (FDR <= 0.01 & logFC < 0) * 1 ) %>% pull(up, name = geneID)
+genes.down.antheridogen <- genes.all %>% mutate(up = (FDR <= 0.01 & logFC > 0) * 1 ) %>% pull(up, name = geneID)
 ```
 
 checking number of gene with/without GO terms
@@ -290,7 +285,7 @@ genes.all %>% filter(!is.na(GO)) %>% nrow() %>% magrittr::divide_by(nrow(genes.a
 
 ```{r}
 #determines if there is bias due to gene length.  The plot shows the relationship.
-nullp.result.up <- nullp(DEgenes = genes.up, bias.data = gene.lengths)
+nullp.result.up <- nullp(DEgenes = genes.up.antheridogen, bias.data = gene.lengths)
 
 #calculate p-values for each GO term
 rownames(nullp.result.up) <- names(gene.lengths) #because of a bug in nullp()
@@ -308,7 +303,7 @@ write.csv(GO.out.up, "../output/GO_up_antheridogen_Atallah.csv")
 
 ```{r}
 #determines if there is bias due to gene length.  The plot shows the relationship.
-nullp.result.down <- nullp(DEgenes = genes.down, bias.data = gene.lengths)
+nullp.result.down <- nullp(DEgenes = genes.down.antheridogen, bias.data = gene.lengths)
 
 #calculate p-values for each GO term
 rownames(nullp.result.down) <- names(gene.lengths) #because of a bug in nullp()

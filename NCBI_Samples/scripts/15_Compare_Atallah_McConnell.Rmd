@@ -20,7 +20,7 @@ library(ggVennDiagram)
 
 ```{r}
 atallah_deg <- read_csv("../output/DEG_ALL_Atallah.csv.gz")
-# note "up" is plus antheridogen
+# note "up" is ctrl (no antheridogen)
 
 mcconnell_deg <- read_csv("../../McConnell_Samples/output/DEG_ALL_WT_male_v_herm.csv.gz")
 # note "up" is hermaphrodites
@@ -30,10 +30,10 @@ Venn Diagram
 ```{r}
 venn_list <- list(
   McConnell_hermaphrodite = mcconnell_deg %>% filter(FDR < 0.01, logFC > 0) %>% pull(geneID),
-  Atallah_ctrl = atallah_deg %>% filter(FDR < 0.01, logFC < 0) %>% pull(geneID),
-  Atallah_antheridogen = atallah_deg %>% filter(FDR < 0.01, logFC > 0) %>% pull(geneID),
+  Atallah_ctrl = atallah_deg %>% filter(FDR < 0.01, logFC > 0) %>% pull(geneID),
+  Atallah_antheridogen = atallah_deg %>% filter(FDR < 0.01, logFC < 0) %>% pull(geneID),
   McConnell_male = mcconnell_deg %>% filter(FDR < 0.01, logFC < 0) %>% pull(geneID)
-  )
+)
 
 v_data <- process_data(Venn(venn_list))
 
@@ -43,21 +43,21 @@ category_names = c("McConnell\nhermaphrodite", "Atallah\ncontrol", "Atallah\nant
 ggplot() +
   # 1. region count layer
   geom_polygon(aes(X, Y, fill = count, group = id), 
-          data = venn_regionedge(v_data)) +
+               data = venn_regionedge(v_data)) +
   # 2. set edge layer
   geom_path(aes(X, Y, color = id, group = id), 
-          data = venn_setedge(v_data), 
-          show.legend = FALSE) +
+            data = venn_setedge(v_data), 
+            show.legend = FALSE) +
   # 3. set label layer
   geom_text(aes(X, Y*1.02, label = category_names), 
-               data = venn_setlabel(v_data)) +
+            data = venn_setlabel(v_data)) +
   # 4. region label layer
   geom_label(aes(X, Y, label = count), 
              fill = "grey90",
-                data = venn_regionlabel(v_data)) +
+             data = venn_regionlabel(v_data)) +
   coord_equal() +
   theme_void() +
-    scale_x_continuous(expand = expansion(mult = .2)) 
+  scale_x_continuous(expand = expansion(mult = .2)) 
 
 ggsave("../Atallah_McConnell_Venn.pdf")
 ggsave("../Atallah_McConnell_Venn.png")
@@ -95,5 +95,26 @@ ctrl_herm_combined %>%
 
 ggsave("../output/Atallah_McConnell_GO_herm_ctrl.pdf")
 ggsave("../output/Atallah_McConnell_GO_herm_ctrl.png")
+```
+
+## output combined list
+
+```{r}
+combined <- mcconnell_deg %>%
+  select(geneID:FDR) %>%
+  full_join(atallah_deg, by = "geneID", suffix = c(".mcconnell", ".atallah")) %>%
+  mutate(up.male.both = logFC.mcconnell < 0 & logFC.atallah < 0 & FDR.mcconnell < 0.01 & FDR.atallah < 0.01,
+         up.hermaphrodite.both = logFC.mcconnell > 0 & logFC.atallah > 0 & FDR.mcconnell < 0.01 & FDR.atallah < 0.01,
+         up.male.mcconnell.only  = logFC.mcconnell < 0 & FDR.mcconnell < 0.01 & (is.na(FDR.atallah) | FDR.atallah >= 0.01),
+         up.male.atallah = logFC.atallah < 0 & (is.na(FDR.mcconnell) | FDR.mcconnell >= 0.01) & FDR.atallah < 0.01,
+         up.herm.mcconnell.only = logFC.mcconnell > 0 & FDR.mcconnell < 0.01 & (is.na(FDR.atallah) | FDR.atallah >= 0.01),
+         up.herm.attallah.only = logFC.atallah > 0 & (is.na(FDR.mcconnell) | FDR.mcconnell >= 0.01) & FDR.atallah < 0.01,
+  ) %>%
+  select(geneID, starts_with("up"), everything()) %>%
+  arrange(FDR.mcconnell)
+
+combined
+
+write_csv(combined, "../output/Atallah_McConnell_DEG_combined.csv.gz")
 ```
 
