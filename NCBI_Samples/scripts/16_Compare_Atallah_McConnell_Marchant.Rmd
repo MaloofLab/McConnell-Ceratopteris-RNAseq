@@ -107,17 +107,19 @@ marchant_cpm <- marchant %>%
 
 
 
-Venn Diagram of genes with > 5 counts (raw)
+Venn Diagram of genes with > 1 cpm
 
 ```{r}
+threshold = .5
+
 venn_listcpm1 = list(McConnell = 
-                    {mcconnell_cpm %>% filter(sum_count > 1) %>% pull(gene_ID)},
+                    {mcconnell_cpm %>% filter(sum_count > threshold) %>% pull(gene_ID)},
                  Atallah=
-                   {atallah_cpm %>% filter(sum_count > 1) %>% pull(gene_ID)},
+                   {atallah_cpm %>% filter(sum_count > threshold) %>% pull(gene_ID)},
                  Marchant_immature =
-                   { marchant %>% filter(Marchant_immature > 1) %>% pull(gene_ID)},
+                   { marchant %>% filter(Marchant_immature > threshold) %>% pull(gene_ID)},
                  Marchant_mature_cpm =
-                   { marchant %>% filter(Marchant_mature > 1) %>% pull(gene_ID)})
+                   { marchant %>% filter(Marchant_mature > threshold) %>% pull(gene_ID)})
 
 v_datacpm1 <- process_data(Venn(venn_listcpm1))
 
@@ -141,4 +143,8 @@ ggplot() +
   coord_equal() +
   theme_void() +
     scale_x_continuous(expand = expansion(mult = .2)) 
+
+ggsave("../output/Atallah_McConnell__Marchant_Venn.png")
+ggsave("../output/Atallah_McConnell__Marchant_Venn.pdf")
+
 ```
