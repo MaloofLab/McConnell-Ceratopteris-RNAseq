@@ -62,6 +62,22 @@ ggplot() +
 ggsave("../Atallah_McConnell_Venn.pdf")
 ggsave("../Atallah_McConnell_Venn.png")
 ```
+```{r}
+#males and antheridogen
+mcconnell_deg %>% mutate(up_male = FDR < 0.01 & logFC<0) %>%
+  select(geneID, up_male) %>%
+  full_join(atallah_deg, by = "geneID") %>%
+  mutate(up_antheridogen = FDR < 0.01 & logFC<0) %>%
+  fisher.test(x=.$up_male, y = .$up_antheridogen)
+```
+```{r}
+#hermaphrodites and ctrl
+mcconnell_deg %>% mutate(up_herm = FDR < 0.01 & logFC>0) %>%
+  select(geneID, up_herm) %>%
+  full_join(atallah_deg, by = "geneID") %>%
+  mutate(up_ctrl = FDR < 0.01 & logFC>0) %>%
+  fisher.test(x=.$up_herm, y = .$up_ctrl)
+```
 
 ## GOs
 
