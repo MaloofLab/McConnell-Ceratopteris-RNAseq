@@ -54,7 +54,7 @@ families %>% select(geneID = Male.Flagella.genes) %>% mutate(male.flagella = TRU
 ```
 
 ```{r}
-families.long <- families %>% pivot_longer(everything(), names_to = "gene_type", values_to = "geneID")
+families.long <- families %>% pivot_longer(everything(), names_to = "gene_type", values_to = "geneID", values_drop_na = TRUE)
 ```
 
 ```{r}
@@ -68,17 +68,17 @@ fisher.data %>% full_join(families.long) %>%
 case by case
 ```{r}
 # missing Herm.flagella.gene
-families.long %>% filter(gene_type == "Herm.Flagella.genes") %>% drop_na() %>% anti_join(fisher.data) %>% left_join(deg)
+families.long %>% filter(gene_type == "Herm.Flagella.genes") %>% anti_join(fisher.data) %>% left_join(deg)
 ```
 
 ```{r}
 # missing Herm.RWP.RK.Family.Genes
-families.long %>% filter(gene_type == "Herm.RWP.RK.Family.Genes") %>% drop_na() %>% anti_join(fisher.data) %>% left_join(deg)
+families.long %>% filter(gene_type == "Herm.RWP.RK.Family.Genes") %>% anti_join(fisher.data) %>% left_join(deg)
 ```
 
 ```{r}
 # miscategorized Male.Flagella.genes
-families.long %>% filter(gene_type == "Male.Flagella.genes") %>% drop_na() %>% left_join(deg) %>% filter(logFC > 0)
+families.long %>% filter(gene_type == "Male.Flagella.genes") %>% left_join(deg) %>% filter(logFC > 0)
 ```
 
 
@@ -96,3 +96,20 @@ fisher.test(fisher.data$category, fisher.data$cell_div)
 ```{r}
 fisher.test(fisher.data$category, fisher.data$RWP.RK) 
 ```
+## plot of RWP.RK genes
+
+```{r}
+families.long %>% filter(str_detect(gene_type, "RWP")) %>%
+  left_join(deg) %>%
+  filter(FDR < 0.01) %>%
+  mutate(geneID = fct_reorder(geneID, logFC, .desc = TRUE)) %>%  
+  ggplot(aes(x=geneID, y = logFC, fill = logFC > 0)) +
+  geom_col() +
+  guides(fill = "none") +
+  theme(axis.title.x = element_blank(), axis.text.x = element_text(angle=90, vjust = 0.5))
+
+ggsave("../output/Fig_RWP.RK_genes.pdf", width = 3, height = 3)
+ggsave("../output/Fig_RWP.RK_genes.png", width = 3, height = 3)
+
+```
+
