@@ -1,0 +1,98 @@
+---
+title: "Gene Family Enrichment"
+author: "Julin Maloof"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Hannah has curated some gene families whose members are enriched in the DEG set.  This script tests whether the enrichment is significant.  (Table 2)
+
+```{r}
+library(tidyverse)
+library(googlesheets4)
+```
+
+## Data import
+
+```{r}
+families <- read_sheet("https://docs.google.com/spreadsheets/d/1205a9pwhUPYs87YmiousdaB6jWWAaH4Lu97N-pW38W0", .name_repair = "universal") %>% 
+  select(-starts_with("...")) %>%
+  rename_with(str_remove, pattern = "\\.$")
+families
+```
+
+```{r}
+deg <- read_csv("../output/DEG_ALL_WT_male_v_herm.csv.gz")
+```
+
+```{r}
+fisher.data <- deg %>% filter(FDR < 0.01) %>% 
+  mutate(category = ifelse(logFC < 0, "up_male", "up_hermaphrodite")) %>%
+  select(geneID, category) %>%
+  mutate(flagella = geneID %in% c(families$Male.Flagella.genes, families$Herm.Flagella.genes),
+         dynein = geneID %in% c(families$Male.Dynein.Genes, families$Herm.Dynein.Genes),
+         cell_div = geneID %in% families$Male.Cell.Division.Genes,
+         RWP.RK = geneID %in% c(families$Male.RWP.RK.Family.Genes, families$Herm.RWP.RK.Family.Genes))
+```
+
+```{r}
+fisher.data %>%
+  group_by(category) %>%
+  summarize(across(flagella:RWP.RK, sum))
+  
+```
+
+Numbers don't quite match...what is missing?
+
+```{r}
+families %>% select(geneID = Male.Flagella.genes) %>% mutate(male.flagella = TRUE) %>% full_join(fisher.data) %>% group_by(category) %>% summarize(sum(male.flagella, na.rm = TRUE))
+
+```
+
+```{r}
+families.long <- families %>% pivot_longer(everything(), names_to = "gene_type", values_to = "geneID")
+```
+
+```{r}
+fisher.data %>% full_join(families.long) %>%
+  group_by(gene_type, category) %>%
+  summarize(count = n()) %>%
+  drop_na() %>% 
+  arrange(gene_type)
+```
+
+case by case
+```{r}
+# missing Herm.flagella.gene
+families.long %>% filter(gene_type == "Herm.Flagella.genes") %>% drop_na() %>% anti_join(fisher.data) %>% left_join(deg)
+```
+
+```{r}
+# missing Herm.RWP.RK.Family.Genes
+families.long %>% filter(gene_type == "Herm.RWP.RK.Family.Genes") %>% drop_na() %>% anti_join(fisher.data) %>% left_join(deg)
+```
+
+```{r}
+# miscategorized Male.Flagella.genes
+families.long %>% filter(gene_type == "Male.Flagella.genes") %>% drop_na() %>% left_join(deg) %>% filter(logFC > 0)
+```
+
+
+```{r}
+fisher.test(fisher.data$category, fisher.data$flagella) 
+```
+```{r}
+fisher.test(fisher.data$category, fisher.data$dynein) 
+```
+
+```{r}
+fisher.test(fisher.data$category, fisher.data$cell_div) 
+```
+
+```{r}
+fisher.test(fisher.data$category, fisher.data$RWP.RK) 
+```
