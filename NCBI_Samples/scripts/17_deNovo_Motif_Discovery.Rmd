@@ -1,0 +1,278 @@
+---
+title: "17_de_Novo_Motif_Analysis"
+output: html_notebook
+---
+
+```{r, message=FALSE}
+library(Biostrings)
+library(tidyverse)
+library(memes)
+```
+
+```{r}
+setwd(this.path::this.dir()) # for VScode
+```
+
+load genome
+```{r}
+genome <- readDNAStringSet("~/Sequences/ref_genomes/C_richardii_v2.1/assembly/Crichardii_676_v2.0.fa.gz")
+genome <- genome[nchar(genome) >= 100000] # only keep reasonably sized scaffolds
+```
+
+load gff
+
+```{r}
+gff <- rtracklayer::import.gff("~/Sequences/ref_genomes/C_richardii_v2.1/annotation/Crichardii_676_v2.1.gene.gff3.gz") 
+gff <- gff[gff$type=="mRNA" & gff$longest==1]
+```
+
+```{r}
+promoters <- flank(gff, 5000)
+# Keep only promoters on scaffolds that are in the genome
+promoters <- promoters[seqnames(promoters) %in% names(genome)]
+# Set sequence info for promoters to match genome
+seqlevels(promoters) <- seqlevels(promoters)[seqlevels(promoters) %in% names(genome)]
+suppressWarnings(seqinfo(promoters) <- seqinfo(genome)[seqlevels(promoters)])
+# Trim promoters that extend beyond scaffold boundaries
+promoters <- suppressWarnings(trim(promoters))
+cat("Number of promoters:", length(promoters), "\n")
+```
+
+## LFY1 gametophyte sex cluster
+
+```{r}
+lfy1.gam.sex.cluster <- read_csv("../output/LFY1_gam_sex_cluster_noSexSamples.csv.gz")
+```
+
+### Motif discovery in cluster genes
+
+```{r}
+# Filter for genes in the LFY1 cluster
+cluster_genes <- lfy1.gam.sex.cluster %>%
+  filter(in_LFY1_cluster == TRUE) %>%
+  pull(geneID)
+
+cat("Number of genes in LFY1 cluster:", length(cluster_genes), "\n")
+```
+
+```{r}
+# Match cluster genes to promoters
+# First, add gene names to promoters for easier matching
+promoters_names_clean <- str_remove(promoters$Name, "\\.v2$")
+names(promoters) <- promoters_names_clean
+
+# Remove version suffix if present in geneID
+cluster_genes_clean <- str_remove(cluster_genes, "\\.v2$")
+
+# Get promoters for cluster genes by name
+cluster_promoters <- promoters[cluster_genes_clean[cluster_genes_clean %in% names(promoters)]]
+
+cat("Number of cluster promoters found:", length(cluster_promoters), "\n")
+
+# Get background promoters (genes NOT in cluster)
+background_genes <- lfy1.gam.sex.cluster %>%
+  filter(in_LFY1_cluster == FALSE) %>%
+  pull(geneID)
+
+background_genes_clean <- str_remove(background_genes, "\\.v2$")
+background_promoters <- promoters[background_genes_clean[background_genes_clean %in% names(promoters)]]
+
+cat("Number of background promoters found:", length(background_promoters), "\n")
+```
+
+```{r}
+# Extract sequences using genome DNAStringSet
+cluster_seqs <- genome[cluster_promoters]
+names(cluster_seqs) <- names(cluster_promoters)
+
+background_seqs <- genome[background_promoters]
+names(background_seqs) <- names(background_promoters)
+
+# Save sequences to fasta for memes
+writeXStringSet(cluster_seqs, "../output/LFY1_cluster_promoters.fasta")
+writeXStringSet(background_seqs, "../output/LFY1_background_promoters.fasta")
+```
+
+```{r}
+# Run STREME for discriminative motif discovery
+# Using real background promoters instead of shuffled sequences
+system.time(
+  lfy1_cluster_streme <- runStreme(cluster_seqs, 
+                                  control = background_seqs,
+                                  nmotifs = 10,
+                                  minw = 6,
+                                  maxw = 20,
+                                  p = 8)  # number of threads
+)
+
+lfy1_cluster_streme
+```
+
+```{r}
+# View the motifs
+view_tomtom_hits(lfy1_cluster_streme)
+```
+
+
+## WGCNA
+
+### gametophyte samples
+```{r}
+load("../output/WGCNA_gametophyte_all_no4.5DAG.Rdata")
+gmodule.assignment <- module.assignment
+```
+
+### LFY1
+```{r}
+lfy1.gmodule <- gmodule.assignment %>% filter(str_detect(geneID, CrLFY1)) %>% pull(module)
+
+gmodule.assignment %>%
+  mutate(geneID = str_remove(geneID, "\\.v2")) %>% 
+  right_join(overlaps) %>%
+  mutate(module=ifelse(is.na(module), "none", module),
+         in.network = module==lfy1.gmodule) %>%
+  t.test(count ~ in.network, data = .)
+```
+```{r}
+lfy2.gmodule <- gmodule.assignment %>% filter(str_detect(geneID, CrLFY2)) %>% pull(module)
+
+gmodule.assignment %>%
+  mutate(geneID = str_remove(geneID, "\\.v2")) %>% 
+  right_join(overlaps) %>%
+  mutate(module=ifelse(is.na(module), "none", module),
+         in.network = module==lfy2.gmodule) %>%
+  t.test(count ~ in.network, data = .)
+```
+
+### sporophyte samples
+```{r}
+load("../output/WGCNA_sporophyte_all.Rdata")
+smodule.assignment <- module.assignment
+```
+
+### LFY1
+```{r}
+lfy1.smodule <- smodule.assignment %>% filter(str_detect(geneID, CrLFY1)) %>% pull(module)
+
+smodule.assignment %>%
+  mutate(geneID = str_remove(geneID, "\\.v2")) %>% 
+  right_join(overlaps) %>%
+  mutate(module=ifelse(is.na(module), "none", module),
+         in.network = module==lfy1.smodule) %>%
+  t.test(count ~ in.network, data = .)
+```
+
+```{r}
+lfy2.smodule <- smodule.assignment %>% filter(str_detect(geneID, CrLFY2)) %>% pull(module)
+
+smodule.assignment %>%
+  mutate(geneID = str_remove(geneID, "\\.v2")) %>% 
+  right_join(overlaps) %>%
+  mutate(module=ifelse(is.na(module), "none", module),
+         in.network = module==lfy2.smodule) %>%
+  t.test(count ~ in.network, data = .)
+```
+
+## load TGCN networks
+
+## TGCN Gametophyte
+
+### LFY1 Cutoff 6
+
+All genes in submodules
+```{r}
+read_csv("../output/TGCN_LFY1_gam/results/LFY1_gam_c6_TGCN.csv") %>% 
+  rename(geneID = genes) %>% 
+  right_join(overlaps) %>%
+  mutate(in.network=!is.na(hubGene))  %>%
+  t.test(count ~ in.network, data = .)
+```
+hub genes only
+```{r}
+read_csv("../output/TGCN_LFY1_gam/results/LFY1_gam_c6_TGCN.csv") %>% 
+  select(geneID=hubGene) %>%
+  distinct() %>% 
+  mutate(in.network=TRUE) %>%
+  right_join(overlaps) %>%
+  mutate(in.network=!is.na(in.network))  %>%
+  t.test(count ~ in.network, data = .)
+```
+
+### LFY2 Cutoff 5
+
+Note: this gets more significant as I raise the cutoff (e.g. to 7)
+
+All genes in submodules
+```{r}
+read_csv("../output/TGCN_LFY2_gam/results/LFY2_gam_c6_TGCN.csv") %>% 
+  rename(geneID = genes) %>% 
+  right_join(overlaps) %>%
+  mutate(in.network=!is.na(hubGene)) %>%
+  t.test(count ~ in.network, data = .)
+
+```
+hub genes only
+```{r}
+read_csv("../output/TGCN_LFY2_gam/results/LFY2_gam_c5_TGCN.csv") %>% 
+  select(geneID=hubGene) %>%
+  distinct() %>% 
+  mutate(in.network=TRUE) %>%
+  right_join(overlaps) %>%
+  mutate(in.network=!is.na(in.network)) %>%
+  t.test(count ~ in.network, data = .)
+```
+
+## TGCN Sporophyte
+
+### LFY1 Cutoff 5
+
+All genes in submodules
+```{r}
+read_csv("../output/TGCN_LFY1_sp/results/LFY1_sp_c5_TGCN.csv", show_col_types = FALSE) %>% 
+  rename(geneID = genes) %>% 
+  right_join(overlaps) %>%
+  mutate(in.network=!is.na(hubGene))  %>%
+  t.test(count ~ in.network, data = .)
+```
+hub genes only
+```{r}
+read_csv("../output/TGCN_LFY1_gam/results/LFY1_gam_c5_TGCN.csv", show_col_types = FALSE) %>% 
+  select(geneID=hubGene) %>%
+  distinct() %>% 
+  mutate(in.network=TRUE) %>%
+  right_join(overlaps) %>%
+  mutate(in.network=!is.na(in.network))  %>%
+  t.test(count ~ in.network, data = .)
+```
+
+### LFY2 Cutoff 4
+
+Note: cutoff of 5 or higher is n.s.
+
+All genes in submodules
+```{r}
+read_csv("../output/TGCN_LFY2_sp/results/LFY2_sp_c4_TGCN.csv", show_col_types = FALSE) %>% 
+  rename(geneID = genes) %>% 
+  right_join(overlaps) %>%
+  mutate(in.network=!is.na(hubGene)) %>%
+  t.test(count ~ in.network, data = .)
+
+```
+hub genes only
+```{r}
+read_csv("../output/TGCN_LFY2_sp/results/LFY2_sp_c4_TGCN.csv", show_col_types = FALSE) %>% 
+  select(geneID=hubGene) %>%
+  distinct() %>% 
+  mutate(in.network=TRUE) %>%
+  right_join(overlaps) %>%
+  mutate(in.network=!is.na(in.network)) %>%
+  t.test(count ~ in.network, data = .)
+```
+
+
+Next steps...
+
+
+Also think about looking at relationship between # of LFY binding sites and correlation
+
+
