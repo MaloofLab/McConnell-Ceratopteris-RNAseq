@@ -110,7 +110,16 @@ write_csv(lfy1_cluster_streme, "../output/lfy1_cluster_denovo_streme.csv")
 ```
 
 ```{r}
-# View the motifs
+# Run TOMTOM to compare discovered motifs against JASPAR2024 plant database
+# Note: This requires JASPAR2024_CORE_plants_non-redundant.meme to be available
+# You may need to download it from: http://meme-suite.org/meme/doc/download.html
+# Or install via: install_meme_databases()
+lfy1_cluster_streme <- runTomTom(lfy1_cluster_streme, 
+                                database = "JASPAR2024_CORE_plants_non-redundant")
+```
+
+```{r}
+# View the motifs with TOMTOM hits
 view_tomtom_hits(lfy1_cluster_streme)
 ```
 
