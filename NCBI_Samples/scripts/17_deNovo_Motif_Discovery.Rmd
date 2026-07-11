@@ -7,6 +7,9 @@ output: html_document
 library(Biostrings)
 library(tidyverse)
 library(memes)
+library(JASPAR2024)
+library(TFBSTools)
+library(universalmotif)
 ```
 
 ```{r}
@@ -110,12 +113,19 @@ write_csv(lfy1_cluster_streme, "../output/lfy1_cluster_denovo_streme.csv")
 ```
 
 ```{r}
+# Load JASPAR2024 plant motifs and convert to universalmotif format for TOMTOM
+jaspar_db <- JASPAR2024()@db
+opts <- list(tax_group = "plants")
+pfm_list <- getMatrixSet(jaspar_db, opts)
+
+# Convert to universalmotif format (compatible with memes package)
+jaspar_plant_motifs <- convert_motifs(pfm_list)
+```
+
+```{r}
 # Run TOMTOM to compare discovered motifs against JASPAR2024 plant database
-# Note: This requires JASPAR2024_CORE_plants_non-redundant.meme to be available
-# You may need to download it from: http://meme-suite.org/meme/doc/download.html
-# Or install via: install_meme_databases()
 lfy1_cluster_streme <- runTomTom(lfy1_cluster_streme, 
-                                database = "JASPAR2024_CORE_plants_non-redundant")
+                                database = jaspar_plant_motifs)
 ```
 
 ```{r}
