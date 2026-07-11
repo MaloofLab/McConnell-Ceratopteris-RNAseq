@@ -1,6 +1,6 @@
 ---
 title: "17_de_Novo_Motif_Analysis"
-output: html_notebook
+output: html_document
 ---
 
 ```{r, message=FALSE}
@@ -101,11 +101,12 @@ system.time(
                                   control = background_seqs,
                                   nmotifs = 10,
                                   minw = 6,
-                                  maxw = 20,
-                                  p = 8)  # number of threads
+                                  maxw = 20)
 )
 
 lfy1_cluster_streme
+
+write_csv(lfy1_cluster_streme, "../output/lfy1_cluster_denovo_streme.csv")
 ```
 
 ```{r}
