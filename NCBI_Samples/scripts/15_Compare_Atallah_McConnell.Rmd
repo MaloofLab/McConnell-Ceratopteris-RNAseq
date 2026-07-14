@@ -97,7 +97,13 @@ mcconnell_go_hermaphrodites <- mcconnell_go_hermaphrodites %>%
   mutate(enrichment=numDEInCat/numInCat) %>%
   select(term, enrichment, FDR)
 
+mcconnell_go_male <- mcconnell_go_male %>%
+  mutate(enrichment=numDEInCat/numInCat) %>%
+  select(term, enrichment, FDR)
+
 ctrl_herm_combined <- bind_rows(Atallah = atallah_go_control, McConnell = mcconnell_go_hermaphrodites,.id="data_set")
+
+all_combined <- bind_rows(Atallah_hermaphrodite = atallah_go_control, McConnell_hermaphrodite = mcconnell_go_hermaphrodites, McConnell_male = mcconnell_go_male, .id="data_set")
 ```
 
 ```{r}
@@ -112,6 +118,25 @@ ctrl_herm_combined %>%
 ggsave("../output/Atallah_McConnell_GO_herm_ctrl.pdf")
 ggsave("../output/Atallah_McConnell_GO_herm_ctrl.png")
 ```
+
+```{r, fig.height=6}
+all_combined %>%
+  group_by(term) %>%
+  separate(data_set, into = c("Study", "Sex")) %>%
+  mutate(Sex = ifelse(Sex == "male", "antheridogen / male", Sex),
+         enrich_max = max(enrichment, na.rm = TRUE),
+         FDR_min = min(FDR, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(term=fct_reorder(term, enrich_max, .desc = FALSE)) %>%
+  ggplot(aes(x=Study, y = term, size = enrichment, color = -log10(FDR))) +
+  geom_point() +
+  facet_wrap(~Sex, ncol=1, scale = "free_y", space = "free_y") +
+  theme(axis.title.x = element_blank())
+
+ggsave("../output/Atallah_McConnell_GO_all.pdf")
+ggsave("../output/Atallah_McConnell_GO_all.png")
+```
+
 
 ## output combined list
 
