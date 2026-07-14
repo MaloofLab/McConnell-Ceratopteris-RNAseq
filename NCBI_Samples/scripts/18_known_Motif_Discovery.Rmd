@@ -10,6 +10,7 @@ library(memes)
 library(JASPAR2024)
 library(TFBSTools)
 library(universalmotif)
+library(BiocParallel)
 ```
 
 ```{r}
@@ -194,14 +195,14 @@ results.table <- results.table %>%
     p.value = fisher.test(
       matrix(c(
         target.count,
-        length(target.promoters) - target.count,
+        length(cluster_seqs) - target.count,
         non.target.count,
-        length(non.target.promoters) - non.target.count
+        length(background_seqs) - non.target.count
       ), ncol = 2),
       alternative = "greater"
     )$p.value,
-    non.target.percent = round(non.target.count / length(non.target.promoters), 3) * 100,
-    target.percent = round(target.count / length(target.promoters), 3) * 100
+    non.target.percent = round(non.target.count / length(background_seqs), 3) * 100,
+    target.percent = round(target.count / length(cluster_seqs), 3) * 100
   ) %>%
   ungroup() %>%
   mutate(FDR = p.adjust(p.value, method = "fdr")) %>%
@@ -211,6 +212,7 @@ results.table <- results.table %>%
 bpstop(bpparam) # stop the parallel workers
 
 write_csv(results.table, "../output/lfy1_cluster_FIMO_motif_results_trt.csv.gz")
+results.table
 ```
 
 
