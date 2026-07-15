@@ -1,0 +1,282 @@
+---
+title: "09.4_MR_intersection_with_gametophyte_Atallah_DE"
+output: html_notebook
+---
+
+Create a mutual rank network and intersect that with Atallah's antheridogen vs hermaphrodite DE genes.  
+
+```{r, message=FALSE}
+library(tidyverse)
+library(dbscan)    # Contains both DBSCAN and HDBSCAN implementations
+library(patchwork)   # For arranging multiple plots
+library(topGO)
+library(broom)
+conflicted::conflicts_prefer(dplyr::rename, dplyr::filter, dplyr::select)
+```
+
+```{r}
+CrLFY1 <- "Ceric.33G031700.1" 
+
+CrLFY2 <- "Ceric.18G076300.1"
+```
+
+load sample info
+```{r}
+sample.description <- read.csv("../output/sample.description.gametophyte.no4.5DAG.csv")
+```
+
+load DEG list for Atallah
+```{r}
+deg <- read_csv("../output/DEG_ALL_Atallah.csv.gz") %>%
+  slice_sample(n=nrow(.))
+deg
+```
+
+load MR network.  See script 09.2 for creation.  This currently has McConnell DEG info in it and that will need to be replaced
+```{r}
+deg.cor <- 
+  read_csv("../../McConnell_Samples/output/DEG_ALL_WT_male_v_herm_LFY_CORRELATIONS_v2_noSexMR.csv.gz") %>%
+  select(-(logFC:FDR)) %>% # remove McConnell data
+  
+# Combine Atallah DEGs with LFY correlations and MR
+  left_join(deg) %>%
+  select(geneID:FDR, starts_with("LFY"), everything())
+
+deg.cor
+```
+
+
+```{r}
+deg.cor %>%
+  ggplot(aes(x=logFC, y=LFY1.cor)) +
+  geom_point(alpha=.05)
+```
+
+```{r}
+deg.cor %>%
+  ggplot(aes(x=logFC, y=LFY2.cor)) +
+  geom_point(alpha=.1)
+```
+
+```{r}
+deg.cor %>%
+  ggplot(aes(x=LFY1.MR, y=logFC)) +
+  geom_point(alpha=.1)
+```
+
+```{r}
+deg.cor %>%
+  ggplot(aes(x=LFY1.rank, y=logFC)) +
+  geom_point(alpha=.1)
+```
+
+```{r}
+deg.cor %>%
+  ggplot(aes(x=LFY2.MR, y=logFC)) +
+  geom_point(alpha=.1)
+```
+
+
+```{r}
+deg.cor %>%
+  ggplot(aes(x=LFY2.rank, y=logFC)) +
+  geom_point(alpha=.1)
+```
+
+## color points by McConnell LFY1 Cluster
+
+Create a column for being in cluster 2 and save output
+```{r}
+mcconnell_lfy_cluster <- read_csv("../output/LFY1_gam_sex_cluster_noSexSamples.csv.gz") %>%
+  select(geneID, in_LFY1_cluster)
+```
+
+Where is this cluster on the cor.plot?
+
+```{r}
+deg.cor %>% left_join(mcconnell_lfy_cluster) %>%
+  #arrange(in_LFY1_cluster) %>%
+  ggplot(aes(x = LFY1.MR, y = logFC, color = in_LFY1_cluster, alpha = in_LFY1_cluster)) +
+  geom_point() +
+  scale_alpha_manual(values = c("TRUE" = 0.35, "FALSE" = 0.1)) +
+  scale_color_manual(values = c("TRUE" = "red", "FALSE" = "gray")) +
+  guides(color = guide_legend(override.aes = list(alpha = 1)))
+```
+
+
+## Compare LFY1 and LFY2 MR in cluster
+
+```{r}
+deg.cor %>%
+  mutate(upMale = logFC < -1 & FDR < 0.01) %>%
+  t.test(LFY1.MR ~ upMale, data = .)
+
+deg.cor %>%
+  mutate(upMale = logFC < -1 & FDR < 0.01) %>%
+  t.test(LFY2.MR ~ upMale, data = .)
+```
+```{r}
+deg.cor %>%
+  t.test(LFY1.MR ~ in_LFY1_cluster, data = .)
+
+deg.cor %>%
+  t.test(LFY2.MR ~ in_LFY1_cluster, data = .)
+```
+
+```{r}
+lfy.network.threshold <- deg.cor %>% filter(in_LFY1_cluster) %>% pull(LFY1.MR) %>% max()
+
+fisher.tmp <- deg.cor %>% mutate(LFY1.network = LFY1.MR <= lfy.network.threshold,
+                   LFY2.network = LFY2.MR <= lfy.network.threshold,
+                   upMale = logFC < 0 & FDR < 0.01) 
+
+fisher.test(fisher.tmp$upMale, fisher.tmp$LFY1.network, alternative = "greater")
+fisher.test(fisher.tmp$upMale, fisher.tmp$LFY2.network, alternative = "greater")
+
+```
+
+
+## GO enrichment for LFY1 cluster
+
+```{r}
+gene2GO.list <- deg.cor %>% 
+  rowwise() %>%
+  mutate(GOlist = str_split(GO, pattern = " ")) %>%
+  ungroup() %>%
+  mutate(GOlist = set_names(GOlist, geneID)) %>%
+  pull(GOlist)
+
+cluster.genes <- deg.cor %>%
+  mutate(cluster.genes = as.numeric(in_LFY1_cluster)) %>% 
+  pull(cluster.genes, name = geneID) %>% generics::as.factor()
+
+go.data.cluster <- new("topGOdata", ontology = "BP", description = "In LFY1 Cluster", allGenes = cluster.genes, annot = annFUN.gene2GO, gene2GO = gene2GO.list)
+
+result.cluster <- runTest(go.data.cluster, algorithm = "weight01", statistic = "fisher")
+
+GO.results <- GenTable(go.data.cluster, result.cluster, topNodes = sum(result.cluster@score < 0.05 )) %>%
+  dplyr::rename_with( \(x) str_replace(x, "result1|apply.*", "p.value")) %>%
+  mutate(p.value = as.numeric(p.value))
+
+GO.results
+```
+
+```{r, message=FALSE}
+write_csv(GO.results, file = "../output/LFY1_Sex_Cluster_GO_noSexSamples.csv")
+```
+
+## Look for overlap with A.t. repro  genes in all male vs hermaphrodite DEG
+
+load gene info
+
+```{r}
+Cr_gene_info <- read_csv("../../shared/output/Cr_At_repro_Placket.csv")
+```
+
+
+### Enrichment
+
+For each gene set (up or down), retain genes that are orthologs of A.t. vegetative or one of the reproductive sets and then do Fisher's exact.
+
+```{r}
+Cr_gene_info_deg <- deg %>% 
+  select(geneID, logFC, FDR) %>%
+  inner_join(Cr_gene_info, by=c("geneID"="Crichardii")) %>%
+  select(-Athaliana) %>%
+  mutate(upHermaphrodite = FDR < 0.01 & logFC > 0,
+         upMale = FDR < 0.01 & logFC < 0) %>%
+  select(geneID, starts_with("up"), everything(), -FDR, -logFC)
+
+Cr_gene_info_deg
+
+
+```
+
+Is it ratio of each reproductive category to all others, or to vegetative specific?
+
+
+```{r}
+get.fisher <- function(category, module, t = Cr_gene_info_deg) {
+  fisher.test(get(category, t), get(module, t), alternative = "greater")
+}
+
+fisher.results <- expand_grid(gene.category = colnames(Cr_gene_info)[-1:-2],
+                              module = c("upMale", "upHermaphrodite")) %>%
+  mutate(fisher = map2(gene.category, module, get.fisher, Cr_gene_info_deg),
+         fisher.tidy = map(fisher, tidy)) %>%
+  unnest(fisher.tidy) %>%
+  rename(fisher.p.value = p.value) %>%
+    mutate(fisher.fdr = p.adjust(fisher.p.value, method = "fdr")) %>%
+  arrange(fisher.p.value)
+
+```
+
+```{r}
+fisher.results.filter <- fisher.results %>%
+  # group_by(module) %>%
+  ungroup() %>%
+  filter(fisher.fdr < 0.05) %>%
+  arrange(module, fisher.fdr) %>%
+  select(module, gene.category, estimate, fisher.fdr, everything(), -fisher, -method, -alternative)
+
+#Table 1
+write_csv(fisher.results.filter, "../output/male_hermaphrodite_DEG_At_repro_fisher_fdr_0.05.csv")
+
+# Supplemental Table 1
+write_csv(fisher.results, "../output/male_hermaphrodite_DEG_At_repro_fisher_all.csv")
+
+
+fisher.results.filter 
+```
+
+
+## Look for overlap with A.t. repro  genes in male vs hermaphrodite DEG LFY1 cluster
+
+### Enrichment
+
+For each gene set (up or down), retain genes that are orthologs of A.t. vegetative or one of the reproductive sets and then do Fisher's exact.
+
+```{r}
+Cr_gene_info_LFY1Cluster <- deg.cor %>% 
+  select(geneID, in_LFY1_cluster) %>%
+  inner_join(Cr_gene_info, by=c("geneID"="Crichardii")) %>%
+  select(-Athaliana)
+
+Cr_gene_info_LFY1Cluster
+
+
+```
+
+Is it ratio of each reproductive category to all others, or to vegetative specific?
+
+
+```{r}
+get.fisher <- function(category, module, t = Cr_gene_info_LFY1Cluster) {
+  fisher.test(get(category, t), get(module, t), alternative = "greater")
+}
+
+fisher.results.LFY1.cluster <- expand_grid(gene.category = colnames(Cr_gene_info)[-1:-2],
+                              module = "in_LFY1_cluster") %>%
+  mutate(fisher = map2(gene.category, module, get.fisher, Cr_gene_info_LFY1Cluster),
+         fisher.tidy = map(fisher, tidy)) %>%
+  unnest(fisher.tidy) %>%
+  rename(fisher.p.value = p.value) %>%
+    mutate(fisher.fdr = p.adjust(fisher.p.value, method = "fdr")) %>%
+  arrange(fisher.p.value)
+
+write_csv(fisher.results.LFY1.cluster, "../output/male_hermaphrodite_DEG_LFY1_Cluster_At_repro_fisher_all.csv")
+
+```
+
+```{r}
+fisher.results.LFY1.cluster.filter <- fisher.results.LFY1.cluster %>%
+  # group_by(module) %>%
+  ungroup() %>%
+  filter(fisher.fdr < 0.05) %>%
+  arrange(module, fisher.fdr) %>%
+  select(module, gene.category, estimate, fisher.fdr, everything(), -fisher, -method, -alternative)
+
+write_csv(fisher.results.LFY1.cluster.filter, "../output/male_hermaphrodite_DEG_LFY1_Cluster_At_repro_fisher_fdr_0.05.csv")
+
+fisher.results.LFY1.cluster.filter
+```
