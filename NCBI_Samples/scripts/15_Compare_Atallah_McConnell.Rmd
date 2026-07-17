@@ -131,7 +131,8 @@ all_combined %>%
   ggplot(aes(x=Study, y = term, size = enrichment, color = -log10(FDR))) +
   geom_point() +
   facet_wrap(~Sex, ncol=1, scale = "free_y", space = "free_y") +
-  theme(axis.title.x = element_blank())
+  theme(axis.title.x = element_blank()) +  
+  scale_color_gradient(transform = "log10", high = "#132B43", low = "#86E1F7")
 
 ggsave("../output/Atallah_McConnell_GO_all.pdf")
 ggsave("../output/Atallah_McConnell_GO_all.png")
