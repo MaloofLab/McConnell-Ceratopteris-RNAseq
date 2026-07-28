@@ -103,14 +103,23 @@ mdsvals <- plotMDS(dge.data, plot = FALSE) # get the MDS values for plotting
 
 
 ```{r}
-mdsvals2 <- tibble(x=mdsvals$x, y=mdsvals$y, sample=rownames(dge.data$samples)) %>%
-  inner_join(sample.description)
+mdsvals2 <- tibble(MDS1=mdsvals$x, MDS2=mdsvals$y, sample=rownames(dge.data$samples)) %>%
+  inner_join(sample.description) %>%
+  mutate(sample = ifelse(tissue == "male_gam", "male", "hermaphrodite"))
+
+var.explained <- mdsvals$var.explained[1:2] %>% magrittr::multiply_by(100) %>% round(1) %>% str_c(" (", ., "%)")
 
 
-mdsvals2 %>%  ggplot(aes(x=x, y=y, color=tissue)) +
+mdsvals2 %>%  ggplot(aes(x=MDS1, y=MDS2, color=sample, shape = sample)) +
   scale_color_brewer(type="qual", palette = 3) +
   theme_bw() +
-  geom_point(size=3) 
+  geom_point(size=3) +
+  labs(x = str_c("Dimension 1", var.explained[1]),  y = str_c("Dimension 2", var.explained[2]))
+
+ggsave("../output/McConnellMDS.png")
+
+ggsave("../output/McConnellMDS.pdf")
+
 ```
 ## Calculate dispersion
 
