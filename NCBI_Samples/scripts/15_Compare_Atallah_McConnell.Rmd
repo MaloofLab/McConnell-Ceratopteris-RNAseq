@@ -14,6 +14,88 @@ Compare GO and DEG in the Attalah (immature) and McConnell (mature) gametophyte 
 ```{r}
 library(tidyverse)
 library(ggVennDiagram)
+library(edgeR)
+```
+
+## MDS
+
+```{r}
+mcconnell_counts <- read_csv("../../McConnell_Samples/output/counts_unfiltered_male_herm.csv.gz")
+atallah_counts <- read_csv("../output/counts_unfiltered_Atallah.csv.gz")
+```
+```{r}
+head(mcconnell_counts)
+```
+
+```{r}
+head(atallah_counts)
+```
+
+
+```{r}
+all_counts <- full_join(mcconnell_counts, atallah_counts)
+all_counts[is.na(all_counts)] <- 0
+```
+
+```{r}
+head(all_counts)
+```
+
+
+```{r}
+sample_description <- tibble(sample_ID = colnames(all_counts[-1])) %>%
+  mutate(
+       stage = rep(c("mature", "immature"), each = 6),
+       trt = str_extract(sample_ID, "male|herm|ctrl|antheridogen"),
+       group = str_c(stage, trt)
+  )
+sample_description
+```
+
+remove low read genes:
+
+```{r}
+nrow(all_counts)
+all_counts <- all_counts[rowSums(all_counts[,-1] > 5) >= 3,]
+nrow(all_counts)
+```
+
+```{r}
+counts_matrix <- all_counts %>% select(-gene_ID) %>% as.matrix()
+rownames(counts_matrix) <- all_counts$gene_ID
+
+dge.data <- DGEList(counts=counts_matrix, 
+                    group=sample_description$group)
+dim(dge.data) 
+dge.data <- calcNormFactors(dge.data, method = "TMM")
+dge.data$samples # look at the normalization factors
+```
+
+## MAKE AN MDS
+
+```{r}
+mdsvals <- plotMDS(dge.data, plot = FALSE) # get the MDS values for plotting
+```
+
+
+```{r}
+mdsvals2 <- tibble(MDS1=mdsvals$x, MDS2=mdsvals$y, sample_ID=rownames(dge.data$samples)) %>%
+  inner_join(sample_description) %>%
+  mutate(sample = ifelse(str_detect(trt, "ctrl|herm"), "ctrl / hermaphrodite", "antheridogen / male"))
+
+var.explained <- mdsvals$var.explained[1:2] %>% magrittr::multiply_by(100) %>% round(1) %>% str_c(" (", ., "%)")
+
+
+mdsvals2 %>%  ggplot(aes(x=MDS1, y=MDS2, color=stage, shape = sample)) +
+  #scale_color_brewer(type="qual", palette = 1) +
+  theme_bw() +
+  geom_point(size=3) +
+  labs(x = str_c("Dimension 1", var.explained[1]),  y = str_c("Dimension 2", var.explained[2]))
+
+ggsave("../output/McConnell_Atallah_MDS.png")
+
+ggsave("../output/McConnell_Atallah_MDS.pdf")
+
 ```
 
 ## DEGs

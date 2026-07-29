@@ -69,6 +69,9 @@ sample.description <- sample.description.ncbi %>%
 counts.data <- counts.data.ncbi[,c("gene_ID", sample.description$sample)]
 
 colnames(counts.data)[-1] == sample.description$sample
+
+
+colnames(counts.data)[-1] <- str_c(sample.description$sample, "_", sample.description$trt)
 ```
 
 ```{r}
